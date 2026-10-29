@@ -13,10 +13,34 @@ interface Props {
 }
 
 export default function LoadingScreen({ theme = 'dark', label = 'Chargement...', logoUrl, brand }: Props) {
-  const bg    = theme === 'light' ? 'bg-gray-50'   : 'bg-gray-950'
-  const card  = theme === 'light' ? 'bg-white border border-gray-100 shadow-sm' : 'bg-gray-900 border border-gray-800'
-  const text  = theme === 'light' ? 'text-gray-500' : 'text-gray-400'
-  const dot   = theme === 'light' ? 'bg-brand-400'  : 'bg-brand-500'
+  // Company portal (Forest & Ivory): quiet, branded, no bouncing
+  if (theme === 'light') {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-ivory-100 font-sans" role="status" aria-live="polite">
+        <div className="flex flex-col items-center gap-5">
+          <div className="relative flex size-14 items-center justify-center rounded-2xl bg-forest-900 bg-forest-grain shadow-lifted">
+            {logoUrl
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={logoUrl} alt="" className="size-10 object-contain" />
+              : <Leaf className="size-6 text-gold-300" strokeWidth={1.8} />}
+          </div>
+          <div className="text-center">
+            <p className="font-display text-xl text-forest-900">{brand || 'CarbonTrack'}</p>
+            <p className="mt-1 text-xs text-ink-400">{label}</p>
+          </div>
+          <div className="h-0.5 w-32 overflow-hidden rounded-full bg-ivory-300">
+            <div className="h-full w-1/3 animate-[loading-bar_1.2s_ease-in-out_infinite] rounded-full bg-gold-500" />
+          </div>
+        </div>
+        <style>{'@keyframes loading-bar { 0% { transform: translateX(-100%) } 100% { transform: translateX(300%) } }'}</style>
+      </div>
+    )
+  }
+
+  const bg    = 'bg-gray-950'
+  const card  = 'bg-gray-900 border border-gray-800'
+  const text  = 'text-gray-400'
+  const dot   = 'bg-brand-500'
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center ${bg}`}>
@@ -39,7 +63,7 @@ export default function LoadingScreen({ theme = 'dark', label = 'Chargement...',
 
         {/* Brand */}
         <div className="text-center">
-          <p className={`text-base font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>{brand || 'CarbonTrack'}</p>
+          <p className={`text-base font-bold text-white`}>{brand || 'CarbonTrack'}</p>
           <p className={`text-xs mt-0.5 ${text}`}>{label}</p>
         </div>
 

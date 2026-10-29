@@ -6,6 +6,15 @@
   body {
     @apply bg-white text-gray-900 antialiased;
   }
+  /* Visible, on-brand keyboard focus for anything that doesn't define its own ring */
+  :where(a, button, summary, [role='tab'], [role='button'], input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid #C4A068;
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
 }
 
 @layer components {

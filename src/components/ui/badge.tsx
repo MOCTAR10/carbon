@@ -38,11 +38,11 @@ type Tone = NonNullable<BadgeProps['tone']>
 export const CERT_STATUS_BADGE: Record<string, { label: string; tone: Tone }> = {
   pending:          { label: 'En attente',     tone: 'amber' },
   assigned:         { label: 'Expert assigné', tone: 'sky' },
-  in_progress:      { label: 'Audit en cours', tone: 'sky' },
-  audit_done:       { label: 'Audit terminé',  tone: 'violet' },
+  in_progress:      { label: 'Audit terrain',  tone: 'sky' },
+  audit_done:       { label: 'Audit validé',   tone: 'violet' },
   submitted_to_cnc: { label: 'Déposé au CNC',  tone: 'gold' },
   certified:        { label: 'Certifié',       tone: 'forest' },
-  rejected:         { label: 'Rejeté',         tone: 'red' },
+  rejected:         { label: 'Refusée',        tone: 'red' },
 }
 
 export function CertStatusBadge({ status }: { status: string }) {
