@@ -32,7 +32,7 @@ Routes under `src/app/api/` (21 groups): `admin/*`, `assessments`, `auth`, `cert
 ## DB
 - Config: `DATABASE_URL` or `PG*` (`PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`). `PGSSLMODE=require` enables SSL (Neon/Supabase); default off.
 - Connection retry: `src/lib/db.ts` auto-retries a terminated connection once.
-- Migrations: `scripts/init-db.sql` + `scripts/migrate-*.sql` (12 files). **Run sequentially in alpha order. No version tracking table.**
+- Migrations: `scripts/init-db.sql` + `scripts/migrate-*.sql`, applied by `npm run db:migrate` (`scripts/migrate.mjs`) in alpha order. **No version tracking table: every script must stay idempotent** (CI applies them twice on an empty DB).
 
 ## Build quirks (intentional)
 - `next.config.js`: `eslint.ignoreDuringBuilds: true`, `typescript.ignoreBuildErrors: true`. These skip lint/TS only during production build; dev/IDE still checks.
@@ -44,7 +44,7 @@ Routes under `src/app/api/` (21 groups): `admin/*`, `assessments`, `auth`, `cert
 
 ## Conventions
 - UI text in French.
-- No tests, no formatter, no pre-commit hooks, no Docker.
+- Regression tests: Playwright in `tests/` (`npm run test:api`, `npm run test:e2e`) — see `tests/README.md`. CI: GitHub Actions in the MOCTAR10/carbon monorepo. No formatter, no pre-commit hooks, no Docker.
 - `scripts/` contains DB init/migrations/seeds.
 
 ## Production

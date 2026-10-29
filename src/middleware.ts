@@ -63,14 +63,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // ── Dashboard: redirect admins/experts to their portal ───────────────────
+  // ── Dashboard: company session required; admins/experts go to their portal ─
   if (pathname === '/dashboard' || pathname.startsWith('/dashboard/') || pathname === '/subscription') {
     const token = request.cookies.get(COOKIE.user)?.value
-    if (token) {
-      const role = await verifyRole(token)
-      if (role === 'expert') return NextResponse.redirect(new URL('/expert', request.url))
-      if (role === 'admin')  return NextResponse.redirect(new URL('/admin', request.url))
-    }
+    const role = token ? await verifyRole(token) : null
+    if (role === 'expert') return NextResponse.redirect(new URL('/expert', request.url))
+    if (role === 'admin')  return NextResponse.redirect(new URL('/admin', request.url))
+    if (!role) return NextResponse.redirect(new URL('/login', request.url))
   }
 
   return NextResponse.next()

@@ -62,7 +62,7 @@ export default function ExpertLoginPage() {
         )}
 
         <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form method="post" onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
               <input

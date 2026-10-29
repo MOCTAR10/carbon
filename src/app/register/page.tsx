@@ -296,7 +296,7 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-10">
+          <form method="post" onSubmit={handleSubmit} noValidate className="mt-8 space-y-10">
             <fieldset disabled={loading} className="space-y-10">
               <Section n={1} title="Vos informations">
                 <div className="grid grid-cols-2 gap-4">

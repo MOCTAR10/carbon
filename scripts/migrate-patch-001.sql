@@ -100,7 +100,9 @@ ON CONFLICT (code) DO UPDATE SET
 -- 4. Fix registry_summary view — remove cp.standard (not on carbon_projects)
 -- ─────────────────────────────────────────────────────────────────────────────
 
-CREATE OR REPLACE VIEW registry_summary AS
+-- CREATE OR REPLACE can't drop the old view's columns (standard, project_type): recreate it.
+DROP VIEW IF EXISTS registry_summary;
+CREATE VIEW registry_summary AS
 SELECT
   cp.id                      AS project_id,
   cp.title                   AS project_title,

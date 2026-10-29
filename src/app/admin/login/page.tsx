@@ -70,7 +70,7 @@ export default function AdminLoginPage() {
 
         {/* Card */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form method="post" onSubmit={handleSubmit} className="space-y-4">
 
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1.5">

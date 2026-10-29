@@ -30,7 +30,9 @@ export async function POST(request: NextRequest) {
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
-    const { name, type, address, surface, description, country } = await request.json()
+    const body = await request.json().catch(() => ({}))
+    const name = typeof body.name === 'string' ? body.name.trim().slice(0, 255) : ''
+    const { type, address, surface, description, country } = body
     if (!name) return NextResponse.json({ error: 'Le nom du site est requis' }, { status: 400 })
 
     const result = await query(

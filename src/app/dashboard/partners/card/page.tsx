@@ -1,8 +1,9 @@
 'use client'
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Leaf } from 'lucide-react'
 
-export default function PrintCard() {
+function PrintCard() {
   const searchParams = useSearchParams()
   const name = searchParams.get('name') || 'Partenaire'
   const num = searchParams.get('num') || '0000 0000 0000 0000'
@@ -80,5 +81,14 @@ export default function PrintCard() {
         }
       `}} />
     </div>
+  )
+}
+
+// useSearchParams needs a Suspense boundary, otherwise the production build fails to prerender this page
+export default function PrintCardPage() {
+  return (
+    <Suspense fallback={null}>
+      <PrintCard />
+    </Suspense>
   )
 }

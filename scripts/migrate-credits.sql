@@ -163,7 +163,9 @@ CREATE TABLE IF NOT EXISTS buffer_pool_ledger (
 -- Uses only columns that actually exist on carbon_projects (created by
 -- migrate-add-market.sql) — `standard`, `project_type_mrv`, `methodology_code`
 -- live on the methodologies/carbon_credits tables, not on carbon_projects.
-CREATE OR REPLACE VIEW registry_summary AS
+-- Recreated (not replaced): migrate-patch-001.sql later changes its columns, so a re-run must drop it first.
+DROP VIEW IF EXISTS registry_summary;
+CREATE VIEW registry_summary AS
 SELECT
   cp.id                                 AS project_id,
   cp.title                              AS project_title,
