@@ -1,0 +1,825 @@
+﻿##### ENERGY SHEET #####
+  0: S:Emissions details
+  1: B:[F=Description!C23]
+  3: B:Emission sources: | D:combustibles | F:vapeur | H:├®lectricit├® | N:Description
+  4: B:Total: | D:total | F:sous-postes | H:bilan GES | J:GHG Protocol | L:ISO 14069 | N:CDP
+  6: B:Direct accounting of fuels
+  8: B:1 - Fossil fuels, stationary sources
+  10: B:Fuel | D:Emissions | E:Material characterisation | F:Consumption | G:kgCO2eq/kg | I:Consumption | J:kgCO2eq/kWh LHV | L:Consumption | M:kgCO2eq/toe LHV | O:Consumption | P:kgCO2eq/liter | R:kg CO2eq | S:kg CO2eq
+  11: B:Butane and Propane | D:kg CO2eq | F:(kg) | G:Upstream | H:combustion | I:(kWh LHV) | J:Upstream | K:combustion | L:(tep LHV) | M:Upstream | N:combustion | O:(liters) | P:Upstream | Q:combustion | R:Upstream | S:combustion
+  12: B:Butane (maritime included), Mainland France, Base Carbone | D:[F=SUM(R13,S13)] | G:[F=VLOOKUP($B13&"; "&$G$11&", "&G$12,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B13&"; "&$G$11&", "&H$12,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B13&"; "&$J$11&", "&J$12,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B13&"; "&$J$11&", "&K$12,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B13&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B13&"; "&$M$11&", "&N$12,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B13&"; "&$P$11&", "&P$12,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B13&"; "&$P$11&", "&Q$12,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F13*G13),0,F13*G13)+IF(ISNA(I13*J13),0,I13*J13)+IF(ISNA(L13*M13),0,L13*M13)+IF(ISNA(O13*P13)] | S:[F=IF(ISNA(F13*H13),0,F13*H13)+IF(ISNA(I13*K13),0,I13*K13)+IF(ISNA(L13*N13),0,L13*N13)+IF(ISNA(O13*Q13)]
+  13: B:Propane (maritime included), Mainland France, Base Carbone | D:[F=SUM(R14,S14)] | G:[F=VLOOKUP($B14&"; "&$G$11&", "&G$12,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B14&"; "&$G$11&", "&H$12,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B14&"; "&$J$11&", "&J$12,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B14&"; "&$J$11&", "&K$12,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B14&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B14&"; "&$M$11&", "&N$12,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B14&"; "&$P$11&", "&P$12,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B14&"; "&$P$11&", "&Q$12,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F14*G14),0,F14*G14)+IF(ISNA(I14*J14),0,I14*J14)+IF(ISNA(L14*M14),0,L14*M14)+IF(ISNA(O14*P14)] | S:[F=IF(ISNA(F14*H14),0,F14*H14)+IF(ISNA(I14*K14),0,I14*K14)+IF(ISNA(L14*N14),0,L14*N14)+IF(ISNA(O14*Q14)]
+  14: B:Other gases
+  15: B:Natural Gas, Europe, Base Carbone | D:[F=SUM(R16,S16)] | G:[F=VLOOKUP($B16&"; "&$G$11&", "&G$12,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B16&"; "&$G$11&", "&H$12,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B16&"; "&$J$11&", "&J$12,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B16&"; "&$J$11&", "&K$12,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B16&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B16&"; "&$M$11&", "&N$12,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B16&"; "&$P$11&", "&P$12,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B16&"; "&$P$11&", "&Q$12,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F16*G16),0,F16*G16)+IF(ISNA(I16*J16),0,I16*J16)+IF(ISNA(L16*M16),0,L16*M16)+IF(ISNA(O16*P16)] | S:[F=IF(ISNA(F16*H16),0,F16*H16)+IF(ISNA(I16*K16),0,I16*K16)+IF(ISNA(L16*N16),0,L16*N16)+IF(ISNA(O16*Q16)]
+  16: B:Steel furnace gas, Mainland France, Base Carbone | D:[F=SUM(R17,S17)] | G:[F=VLOOKUP($B17&"; "&$G$11&", "&G$12,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B17&"; "&$G$11&", "&H$12,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B17&"; "&$J$11&", "&J$12,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B17&"; "&$J$11&", "&K$12,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B17&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B17&"; "&$M$11&", "&N$12,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B17&"; "&$P$11&", "&P$12,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B17&"; "&$P$11&", "&Q$12,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F17*G17),0,F17*G17)+IF(ISNA(I17*J17),0,I17*J17)+IF(ISNA(L17*M17),0,L17*M17)+IF(ISNA(O17*P17)] | S:[F=IF(ISNA(F17*H17),0,F17*H17)+IF(ISNA(I17*K17),0,I17*K17)+IF(ISNA(L17*N17),0,L17*N17)+IF(ISNA(O17*Q17)]
+  17: B:Liquides
+  18: A:ALL GSEZ NKOK | B:Road diesel, Mainland France, Base Carbone | D:[F=SUM(R19,S19)] | E:Operated | G:[F=VLOOKUP($B19&"; "&$G$11&", "&G$12,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B19&"; "&$G$11&", "&H$12,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B19&"; "&$J$11&", "&J$12,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B19&"; "&$J$11&", "&K$12,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B19&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B19&"; "&$M$11&", "&N$12,'EF Energy'!$G:$U,9,FALSE)] | O:[F='[2]O&M'!$V$87] | P:[F=VLOOKUP($B19&"; "&$P$11&", "&P$12,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B19&"; "&$P$11&", "&Q$12,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F19*G19),0,F19*G19)+IF(ISNA(I19*J19),0,I19*J19)+IF(ISNA(L19*M19),0,L19*M19)+IF(ISNA(O19*P19)] | S:[F=IF(ISNA(F19*H19),0,F19*H19)+IF(ISNA(I19*K19),0,I19*K19)+IF(ISNA(L19*N19),0,L19*N19)+IF(ISNA(O19*Q19)]
+  19: A:TSIKA | B:Road diesel, Reunion Island, Base Carbone | D:[F=SUM(R20,S20)] | E:Operated | G:[F=VLOOKUP($B20&"; "&$G$11&", "&G$12,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B20&"; "&$G$11&", "&H$12,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B20&"; "&$J$11&", "&J$12,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B20&"; "&$J$11&", "&K$12,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B20&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B20&"; "&$M$11&", "&N$12,'EF Energy'!$G:$U,9,FALSE)] | O:[F='[2]O&M'!$V$45] | P:[F=VLOOKUP($B20&"; "&$P$11&", "&P$12,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B20&"; "&$P$11&", "&Q$12,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F20*G20),0,F20*G20)+IF(ISNA(I20*J20),0,I20*J20)+IF(ISNA(L20*M20),0,L20*M20)+IF(ISNA(O20*P20)] | S:[F=IF(ISNA(F20*H20),0,F20*H20)+IF(ISNA(I20*K20),0,I20*K20)+IF(ISNA(L20*N20),0,L20*N20)+IF(ISNA(O20*Q20)]
+  20: B:Charbons
+  21: B:Concentrated coal, Mainland France, Base Carbone | D:[F=SUM(R22,S22)] | G:[F=VLOOKUP($B22&"; "&$G$11&", "&G$12,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B22&"; "&$G$11&", "&H$12,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B22&"; "&$J$11&", "&J$12,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B22&"; "&$J$11&", "&K$12,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B22&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B22&"; "&$M$11&", "&N$12,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B22&"; "&$P$11&", "&P$12,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B22&"; "&$P$11&", "&Q$12,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F22*G22),0,F22*G22)+IF(ISNA(I22*J22),0,I22*J22)+IF(ISNA(L22*M22),0,L22*M22)+IF(ISNA(O22*P22)] | S:[F=IF(ISNA(F22*H22),0,F22*H22)+IF(ISNA(I22*K22),0,I22*K22)+IF(ISNA(L22*N22),0,L22*N22)+IF(ISNA(O22*Q22)]
+  22: B:Peat, Mainland France, Base Carbone | D:[F=SUM(R23,S23)] | G:[F=VLOOKUP($B23&"; "&$G$11&", "&G$12,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B23&"; "&$G$11&", "&H$12,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B23&"; "&$J$11&", "&J$12,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B23&"; "&$J$11&", "&K$12,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B23&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B23&"; "&$M$11&", "&N$12,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B23&"; "&$P$11&", "&P$12,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B23&"; "&$P$11&", "&Q$12,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F23*G23),0,F23*G23)+IF(ISNA(I23*J23),0,I23*J23)+IF(ISNA(L23*M23),0,L23*M23)+IF(ISNA(O23*P23)] | S:[F=IF(ISNA(F23*H23),0,F23*H23)+IF(ISNA(I23*K23),0,I23*K23)+IF(ISNA(L23*N23),0,L23*N23)+IF(ISNA(O23*Q23)]
+  23: B:Coke & Wastes
+  24: B:Coke from hard coal, Mainland France, Base Carbone | D:[F=SUM(R25,S25)] | G:[F=VLOOKUP($B25&"; "&$G$11&", "&G$12,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B25&"; "&$G$11&", "&H$12,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B25&"; "&$J$11&", "&J$12,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B25&"; "&$J$11&", "&K$12,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B25&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B25&"; "&$M$11&", "&N$12,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B25&"; "&$P$11&", "&P$12,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B25&"; "&$P$11&", "&Q$12,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F25*G25),0,F25*G25)+IF(ISNA(I25*J25),0,I25*J25)+IF(ISNA(L25*M25),0,L25*M25)+IF(ISNA(O25*P25)] | S:[F=IF(ISNA(F25*H25),0,F25*H25)+IF(ISNA(I25*K25),0,I25*K25)+IF(ISNA(L25*N25),0,L25*N25)+IF(ISNA(O25*Q25)]
+  25: B:Used tyres, Mainland France, Base Carbone | D:[F=SUM(R26,S26)] | G:[F=VLOOKUP($B26&"; "&$G$11&", "&G$12,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B26&"; "&$G$11&", "&H$12,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B26&"; "&$J$11&", "&J$12,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B26&"; "&$J$11&", "&K$12,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B26&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B26&"; "&$M$11&", "&N$12,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B26&"; "&$P$11&", "&P$12,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B26&"; "&$P$11&", "&Q$12,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F26*G26),0,F26*G26)+IF(ISNA(I26*J26),0,I26*J26)+IF(ISNA(L26*M26),0,L26*M26)+IF(ISNA(O26*P26)] | S:[F=IF(ISNA(F26*H26),0,F26*H26)+IF(ISNA(I26*K26),0,I26*K26)+IF(ISNA(L26*N26),0,L26*N26)+IF(ISNA(O26*Q26)]
+  27: B:Total | D:[F=SUM(D13:D27)] | R:[F=SUM(R13:R27)] | S:[F=SUM(S13:S27)]
+  29: B:2 - Fuels of organic origin, stationary sources
+  31: B:Fuel | D:Emissions | E:Material characterisation | F:Consumption | G:kgCO2eq/ton | I:Consumption | J:kgCO2eq/kWh LHV | L:Consumption | M:kgCO2eq/toe LHV | O:Consumption | P:kgCO2eq/liter | R:kg CO2eq | S:kg CO2eq
+  32: B:Biodiesel, Bioethanol & Biomethane | D:kg CO2eq | F:(tons) | G:Upstream | H:combustion | I:(kWh LHV) | J:Upstream | K:combustion | L:(tep LHV) | M:Upstream | N:combustion | O:(liters) | P:Upstream | Q:combustion | R:Upstream | S:combustion
+  33: B:Biodiesel (with land-use/land-cover change, maximum scenario | D:[F=R34+S34] | G:[F=VLOOKUP($B34&"; "&$G$32&", "&G$33,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B34&"; "&$G$32&", "&H$33,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B34&"; "&$J$32&", "&J$33,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B34&"; "&$J$32&", "&K$33,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B34&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B34&"; "&$M$32&", "&N$33,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B34&"; "&$P$32&", "&P$33,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B34&"; "&$P$32&", "&Q$33,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F34*G34),0,F34*G34)+IF(ISNA(I34*J34),0,I34*J34)+IF(ISNA(L34*M34),0,L34*M34)+IF(ISNA(O34*P34)] | S:[F=IF(ISNA(F34*H34),0,F34*H34)+IF(ISNA(I34*K34),0,I34*K34)+IF(ISNA(L34*N34),0,L34*N34)+IF(ISNA(O34*Q34)]
+  34: B:Biomethane (Coming from the STEU, injected in the network),  | D:[F=R35+S35] | G:[F=VLOOKUP($B35&"; "&$G$32&", "&G$33,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B35&"; "&$G$32&", "&H$33,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B35&"; "&$J$32&", "&J$33,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B35&"; "&$J$32&", "&K$33,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B35&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B35&"; "&$M$32&", "&N$33,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B35&"; "&$P$32&", "&P$33,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B35&"; "&$P$32&", "&Q$33,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F35*G35),0,F35*G35)+IF(ISNA(I35*J35),0,I35*J35)+IF(ISNA(L35*M35),0,L35*M35)+IF(ISNA(O35*P35)] | S:[F=IF(ISNA(F35*H35),0,F35*H35)+IF(ISNA(I35*K35),0,I35*K35)+IF(ISNA(L35*N35),0,L35*N35)+IF(ISNA(O35*Q35)]
+  35: B:Bois | F:(kg) | G:kgCO2eq/kg
+  36: B:Wood log (20% humidity), Mainland France, Base Carbone | D:[F=R37+S37] | G:[F=VLOOKUP($B37&"; "&$G$36&", "&G$33,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B37&"; "&$G$36&", "&H$33,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B37&"; "&$J$32&", "&J$33,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B37&"; "&$J$32&", "&K$33,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B37&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B37&"; "&$M$32&", "&N$33,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B37&"; "&$P$32&", "&P$33,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B37&"; "&$P$32&", "&Q$33,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F37*G37),0,F37*G37)+IF(ISNA(I37*J37),0,I37*J37)+IF(ISNA(L37*M37),0,L37*M37)+IF(ISNA(O37*P37)] | S:[F=IF(ISNA(F37*H37),0,F37*H37)+IF(ISNA(I37*K37),0,I37*K37)+IF(ISNA(L37*N37),0,L37*N37)+IF(ISNA(O37*Q37)]
+  37: B:Sawdust (50% d'humidity), Mainland France, Base Carbone | D:[F=R38+S38] | G:[F=VLOOKUP($B38&"; "&$G$36&", "&G$33,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B38&"; "&$G$36&", "&H$33,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B38&"; "&$J$32&", "&J$33,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B38&"; "&$J$32&", "&K$33,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B38&"; "&$M$11&", "&M$12,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B38&"; "&$M$32&", "&N$33,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B38&"; "&$P$32&", "&P$33,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B38&"; "&$P$32&", "&Q$33,'EF Energy'!$G:$U,9,FALSE)] | R:[F=IF(ISNA(F38*G38),0,F38*G38)+IF(ISNA(I38*J38),0,I38*J38)+IF(ISNA(L38*M38),0,L38*M38)+IF(ISNA(O38*P38)] | S:[F=IF(ISNA(F38*H38),0,F38*H38)+IF(ISNA(I38*K38),0,I38*K38)+IF(ISNA(L38*N38),0,L38*N38)+IF(ISNA(O38*Q38)]
+  39: B:Total | D:[F=SUM(D34:D39)] | R:[F=SUM(R34:R39)] | S:[F=SUM(S34:S39)]
+  41: B:3 - Fossil heating, from heated sqm 
+  42: H:Upstream | J:combustion
+  43: B:Energy used | D:Emissions | E:Material characterisation | F:kWh per | G:sqm | H:kgCO2eq/kWh LHV | I:kg CO2eq | J:kgCO2eq/kWh LHV | K:kg CO2eq | L:kg CO2eq | M:kg CO2eq
+  44: B:Butane & Propane | D:kg CO2eq | F:heated sqm  | G:heated | I:per sqm.year | K:per sqm.year | L:Upstream | M:combustion
+  45: B:Butane (maritime included), Mainland France, Base Carbone | D:[F=L46+M46] | H:[F=VLOOKUP($B46&"; "&$H$44&", "&H$43,'EF Energy'!$G:$U,9,FALSE)] | I:[F=F46*H46] | J:[F=VLOOKUP($B46&"; "&$J$44&", "&J$43,'EF Energy'!$G:$U,9,FALSE)] | K:[F=F46*J46] | L:[F=G46*I46] | M:[F=G46*K46]
+  46: B:Other gases
+  47: B:Coke-oven gas, Mainland France, Base Carbone | D:[F=L48+M48] | H:[F=IF(ISNA(VLOOKUP($B48&"; "&$H$44&", "&H$43,'EF Energy'!$G:$U,9,FALSE)),0,VLOOKUP($B48&"; "&$H$44&", "] | I:[F=F48*H48] | J:[F=IF(ISNA(VLOOKUP($B48&"; "&$J$44&", "&J$43,'EF Energy'!$G:$U,9,FALSE)),0,VLOOKUP($B48&"; "&$J$44&", "] | K:[F=F48*J48] | L:[F=G48*I48] | M:[F=G48*K48]
+  48: B:Liquids
+  49: B:Bitumens, Mainland France, Base Carbone | D:[F=L50+M50] | H:[F=VLOOKUP($B50&"; "&$H$44&", "&H$43,'EF Energy'!$G:$U,9,FALSE)] | I:[F=F50*H50] | J:[F=VLOOKUP($B50&"; "&$J$44&", "&J$43,'EF Energy'!$G:$U,9,FALSE)] | K:[F=F50*J50] | L:[F=G50*I50] | M:[F=G50*K50]
+  50: B:Coals
+  51: B:Lignite briquette, Mainland France, Base Carbone | D:[F=L52+M52] | H:[F=VLOOKUP($B52&"; "&$H$44&", "&H$43,'EF Energy'!$G:$U,9,FALSE)] | I:[F=F52*H52] | J:[F=VLOOKUP($B52&"; "&$J$44&", "&J$43,'EF Energy'!$G:$U,9,FALSE)] | K:[F=F52*J52] | L:[F=G52*I52] | M:[F=G52*K52]
+  53: B:Total | D:[F=SUM(D46:D53)] | L:[F=SUM(L46:L53)] | M:[F=SUM(M46:M53)]
+  56: B:Purchase of steam and cooling
+  58: B:Steam purchase
+  60: B:City | D:Emissions | E:Material characterisation | F:Consumption | G:kg CO2eq | H:Consumption | I:kgCO2eq/kWh | J:Consumption | K:kg CO2eq | L:Inline losses | M:kg CO2eq
+  61: D:kg CO2eq | F:(tons) | G:par ton | H:(kWh) | J:(tep) | K:par tep | L:rate
+  62: B:1, Bourg-en-Bresse, La Reyssouze, Mainland France, Base Carb | D:[F=M63] | G:[F=I63*700] | I:[F=VLOOKUP($B63&"; "&$I$61,'EF Energy'!$G:$U,9,FALSE)] | K:[F=I63*Utilities!$P$20] | L:0.1 | M:[F=(F63*G63+H63*I63+J63*K63)*(1+L63)]
+  63: B:10, Les Noes, ZUP de la Chapelle Saint-Luc, Mainland France, | D:[F=M64] | G:[F=I64*700] | I:[F=VLOOKUP($B64&"; "&$I$61,'EF Energy'!$G:$U,9,FALSE)] | K:[F=I64*Utilities!$P$20] | L:0.1 | M:[F=(F64*G64+H64*I64+J64*K64)*(1+L64)]
+  64: B:21, Dijon, La Fontaine d'Ouche, Mainland France, Base Carbon | D:[F=M65] | G:[F=I65*700] | I:[F=VLOOKUP($B65&"; "&$I$61,'EF Energy'!$G:$U,9,FALSE)] | K:[F=I65*Utilities!$P$20] | L:0.1 | M:[F=(F65*G65+H65*I65+J65*K65)*(1+L65)]
+  66: B:Total | D:[F=SUM(D63:D66)] | M:[F=SUM(M63:M66)]
+  68: B:Cooling purchase
+  70: B:City | D:Emissions | E:Material characterisation | F:Consumption | G:kgCO2eq/kWh | H:Inline losses | I:kg CO2eq
+  71: D:kg CO2eq | F:(kWh) | G:Cold | H:rate
+  72: B:92, Courbevoie, R├®seau de La D├®fense-Enertherm, Mainland Fra | D:[F=I73] | G:[F=VLOOKUP($B73&"; "&$G$71&", "&$G$72,'EF Energy'!$G:$U,9,FALSE)] | H:0.1 | I:[F=IF(ISNA(F73*G73),0,(F73*G73))*(1+H73)]
+  73: B:34, Montpellier, Port Marianne Odysseum, Mainland France, Ba | D:[F=I74] | G:[F=VLOOKUP($B74&"; "&$G$71&", "&$G$72,'EF Energy'!$G:$U,9,FALSE)] | H:0.1 | I:[F=IF(ISNA(F74*G74),0,(F74*G74))*(1+H74)]
+  74: B:31, Toulouse, Cancerop├┤le, Mainland France, Base Carbone | D:[F=I75] | G:[F=VLOOKUP($B75&"; "&$G$71&", "&$G$72,'EF Energy'!$G:$U,9,FALSE)] | H:0.1 | I:[F=IF(ISNA(F75*G75),0,(F75*G75))*(1+H75)]
+  76: B:Total | D:[F=SUM(D73:D76)] | I:[F=SUM(I73:I76)]
+  79: B:Purchase of Electricity
+  81: B:1 - Electricity purchase, per usage, in mainland France
+  83: D:Emissions | E:Material characterisation | F:Consumption | G:kgCO2eq/kWh | J:kg CO2eq | K:kg CO2eq
+  84: D:kg CO2eq | F:(kWh) | G:Upstream | H:combustion at plant | I:losses | J:Upstream | K:production
+  85: A:[F=IFERROR(__xludf.DUMMYFUNCTION("IMPORTRANGE(""18F9TxjQIY32wAtZaLsG5qG8uDBFLhdPpmHrcuCyzqHs"",""Sheet1] | B:2008 - use : others (construction. research. armyÔÇª), Mainlan | D:[F=J86+K86] | G:[F=VLOOKUP($B86&"; "&$G$84&", "&G$85,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B86&"; "&$G$84&", "&H$85,'EF Energy'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B86&"; "&$G$84&", "&I$85,'EF Energy'!$G:$U,9,FALSE)] | J:[F=IF(ISNA(G86),0,F86*G86)] | K:[F=IF(ISNA(H86),0,F86*H86)]
+  86: B:2013 - use : heating, Mainland France, Base Carbone | D:[F=J87+K87] | G:[F=VLOOKUP($B87&"; "&$G$84&", "&G$85,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B87&"; "&$G$84&", "&H$85,'EF Energy'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B87&"; "&$G$84&", "&I$85,'EF Energy'!$G:$U,9,FALSE)] | J:[F=IF(ISNA(G87),0,F87*G87)] | K:[F=IF(ISNA(H87),0,F87*H87)]
+  87: B:2018 - use : Transports, Mainland France, Base Carbone | D:[F=J88+K88] | G:[F=VLOOKUP($B88&"; "&$G$84&", "&G$85,'EF Energy'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B88&"; "&$G$84&", "&H$85,'EF Energy'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B88&"; "&$G$84&", "&I$85,'EF Energy'!$G:$U,9,FALSE)] | J:[F=IF(ISNA(G88),0,F88*G88)] | K:[F=IF(ISNA(H88),0,F88*H88)]
+  89: B:Total | D:[F=SUM(D86:D89)] | J:[F=SUM(J86:J89)] | K:[F=SUM(K86:K89)]
+
+
+##### NON ENERGY SHEET #####
+
+
+##### INPUTS SHEET #####
+
+
+##### FREIGHT SHEET #####
+  1: B:[F=Description!C30]
+  3: B:Emission sources: | D:Routier entrant | F:A├®rien entrant | H:Fer entrant | J:Maritime entrant | N:Description
+  4: D:route interne | F:A├®rien interne | H:ferroviaire interne | J:Maritime interne
+  5: D:Routier sortant | F:A├®rien sortant | H:Ferroviaire sortant | J:Maritime sortant
+  6: B:Total : | D:Total | F:Sous-postes | H:bilan GES | J:GHG Protocol | L:ISO 14069 | N:CDP
+  8: B:Upstream freight
+  10: B:Road
+  12: B:1 - Road upstream freigh, owned vehicles
+  14: B:Fuels | D:Emissions | F:Transport | G:Conso | H:kgCO2eq/ton | J:Conso | K:kgCO2eq/kWh LHV | M:Conso | N:kgCO2eq/toe LHV | P:Conso | Q:kgCO2eq/liter | S:kg CO2eq
+  15: D:kg CO2eq | F:characterization | G:(tons) | H:Upstream | I:combustion | J:(kWh LHV) | K:Upstream | L:combustion | M:(tep LHV) | N:Upstream | O:combustion | P:(liters) | Q:Upstream | R:combustion | S:Upstream
+  16: B:Gasoline (lead free), Mainland France, Base Carbone | D:[F=S17+T17] | H:[F=VLOOKUP($B17&"; "&$H$15&", "&H$16,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B17&"; "&$H$15&", "&I$16,'EF Freight'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B17&"; "&$K$15&", "&K$16,'EF Freight'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B17&"; "&$K$15&", "&L$16,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B17&"; "&$N$15&", "&N$16,'EF Freight'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B17&"; "&$N$15&", "&O$16,'EF Freight'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B17&"; "&$Q$15&", "&Q$16,'EF Freight'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B17&"; "&$Q$15&", "&R$16,'EF Freight'!$G:$U,9,FALSE)] | S:[F=IF(ISNA($G17*H17),0,$G17*H17)+IF(ISNA($J17*K17),0,$J17*K17)+IF(ISNA($M17*N17),0,$M17*N17)+IF(ISNA($P]
+  17: B:Diesel oil (B30), Mainland France, Base Carbone | D:[F=S18+T18] | H:[F=VLOOKUP($B18&"; "&$H$15&", "&H$16,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B18&"; "&$H$15&", "&I$16,'EF Freight'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B18&"; "&$K$15&", "&K$16,'EF Freight'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B18&"; "&$K$15&", "&L$16,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B18&"; "&$N$15&", "&N$16,'EF Freight'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B18&"; "&$N$15&", "&O$16,'EF Freight'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B18&"; "&$Q$15&", "&Q$16,'EF Freight'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B18&"; "&$Q$15&", "&R$16,'EF Freight'!$G:$U,9,FALSE)] | S:[F=IF(ISNA($G18*H18),0,$G18*H18)+IF(ISNA($J18*K18),0,$J18*K18)+IF(ISNA($M18*N18),0,$M18*N18)+IF(ISNA($P]
+  18: B:Road diesel, Mainland France, Base Carbone | D:[F=S19+T19] | H:[F=VLOOKUP($B19&"; "&$H$15&", "&H$16,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B19&"; "&$H$15&", "&I$16,'EF Freight'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B19&"; "&$K$15&", "&K$16,'EF Freight'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B19&"; "&$K$15&", "&L$16,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B19&"; "&$N$15&", "&N$16,'EF Freight'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B19&"; "&$N$15&", "&O$16,'EF Freight'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B19&"; "&$Q$15&", "&Q$16,'EF Freight'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B19&"; "&$Q$15&", "&R$16,'EF Freight'!$G:$U,9,FALSE)] | S:[F=IF(ISNA($G19*H19),0,$G19*H19)+IF(ISNA($J19*K19),0,$J19*K19)+IF(ISNA($M19*N19),0,$M19*N19)+IF(ISNA($P]
+  19: B:LNG, Liquefied Natural Gas ((road, maritime and river transp | D:[F=S20+T20] | H:[F=VLOOKUP($B20&"; "&$H$15&", "&H$16,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B20&"; "&$H$15&", "&I$16,'EF Freight'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B20&"; "&$K$15&", "&K$16,'EF Freight'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B20&"; "&$K$15&", "&L$16,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B20&"; "&$N$15&", "&N$16,'EF Freight'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B20&"; "&$N$15&", "&O$16,'EF Freight'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B20&"; "&$Q$15&", "&Q$16,'EF Freight'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B20&"; "&$Q$15&", "&R$16,'EF Freight'!$G:$U,9,FALSE)] | S:[F=IF(ISNA($G20*H20),0,$G20*H20)+IF(ISNA($J20*K20),0,$J20*K20)+IF(ISNA($M20*N20),0,$M20*N20)+IF(ISNA($P]
+  20: B:LPG Liquefied Petroleum Gas for Vehicles, Mainland France, B | D:[F=S21+T21] | H:[F=VLOOKUP($B21&"; "&$H$15&", "&H$16,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B21&"; "&$H$15&", "&I$16,'EF Freight'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B21&"; "&$K$15&", "&K$16,'EF Freight'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B21&"; "&$K$15&", "&L$16,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B21&"; "&$N$15&", "&N$16,'EF Freight'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B21&"; "&$N$15&", "&O$16,'EF Freight'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B21&"; "&$Q$15&", "&Q$16,'EF Freight'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B21&"; "&$Q$15&", "&R$16,'EF Freight'!$G:$U,9,FALSE)] | S:[F=IF(ISNA($G21*H21),0,$G21*H21)+IF(ISNA($J21*K21),0,$J21*K21)+IF(ISNA($M21*N21),0,$M21*N21)+IF(ISNA($P]
+  21: B:Biodiesel (with land-use/land-cover change, optimistic scena | D:[F=S22+T22] | H:[F=VLOOKUP($B22&"; "&$H$15&", "&H$16,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B22&"; "&$H$15&", "&I$16,'EF Freight'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B22&"; "&$K$15&", "&K$16,'EF Freight'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B22&"; "&$K$15&", "&L$16,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B22&"; "&$N$15&", "&N$16,'EF Freight'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B22&"; "&$N$15&", "&O$16,'EF Freight'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B22&"; "&$Q$15&", "&Q$16,'EF Freight'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B22&"; "&$Q$15&", "&R$16,'EF Freight'!$G:$U,9,FALSE)] | S:[F=IF(ISNA($G22*H22),0,$G22*H22)+IF(ISNA($J22*K22),0,$J22*K22)+IF(ISNA($M22*N22),0,$M22*N22)+IF(ISNA($P]
+  23: B:Total | D:[F=SUM(D17:D23)] | S:[F=SUM(S17:S23)]
+  25: B:2 - Road upstream freight, GHG information of transport serv
+  26: I:kg CO2eq
+  27: D:Emissions | F:Transport | G:GHG Info | I:Upstream +
+  28: D:kg CO2eq | F:characterization | G:(kg CO2eq) | I:combustion
+  29: B:GHG information of transport services | D:[F=I30] | I:[F=G30]
+  30: B:GHG information of transport services | D:[F=I31] | I:[F=G31]
+  31: B:GHG information of transport services | D:[F=I32] | I:[F=G32]
+  33: B:Total | D:[F=SUM(D30:D33)] | I:[F=SUM(I30:I33)]
+  35: B:3 - Road upstream freight
+  36: O:fuel
+  37: D:Emissions | F:Transport | H:kgCO2eq/km | L:kgCO2eq/ton.km | O:kg CO2eq | P:kg CO2eq | Q:kg CO2eq | R:Scope 1 part
+  38: D:kg CO2eq | F:characterization | G:vehicle.km | H:Upstream | I:combustion | J:manufacturing | K:ton.km | L:Upstream | M:combustion | N:manufacturing | O:Upstream | P:combustion | Q:manufacturing | R:kg CO2eq
+  39: A:Plastics  | B:Articulated, 90 m3, , Mainland France, Base Carbone | D:[F=SUM(O40:Q40)] | H:[F=VLOOKUP($B40&"; "&$H$38&", "&H$39,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B40&"; "&$H$38&", "&I$39,'EF Freight'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B40&"; "&$H$38&", "&J$39,'EF Freight'!$G:$U,9,FALSE)] | K:[F='[2]O&M'!$V$23+'[2]O&M'!$V$52+'[2]O&M'!$V$101+'[2]O&M'!$V$122] | L:[F=VLOOKUP($B40&"; "&$L$38&", "&L$39,'EF Freight'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B40&"; "&$L$38&", "&M$39,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B40&"; "&$L$38&", "&N$39,'EF Freight'!$G:$U,9,FALSE)] | O:[F=IF(ISNA($G40*H40),0,$G40*H40)+IF(ISNA($K40*L40),0,$K40*L40)] | P:[F=IF(ISNA($G40*I40),0,$G40*I40)+IF(ISNA($K40*M40),0,$K40*M40)] | Q:[F=IF(ISNA($G40*J40),0,$G40*J40)+IF(ISNA($K40*N40),0,$K40*N40)] | R:[F=IF(OR(F40=Utilities!$G$571,F40=Utilities!$G$576),P40,0)]
+  40: A:Paper  | B:Articulated, 90 m3, , Mainland France, Base Carbone | D:[F=SUM(O41:Q41)] | H:[F=VLOOKUP($B41&"; "&$H$38&", "&H$39,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B41&"; "&$H$38&", "&I$39,'EF Freight'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B41&"; "&$H$38&", "&J$39,'EF Freight'!$G:$U,9,FALSE)] | K:[F='[2]O&M'!$V$24+'[2]O&M'!$V$53+'[2]O&M'!$V$102+'[2]O&M'!$V$123] | L:[F=VLOOKUP($B41&"; "&$L$38&", "&L$39,'EF Freight'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B41&"; "&$L$38&", "&M$39,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B41&"; "&$L$38&", "&N$39,'EF Freight'!$G:$U,9,FALSE)] | O:[F=IF(ISNA($G41*H41),0,$G41*H41)+IF(ISNA($K41*L41),0,$K41*L41)] | P:[F=IF(ISNA($G41*I41),0,$G41*I41)+IF(ISNA($K41*M41),0,$K41*M41)] | Q:[F=IF(ISNA($G41*J41),0,$G41*J41)+IF(ISNA($K41*N41),0,$K41*N41)] | R:[F=IF(OR(F41=Utilities!$G$571,F41=Utilities!$G$576),P41,0)]
+  41: A:Hardware  | B:Articulated, 90 m3, , Mainland France, Base Carbone | D:[F=SUM(O42:Q42)] | H:[F=VLOOKUP($B42&"; "&$H$38&", "&H$39,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B42&"; "&$H$38&", "&I$39,'EF Freight'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B42&"; "&$H$38&", "&J$39,'EF Freight'!$G:$U,9,FALSE)] | K:[F='[2]O&M'!$V$25+'[2]O&M'!$V$54+'[2]O&M'!$V$103+'[2]O&M'!$V$124] | L:[F=VLOOKUP($B42&"; "&$L$38&", "&L$39,'EF Freight'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B42&"; "&$L$38&", "&M$39,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B42&"; "&$L$38&", "&N$39,'EF Freight'!$G:$U,9,FALSE)] | O:[F=IF(ISNA($G42*H42),0,$G42*H42)+IF(ISNA($K42*L42),0,$K42*L42)] | P:[F=IF(ISNA($G42*I42),0,$G42*I42)+IF(ISNA($K42*M42),0,$K42*M42)] | Q:[F=IF(ISNA($G42*J42),0,$G42*J42)+IF(ISNA($K42*N42),0,$K42*N42)] | R:[F=IF(OR(F42=Utilities!$G$571,F42=Utilities!$G$576),P42,0)]
+  42: A:Automobile  | B:Articulated, 90 m3, , Mainland France, Base Carbone | D:[F=SUM(O43:Q43)] | H:[F=VLOOKUP($B43&"; "&$H$38&", "&H$39,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B43&"; "&$H$38&", "&I$39,'EF Freight'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B43&"; "&$H$38&", "&J$39,'EF Freight'!$G:$U,9,FALSE)] | K:[F='[2]O&M'!$V$26+'[2]O&M'!$V$55+'[2]O&M'!$V$104+'[2]O&M'!$V$125] | L:[F=VLOOKUP($B43&"; "&$L$38&", "&L$39,'EF Freight'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B43&"; "&$L$38&", "&M$39,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B43&"; "&$L$38&", "&N$39,'EF Freight'!$G:$U,9,FALSE)] | O:[F=IF(ISNA($G43*H43),0,$G43*H43)+IF(ISNA($K43*L43),0,$K43*L43)] | P:[F=IF(ISNA($G43*I43),0,$G43*I43)+IF(ISNA($K43*M43),0,$K43*M43)] | Q:[F=IF(ISNA($G43*J43),0,$G43*J43)+IF(ISNA($K43*N43),0,$K43*N43)] | R:[F=IF(OR(F43=Utilities!$G$571,F43=Utilities!$G$576),P43,0)]
+  43: B:Utility <3.5t, hydrogen decentralized electrolysis renewable | D:[F=SUM(O44:Q44)] | H:[F=VLOOKUP($B44&"; "&$H$38&", "&H$39,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B44&"; "&$H$38&", "&I$39,'EF Freight'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B44&"; "&$H$38&", "&J$39,'EF Freight'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B44&"; "&$L$38&", "&L$39,'EF Freight'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B44&"; "&$L$38&", "&M$39,'EF Freight'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B44&"; "&$L$38&", "&N$39,'EF Freight'!$G:$U,9,FALSE)] | O:[F=IF(ISNA($G44*H44),0,$G44*H44)+IF(ISNA($K44*L44),0,$K44*L44)] | P:[F=IF(ISNA($G44*I44),0,$G44*I44)+IF(ISNA($K44*M44),0,$K44*M44)] | Q:[F=IF(ISNA($G44*J44),0,$G44*J44)+IF(ISNA($K44*N44),0,$K44*N44)] | R:[F=IF(OR(F44=Utilities!$G$571,F44=Utilities!$G$576),P44,0)]
+  45: B:Total | D:[F=SUM(D37:D45)] | O:[F=SUM(O37:O45)] | P:[F=SUM(P37:P45)] | Q:[F=SUM(Q37:Q45)] | R:[F=SUM(R37:R45)]
+  48: B:Air
+  50: B:1 - Air upstream freight, owned aircrafts
+  52: D:Emissions | F:Transport | G:Conso | H:kgCO2eq/kg | J:Conso | K:kgCO2eq/kWh LHV | M:Conso | N:kgCO2eq/toe LHV | P:Conso | Q:kgCO2eq/liter | S:kg CO2eq
+  53: B:Fuels | F:characterization | G:(kg) | H:Upstream | I:combustion | J:(kWh LHV) | K:Upstream | L:combustion | M:(tep LHV) | N:Upstream | O:combustion | P:(liters) | Q:Upstream | R:combustion | S:Upstream
+  54: B:Diesel oil (B30), Mainland France, Base Carbone | D:[F=SUM(S55,T55)] | H:[F=VLOOKUP($B55&"; "&$H$53&", "&H$54,'EF Energy'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B55&"; "&$H$53&", "&I$54,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B55&"; "&$K$53&", "&K$54,'EF Energy'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B55&"; "&$K$53&", "&L$54,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B55&"; "&$N$53&", "&N$54,'EF Energy'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B55&"; "&$N$53&", "&O$54,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B55&"; "&$Q$53&", "&Q$54,'EF Energy'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B55&"; "&$Q$53&", "&R$54,'EF Energy'!$G:$U,9,FALSE)] | S:[F=IF(ISNA(G55*H55),0,G55*H55)+IF(ISNA(J55*K55),0,J55*K55)+IF(ISNA(M55*N55),0,M55*N55)+IF(ISNA(P55*Q55)]
+  55: B:High viscosity fuel, Mainland France, Base Carbone | D:[F=SUM(S56,T56)] | H:[F=VLOOKUP($B56&"; "&$H$53&", "&H$54,'EF Energy'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B56&"; "&$H$53&", "&I$54,'EF Energy'!$G:$U,9,FALSE)] | K:[F=VLOOKUP($B56&"; "&$K$53&", "&K$54,'EF Energy'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B56&"; "&$K$53&", "&L$54,'EF Energy'!$G:$U,9,FALSE)] | N:[F=VLOOKUP($B56&"; "&$N$53&", "&N$54,'EF Energy'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B56&"; "&$N$53&", "&O$54,'EF Energy'!$G:$U,9,FALSE)] | Q:[F=VLOOKUP($B56&"; "&$Q$53&", "&Q$54,'EF Energy'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B56&"; "&$Q$53&", "&R$54,'EF Energy'!$G:$U,9,FALSE)] | S:[F=IF(ISNA(G56*H56),0,G56*H56)+IF(ISNA(J56*K56),0,J56*K56)+IF(ISNA(M56*N56),0,M56*N56)+IF(ISNA(P56*Q56)]
+  57: B:Total | D:[F=SUM(D55:D57)] | S:[F=SUM(S55:S57)]
+  59: B:2 - Air upstream freight, GHG information of transport servi
+  60: I:kg CO2eq
+  61: D:Emissions | F:Transport | G:GHG Info | I:Upstream +
+  62: D:kg CO2eq | F:characterization | G:(kg CO2eq) | I:combustion
+  63: B:GHG information of transport services | D:[F=I64] | I:[F=G64]
+  64: B:GHG information of transport services | D:[F=I65] | I:[F=G65]
+  65: B:GHG information of transport services | D:[F=I66] | I:[F=G66]
+  67: B:Total | D:[F=SUM(D64:D67)] | I:[F=SUM(I64:I67)]
+  69: B:3 - Air upstream freight, tons.km
+  71: D:Emissions | F:Transport | H:kgCO2eq/ton.km | K:kg CO2eq | L:kg CO2eq | M:kg CO2eq | N:Scope 1 part
+  72: D:kg CO2eq | F:characterization | G:tons.km | H:Upstream | I:combustion | J:Fugitives emissions | K:Upstream | L:combustion | M:non Kyoto | N:kg CO2eq
+  73: B:Cargo aircraft, 10 to 25 tons, 500 - 1000 km, 2018, without  | D:[F=SUM(K74:M74)] | H:[F=VLOOKUP($B74&"; "&$H$72&", "&H$73,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B74&"; "&$H$72&", "&I$73,'EF Freight'!$G:$U,9,FALSE)] | J:[F=IF(ISNA(VLOOKUP($B74&"; "&$H$72&", "&J$73,'EF Freight'!$G:$U,9,FALSE)),0,VLOOKUP($B74&"; "&$H$72&", ] | K:[F=G74*H74] | L:[F=G74*I74] | M:[F=G74*J74] | N:[F=IF(OR(F74=Utilities!$G$571,F74=Utilities!$G$576),L74,0)]
+  74: B:Passengers aircraft, 101-220 seats, 1000-3500 kms, 2018, wit | D:[F=SUM(K75:M75)] | H:[F=VLOOKUP($B75&"; "&$H$72&", "&H$73,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B75&"; "&$H$72&", "&I$73,'EF Freight'!$G:$U,9,FALSE)] | J:[F=IF(ISNA(VLOOKUP($B75&"; "&$H$72&", "&J$73,'EF Freight'!$G:$U,9,FALSE)),0,VLOOKUP($B75&"; "&$H$72&", ] | K:[F=G75*H75] | L:[F=G75*I75] | M:[F=G75*J75] | N:[F=IF(OR(F75=Utilities!$G$571,F75=Utilities!$G$576),L75,0)]
+  75: B:Passengers aircraft, long-haul┬áflight, 2018, with contrails, | D:[F=SUM(K76:M76)] | H:[F=VLOOKUP($B76&"; "&$H$72&", "&H$73,'EF Freight'!$G:$U,9,FALSE)] | I:[F=VLOOKUP($B76&"; "&$H$72&", "&I$73,'EF Freight'!$G:$U,9,FALSE)] | J:[F=IF(ISNA(VLOOKUP($B76&"; "&$H$72&", "&J$73,'EF Freight'!$G:$U,9,FALSE)),0,VLOOKUP($B76&"; "&$H$72&", ] | K:[F=G76*H76] | L:[F=G76*I76] | M:[F=G76*J76] | N:[F=IF(OR(F76=Utilities!$G$571,F76=Utilities!$G$576),L76,0)]
+  77: B:Total | D:[F=SUM(D74:D77)] | K:[F=SUM(K74:K77)] | L:[F=SUM(L74:L77)] | M:[F=SUM(M74:M77)] | N:[F=SUM(N74:N77)]
+  80: B:Rail
+  82: B:1 - Rail upstream freight, eletricity for owned trains (Fran
+  84: D:Emissions | F:Transport | G:Conso | H:kg CO2eq | I:kg CO2eq
+  85: D:kg CO2eq | F:characterization | G:(kWh) | H:par kWh
+  86: B:Electricity owned trains | D:[F=I87] | H:[F=IF(ISNA(VLOOKUP(Description!D4&" - usage : Transports, Mainland France, Base Carbone; kgCO2eq/kWh, C] | I:[F=G87*H87]
+  88: B:Total | D:[F=SUM(D87:D88)] | I:[F=SUM(I87:I88)]
+  90: B:2 - inline losses of electricity
+
+
+##### TRANSPORTATION SHEET #####
+
+
+##### DIRECT WASTE SHEET #####
+  0: S:Uncertainties details
+  1: B:[F=Description!C32]
+  3: B:Emission sources: | D:d├®chets banals | F:d├®chets non banals | H:eaux us├®es | N:Description
+  4: B:Total : | D:total | F:sous-postes | H:bilan GES | J:GHG Protocol | L:ISO 14069 | N:CDP
+  6: B:R├®gion consid├®r├®e : | D:France m├®tropolitaine
+  7: B:Lieu de processing des d├®chets : | D:Non personnalisable | G:[F=IF(D7=Utilities!Q590,IF(D8="Non Personnalisable","< Attention n'oubliez pas de compl├®ter cette case.]
+  9: B:Non-hazardous waste
+  11: B:Building waste | Q:uncertainty
+  13: D:Emissions | F:Thrown | G:kgCO2eq/ton | K:kg CO2eq | O:kg CO2eq | Q:uncertainty | R:uncertainty
+  14: D:kg CO2eq | F:tons | G:collection | H:processing | I:incineration | K:collection | L:processing | M:incineration | Q:TOTAL | R:DATA
+  15: B:Concrete, France, Base Carbone | D:[F=O16] | F:[F='[2]O&M'!$V$40/1000] | G:[F=IF(ISNA(VLOOKUP($B16&"; "&$G$14&", "&G$15,'EF Wastes'!$G:$U,9,FALSE)), 0, VLOOKUP($B16&"; "&$G$14&",] | H:[F=IF(ISNA(VLOOKUP($B16&"; "&$G$14&", "&H$15,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B16&"; "&$G$14&", "] | I:[F=IF(ISNA(VLOOKUP($B16&"; "&$G$14&", "&I$15,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B16&"; "&$G$14&", "] | K:[F=$F16*G16] | L:[F=$F16*H16] | M:[F=$F16*I16] | O:[F=SUM(K16:N16)] | Q:[F=IF(X16=0,X16,X16/O16)]
+  16: B:Wood B, France, Base Carbone | D:[F=O17] | G:[F=IF(ISNA(VLOOKUP($B17&"; "&$G$14&", "&G$15,'EF Wastes'!$G:$U,9,FALSE)), 0, VLOOKUP($B17&"; "&$G$14&",] | H:[F=IF(ISNA(VLOOKUP($B17&"; "&$G$14&", "&H$15,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B17&"; "&$G$14&", "] | I:[F=IF(ISNA(VLOOKUP($B17&"; "&$G$14&", "&I$15,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B17&"; "&$G$14&", "] | K:[F=$F17*G17] | L:[F=$F17*H17] | M:[F=$F17*I17] | O:[F=SUM(K17:N17)] | Q:[F=IF(X17=0,X17,X17/O17)]
+  17: B:Mixed inerte waste, France, Base Carbone | D:[F=O18] | G:[F=IF(ISNA(VLOOKUP($B18&"; "&$G$14&", "&G$15,'EF Wastes'!$G:$U,9,FALSE)), 0, VLOOKUP($B18&"; "&$G$14&",] | H:[F=IF(ISNA(VLOOKUP($B18&"; "&$G$14&", "&H$15,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B18&"; "&$G$14&", "] | I:[F=IF(ISNA(VLOOKUP($B18&"; "&$G$14&", "&I$15,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B18&"; "&$G$14&", "] | K:[F=$F18*G18] | L:[F=$F18*H18] | M:[F=$F18*I18] | O:[F=SUM(K18:N18)] | Q:[F=IF(X18=0,X18,X18/O18)]
+  18: B:Plaster, France, Base Carbone | D:[F=O19] | G:[F=IF(ISNA(VLOOKUP($B19&"; "&$G$14&", "&G$15,'EF Wastes'!$G:$U,9,FALSE)), 0, VLOOKUP($B19&"; "&$G$14&",] | H:[F=IF(ISNA(VLOOKUP($B19&"; "&$G$14&", "&H$15,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B19&"; "&$G$14&", "] | I:[F=IF(ISNA(VLOOKUP($B19&"; "&$G$14&", "&I$15,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B19&"; "&$G$14&", "] | K:[F=$F19*G19] | L:[F=$F19*H19] | M:[F=$F19*I19] | O:[F=SUM(K19:N19)] | Q:[F=IF(X19=0,X19,X19/O19)]
+  20: D:[F=SUM(D16:D20)] | K:[F=SUM(K16:K20)] | L:[F=SUM(L16:L20)] | M:[F=SUM(M16:M20)] | O:[F=SUM(O16:O20)] | Q:[F=IF(X21=0,X21,X21/O21)]
+  22: B:Mineral wastes | Q:uncertainty
+  24: D:Emissions | F:Thrown | G:kgCO2eq/ton | K:kg CO2eq | O:kg CO2eq | Q:uncertainty | R:uncertainty
+  25: D:kg CO2eq | F:tons | G:collection | H:processing | I:incineration | K:collection | L:processing | M:incineration | Q:TOTAL | R:DATA
+  26: B:end of life incineration, Mainland France, Base Carbone | D:[F=O27] | G:[F=VLOOKUP($B27&"; "&$G$25&", "&G$26,'EF Wastes'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B27&"; "&$G$25&", "&H$26,'EF Wastes'!$G:$U,9,FALSE)] | I:[F=IF(ISNA(VLOOKUP($B27&"; "&$G$25&", "&I$26,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B27&"; "&$G$25&", "] | K:[F=$F27*G27] | L:[F=$F27*H27] | M:[F=$F27*I27] | O:[F=SUM(K27:N27)] | Q:[F=IF(X27=0,X27,X27/O27)]
+  27: B:end of life - landfill, Mainland France, Base Carbone | D:[F=O28] | G:[F=VLOOKUP($B28&"; "&$G$25&", "&G$26,'EF Wastes'!$G:$U,9,FALSE)] | H:[F=VLOOKUP($B28&"; "&$G$25&", "&H$26,'EF Wastes'!$G:$U,9,FALSE)] | I:[F=IF(ISNA(VLOOKUP($B28&"; "&$G$25&", "&I$26,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B28&"; "&$G$25&", "] | K:[F=$F28*G28] | L:[F=$F28*H28] | M:[F=$F28*I28] | O:[F=SUM(K28:N28)] | Q:[F=IF(X28=0,X28,X28/O28)]
+  29: B:Total | D:[F=SUM(D27:D29)] | K:[F=SUM(K27:K29)] | L:[F=SUM(L27:L29)] | M:[F=SUM(M27:M29)] | O:[F=SUM(O27:O29)] | Q:[F=IF(X30=0,X30,X30/O30)]
+  31: B:Organic wastes | Q:uncertainty
+  33: D:Emissions | F:thrown | G:kgCO2eq/ton | K:kg CO2eq | O:kg CO2eq | Q:uncertainty | R:uncertainty
+  34: D:kg CO2eq | F:tons | G:collection | H:processing | I:incineration | J:leakage | K:collection | L:processing | M:incineration | N:leakage | Q:TOTAL | R:DATA
+  35: B:Garden waste and green waste - Compost in closed bin (not st | D:[F=O36] | F:[F=([2]!Tableau17[[#This Row],[FY2022]]+'[2]O&M'!$V$82+'[2]O&M'!$V$84+'[2]O&M'!$V$152+'[2]O&M'!$V$154)/] | G:[F=IF(ISNA(VLOOKUP($B36&"; "&$G$34&", "&G$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B36&"; "&$G$34&", "] | H:[F=IF(ISNA(VLOOKUP($B36&"; "&$G$34&", "&H$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B36&"; "&$G$34&", "] | I:[F=IF(ISNA(VLOOKUP($B36&"; "&$G$34&", "&I$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B36&"; "&$G$34&", "] | J:[F=IF(ISNA(VLOOKUP($B36&"; "&$G$34&", "&J$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B36&"; "&$G$34&", "] | K:[F=$F36*G36] | L:[F=$F36*H36] | M:[F=$F36*I36] | N:[F=$F36*J36] | O:[F=SUM(K36:N36)] | Q:[F=IF(X36=0,X36,X36/O36)]
+  36: B:Cardboard - compost end of life, Mainland France, Base Carbo | D:[F=O37] | G:[F=IF(ISNA(VLOOKUP($B37&"; "&$G$34&", "&G$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B37&"; "&$G$34&", "] | H:[F=IF(ISNA(VLOOKUP($B37&"; "&$G$34&", "&H$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B37&"; "&$G$34&", "] | I:[F=IF(ISNA(VLOOKUP($B37&"; "&$G$34&", "&I$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B37&"; "&$G$34&", "] | J:[F=IF(ISNA(VLOOKUP($B37&"; "&$G$34&", "&J$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B37&"; "&$G$34&", "] | K:[F=$F37*G37] | L:[F=$F37*H37] | M:[F=$F37*I37] | N:[F=$F37*J37] | O:[F=SUM(K37:N37)] | Q:[F=IF(X37=0,X37,X37/O37)]
+  37: B:Paper - incineration end of life, Mainland France, Base Carb | D:[F=O38] | G:[F=IF(ISNA(VLOOKUP($B38&"; "&$G$34&", "&G$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B38&"; "&$G$34&", "] | H:[F=IF(ISNA(VLOOKUP($B38&"; "&$G$34&", "&H$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B38&"; "&$G$34&", "] | I:[F=IF(ISNA(VLOOKUP($B38&"; "&$G$34&", "&I$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B38&"; "&$G$34&", "] | J:[F=IF(ISNA(VLOOKUP($B38&"; "&$G$34&", "&J$35,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B38&"; "&$G$34&", "] | K:[F=$F38*G38] | L:[F=$F38*H38] | M:[F=$F38*I38] | N:[F=$F38*J38] | O:[F=SUM(K38:N38)] | Q:[F=IF(X38=0,X38,X38/O38)]
+  39: B:Total | D:[F=SUM(D36:D39)] | K:[F=SUM(K36:K39)] | L:[F=SUM(L36:L39)] | M:[F=SUM(M36:M39)] | N:[F=SUM(N36:N39)] | O:[F=SUM(O36:O39)] | Q:[F=IF(X40=0,X40,X40/O40)]
+  41: B:Plastic wastes | Q:uncertainty
+  43: D:Emissions | F:thrown | G:kgCO2eq/ton | K:kg CO2eq | O:kg CO2eq | Q:uncertainty | R:uncertainty
+  44: D:kg CO2eq | F:tons | G:collection | H:processing | I:incineration | J:leakage | K:collection | L:processing | M:incineration | N:leakage | Q:TOTAL | R:DATA
+  45: B:Plastic average, Mainland France, Base Carbone | D:[F=O46] | F:[F='[2]O&M'!$V$38/1000] | G:[F=IF(ISNA(VLOOKUP($B46&"; "&$G$44&", "&G$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B46&"; "&$G$44&", "] | H:[F=IF(ISNA(VLOOKUP($B46&"; "&$G$44&", "&H$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B46&"; "&$G$44&", "] | I:[F=IF(ISNA(VLOOKUP($B46&"; "&$G$44&", "&I$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B46&"; "&$G$44&", "] | J:[F=IF(ISNA(VLOOKUP($B46&"; "&$G$44&", "&J$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B46&"; "&$G$44&", "] | K:[F=$F46*G46] | L:[F=$F46*H46] | M:[F=$F46*I46] | N:[F=$F46*J46] | O:[F=SUM(K46:N46)] | Q:[F=IF(X46=0,X46,X46/O46)]
+  46: B:Plastic PE - incineration, Mainland France, Base Carbone | D:[F=O47] | G:[F=IF(ISNA(VLOOKUP($B47&"; "&$G$44&", "&G$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B47&"; "&$G$44&", "] | H:[F=IF(ISNA(VLOOKUP($B47&"; "&$G$44&", "&H$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B47&"; "&$G$44&", "] | I:[F=IF(ISNA(VLOOKUP($B47&"; "&$G$44&", "&I$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B47&"; "&$G$44&", "] | J:[F=IF(ISNA(VLOOKUP($B47&"; "&$G$44&", "&J$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B47&"; "&$G$44&", "] | K:[F=$F47*G47] | L:[F=$F47*H47] | M:[F=$F47*I47] | N:[F=$F47*J47] | O:[F=SUM(K47:N47)] | Q:[F=IF(X47=0,X47,X47/O47)]
+  47: B:Plastic PVC - incineration, Mainland France, Base Carbone | D:[F=O48] | G:[F=IF(ISNA(VLOOKUP($B48&"; "&$G$44&", "&G$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B48&"; "&$G$44&", "] | H:[F=IF(ISNA(VLOOKUP($B48&"; "&$G$44&", "&H$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B48&"; "&$G$44&", "] | I:[F=IF(ISNA(VLOOKUP($B48&"; "&$G$44&", "&I$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B48&"; "&$G$44&", "] | J:[F=IF(ISNA(VLOOKUP($B48&"; "&$G$44&", "&J$45,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B48&"; "&$G$44&", "] | K:[F=$F48*G48] | L:[F=$F48*H48] | M:[F=$F48*I48] | N:[F=$F48*J48] | O:[F=SUM(K48:N48)] | Q:[F=IF(X48=0,X48,X48/O48)]
+  49: B:Total | D:[F=SUM(D46:D49)] | K:[F=SUM(K46:K49)] | L:[F=SUM(L46:L49)] | M:[F=SUM(M46:M49)] | N:[F=SUM(N46:N49)] | O:[F=SUM(O46:O49)] | Q:[F=IF(X50=0,X50,X50/O50)]
+  51: B:Household waste | Q:uncertainty
+  53: D:Emissions | F:thrown | G:kgCO2eq/ton | K:kg CO2eq | O:kg CO2eq | Q:uncertainty | R:uncertainty
+  54: D:kg CO2eq | F:tons | G:collection | H:processing | I:incineration | J:leakage | K:collection | L:processing | M:incineration | N:leakage | Q:TOTAL | R:DATA
+  55: B:compost end of life, Mainland France, Base Carbone | D:[F=O56] | G:[F=IF(ISNA(VLOOKUP($B56&"; "&$G$54&", "&G$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B56&"; "&$G$54&", "] | H:[F=IF(ISNA(VLOOKUP($B56&"; "&$G$54&", "&H$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B56&"; "&$G$54&", "] | I:[F=IF(ISNA(VLOOKUP($B56&"; "&$G$54&", "&I$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B56&"; "&$G$54&", "] | J:[F=IF(ISNA(VLOOKUP($B56&"; "&$G$54&", "&J$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B56&"; "&$G$54&", "] | K:[F=$F56*G56] | L:[F=$F56*H56] | M:[F=$F56*I56] | N:[F=$F56*J56] | O:[F=SUM(K56:N56)] | Q:[F=IF(X56=0,X56,X56/O56)]
+  56: B:incineration end of life, Mainland France, Base Carbone | D:[F=O57] | G:[F=IF(ISNA(VLOOKUP($B57&"; "&$G$54&", "&G$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B57&"; "&$G$54&", "] | H:[F=IF(ISNA(VLOOKUP($B57&"; "&$G$54&", "&H$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B57&"; "&$G$54&", "] | I:[F=IF(ISNA(VLOOKUP($B57&"; "&$G$54&", "&I$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B57&"; "&$G$54&", "] | J:[F=IF(ISNA(VLOOKUP($B57&"; "&$G$54&", "&J$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B57&"; "&$G$54&", "] | K:[F=$F57*G57] | L:[F=$F57*H57] | M:[F=$F57*I57] | N:[F=$F57*J57] | O:[F=SUM(K57:N57)] | Q:[F=IF(X57=0,X57,X57/O57)]
+  57: B:landfill end of life, Mainland France, Base Carbone | D:[F=O58] | G:[F=IF(ISNA(VLOOKUP($B58&"; "&$G$54&", "&G$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B58&"; "&$G$54&", "] | H:[F=IF(ISNA(VLOOKUP($B58&"; "&$G$54&", "&H$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B58&"; "&$G$54&", "] | I:[F=IF(ISNA(VLOOKUP($B58&"; "&$G$54&", "&I$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B58&"; "&$G$54&", "] | J:[F=IF(ISNA(VLOOKUP($B58&"; "&$G$54&", "&J$55,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B58&"; "&$G$54&", "] | K:[F=$F58*G58] | L:[F=$F58*H58] | M:[F=$F58*I58] | N:[F=$F58*J58] | O:[F=SUM(K58:N58)] | Q:[F=IF(X58=0,X58,X58/O58)]
+  59: B:Total | D:[F=SUM(D56:D59)] | K:[F=SUM(K56:K59)] | L:[F=SUM(L56:L59)] | M:[F=SUM(M56:M59)] | N:[F=SUM(N56:N59)] | O:[F=SUM(O56:O59)] | Q:[F=IF(X60=0,X60,X60/O60)]
+  61: B:Reduced emissions from recycling or composting wastes
+  63: B:Reduced emissions from recycling of wastes | J:CAUTION
+Those "reduced emissions" should not be deducted fro | Q:uncertainty
+  65: D:Gains | F:thrown | G:kgCO2eq/ton | H:kg CO2eq | Q:uncertainty | R:kg CO2eq
+  66: D:kg CO2eq | F:tons | G:Gain | Q:TOTAL
+  67: B:Glass | D:[F=H68] | G:[F=IF(ISNA(VLOOKUP($B68,'EF Inputs'!$I$83:$O$97,7,FALSE)),0,VLOOKUP($B68,'EF Inputs'!$I$83:$O$97,7,FALS] | H:[F=F68*G68] | Q:[F=VLOOKUP(B68,'EF Inputs'!$I$83:$M$97,5,FALSE)] | R:[F=H68*Q68]
+  68: B:Paper | D:[F=H69] | G:[F=IF(ISNA(VLOOKUP($B69,'EF Inputs'!$I$83:$O$97,7,FALSE)),0,VLOOKUP($B69,'EF Inputs'!$I$83:$O$97,7,FALS] | H:[F=F69*G69] | Q:[F=VLOOKUP(B69,'EF Inputs'!$I$83:$M$97,5,FALSE)] | R:[F=H69*Q69]
+  69: B:Cardboard | D:[F=H70] | G:[F=IF(ISNA(VLOOKUP($B70,'EF Inputs'!$I$83:$O$97,7,FALSE)),0,VLOOKUP($B70,'EF Inputs'!$I$83:$O$97,7,FALS] | H:[F=F70*G70] | Q:[F=VLOOKUP(B70,'EF Inputs'!$I$83:$M$97,5,FALSE)] | R:[F=H70*Q70]
+  70: H:[F=F71*G71]
+  71: Q:0.5
+  73: B:Total | D:[F=SUM(D68:D73)] | H:[F=SUM(H68:H73)] | Q:[F=IF(R74=0,R74,R74/H74)] | R:[F=SQRT(SUMSQ(R68:R73))]
+  75: B:Hazardous waste
+  77: B:Dangerous waste | Q:uncertainty
+  79: D:Emissions | F:thrown | G:kgCO2eq/ton | K:kg CO2eq | O:kg CO2eq | Q:uncertainty | R:uncertainty
+  80: D:kg CO2eq | F:tons | G:collection | H:processing | I:incineration | J:leakage | K:collection | L:processing | M:incineration | N:leakage | Q:TOTAL | R:DATA
+  81: B:Industrial special waste, Mainland France, Base Carbone | D:[F=O82] | F:[F='[2]O&M'!$V$39/1000] | G:[F=IF(ISNA(VLOOKUP($B82&"; "&$G$80&", "&G$81,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B82&"; "&$G$80&", "] | H:[F=IF(ISNA(VLOOKUP($B82&"; "&$G$80&", "&H$81,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B82&"; "&$G$80&", "] | I:[F=IF(ISNA(VLOOKUP($B82&"; "&$G$80&", "&I$81,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B82&"; "&$G$80&", "] | J:[F=IF(ISNA(VLOOKUP($B82&"; "&$G$80&", "&J$81,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B82&"; "&$G$80&", "] | K:[F=$F82*G82] | L:[F=$F82*H82] | M:[F=$F82*I82] | N:[F=$F82*J82] | O:[F=SUM(K82:N82)] | Q:[F=IF(X82=0,X82,X82/O82)]
+  82: B:Industrial special waste, Mainland France, Base Carbone | D:[F=O83] | G:[F=IF(ISNA(VLOOKUP($B83&"; "&$G$80&", "&G$81,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B83&"; "&$G$80&", "] | H:[F=IF(ISNA(VLOOKUP($B83&"; "&$G$80&", "&H$81,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B83&"; "&$G$80&", "] | I:[F=IF(ISNA(VLOOKUP($B83&"; "&$G$80&", "&I$81,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B83&"; "&$G$80&", "] | J:[F=IF(ISNA(VLOOKUP($B83&"; "&$G$80&", "&J$81,'EF Wastes'!$G:$U,9,FALSE)),0,VLOOKUP($B83&"; "&$G$80&", "] | K:[F=$F83*G83] | L:[F=$F83*H83] | M:[F=$F83*I83] | N:[F=$F83*J83] | O:[F=SUM(K83:N83)] | Q:[F=IF(X83=0,X83,X83/O83)]
+  84: B:Total | D:[F=SUM(D82:D84)] | K:[F=SUM(K82:K84)] | L:[F=SUM(L82:L84)] | M:[F=SUM(M82:M84)] | N:[F=SUM(N82:N84)] | O:[F=SUM(O82:O84)] | Q:[F=IF(X85=0,X85,X85/O85)]
+  86: B:Leaks or non energy emissions (Kyoto) | Q:uncertainty
+  88: D:Emissions | F:tons | G:kg CO2eq | H:kg CO2eq | Q:uncertainty | R:uncertainty
+  89: D:kg CO2eq | F:released | G: par kg | Q:TOTAL | R:DATA
+  90: B:CO2f, Base Carbone | D:[F=H91] | G:[F='EF non energy'!$O$89] | H:[F=F91*G91*1000] | Q:[F=IF(X91=0,X91,X91/H91)]
+
+
+##### CAPITAL GOODS SHEET #####
+  1: B:[F=Description!C33]
+  3: B:Emission sources: | D:b├ótiments | F:Voirie | H:Machines et v├®hicules | J:Informatique | N:Description
+  4: B:Total : | D:Total | F:sous-postes | H:bilan GES | J:GHG Protocol | L:ISO 14069 | N:CDP
+  6: B:For the ISO 14069 extraction, do you want to you amortise em | D:Yes
+  8: B:Buildings
+  10: B:1 - Buildings, surface area method
+  12: D:Emissions | F:Built during  | G:Surface area | H:kgCO2eq/m┬▓ | I:Depreciat. period | J:kg CO2eq
+  13: D:kg CO2eq | F:this year? | G:(sqm) | I:(years)
+  14: B:Industrial building (metallic structure), Mainland France, B | D:[F=J15] | H:[F=VLOOKUP($B15&"; "&$H$13,'EF Capital goods'!$G:$U,9,FALSE)] | J:[F=IF(I15=0,0,G15*H15/I15)]
+  15: B:Office building, Mainland France, Base Carbone | D:[F=J16] | H:[F=VLOOKUP($B16&"; "&$H$13,'EF Capital goods'!$G:$U,9,FALSE)] | J:[F=IF(I16=0,0,G16*H16/I16)]
+  16: B:Leisure (concrete structure), Mainland France, Base Carbone | D:[F=J17] | H:[F=VLOOKUP($B17&"; "&$H$13,'EF Capital goods'!$G:$U,9,FALSE)] | J:[F=IF(I17=0,0,G17*H17/I17)]
+  17: B:Retail stores (concrete structure), Mainland France, Base Ca | D:[F=J18] | H:[F=VLOOKUP($B18&"; "&$H$13,'EF Capital goods'!$G:$U,9,FALSE)] | J:[F=IF(I18=0,0,G18*H18/I18)]
+  19: B:Total | D:[F=SUM(D15:D19)] | J:[F=SUM(J15:J19)]
+  21: B:Buildings - calculation by materials
+  23: B:2 - Buildings, fuels on construction site
+  25: B:Fuel | D:Emissions | F:Built during  | G:Material | H:Conso | I:kgCO2eq/kg | K:Consumption | L:kgCO2eq/kWh LHV | N:Consumption | O:kgCO2eq/toe LHV | Q:Consumption | R:kgCO2eq/liter
+  26: B:Butane & Propane | D:kg CO2eq | F:this year? | G:charaterisation | H:(kg) | I:Upstream | J:combustion | K:(kWh LHV) | L:Upstream | M:combustion | N:(tep LHV) | O:Upstream | P:combustion | Q:(liters) | R:Upstream | S:combustion
+  27: B:Butane (maritime included), Mainland France, Base Carbone | D:[F=SUM(U28,V28)] | I:[F=VLOOKUP($B28&"; "&$I$26&", "&I$27,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B28&"; "&$I$26&", "&J$27,'EF Energy'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B28&"; "&$L$26&", "&L$27,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B28&"; "&$L$26&", "&M$27,'EF Energy'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B28&"; "&$O$26&", "&O$27,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B28&"; "&$O$26&", "&P$27,'EF Energy'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B28&"; "&$R$26&", "&R$27,'EF Energy'!$G:$U,9,FALSE)] | S:[F=VLOOKUP($B28&"; "&$R$26&", "&S$27,'EF Energy'!$G:$U,9,FALSE)]
+  28: B:Propane (maritime included), Europe, Base Carbone | D:[F=SUM(U29,V29)] | I:[F=VLOOKUP($B29&"; "&$I$26&", "&I$27,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B29&"; "&$I$26&", "&J$27,'EF Energy'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B29&"; "&$L$26&", "&L$27,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B29&"; "&$L$26&", "&M$27,'EF Energy'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B29&"; "&$O$26&", "&O$27,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B29&"; "&$O$26&", "&P$27,'EF Energy'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B29&"; "&$R$26&", "&R$27,'EF Energy'!$G:$U,9,FALSE)] | S:[F=VLOOKUP($B29&"; "&$R$26&", "&S$27,'EF Energy'!$G:$U,9,FALSE)]
+  29: B:Other gases
+  30: B:Natural Gas, Mainland France, Base Carbone | D:[F=SUM(U31,V31)] | I:[F=VLOOKUP($B31&"; "&$I$26&", "&I$27,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B31&"; "&$I$26&", "&J$27,'EF Energy'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B31&"; "&$L$26&", "&L$27,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B31&"; "&$L$26&", "&M$27,'EF Energy'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B31&"; "&$O$26&", "&O$27,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B31&"; "&$O$26&", "&P$27,'EF Energy'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B31&"; "&$R$26&", "&R$27,'EF Energy'!$G:$U,9,FALSE)] | S:[F=VLOOKUP($B31&"; "&$R$26&", "&S$27,'EF Energy'!$G:$U,9,FALSE)]
+  31: B:Coke-oven gas, Mainland France, Base Carbone | D:[F=SUM(U32,V32)] | I:[F=VLOOKUP($B32&"; "&$I$26&", "&I$27,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B32&"; "&$I$26&", "&J$27,'EF Energy'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B32&"; "&$L$26&", "&L$27,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B32&"; "&$L$26&", "&M$27,'EF Energy'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B32&"; "&$O$26&", "&O$27,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B32&"; "&$O$26&", "&P$27,'EF Energy'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B32&"; "&$R$26&", "&R$27,'EF Energy'!$G:$U,9,FALSE)] | S:[F=VLOOKUP($B32&"; "&$R$26&", "&S$27,'EF Energy'!$G:$U,9,FALSE)]
+  32: B:Liquids
+  33: B:Gasoline, Mainland France, Base Carbone | D:[F=SUM(U34,V34)] | I:[F=VLOOKUP($B34&"; "&$I$26&", "&I$27,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B34&"; "&$I$26&", "&J$27,'EF Energy'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B34&"; "&$L$26&", "&L$27,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B34&"; "&$L$26&", "&M$27,'EF Energy'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B34&"; "&$O$26&", "&O$27,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B34&"; "&$O$26&", "&P$27,'EF Energy'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B34&"; "&$R$26&", "&R$27,'EF Energy'!$G:$U,9,FALSE)] | S:[F=VLOOKUP($B34&"; "&$R$26&", "&S$27,'EF Energy'!$G:$U,9,FALSE)]
+  34: B:Aviation gasoline (AvGas), Mainland France, Base Carbone | D:[F=SUM(U35,V35)] | I:[F=VLOOKUP($B35&"; "&$I$26&", "&I$27,'EF Energy'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B35&"; "&$I$26&", "&J$27,'EF Energy'!$G:$U,9,FALSE)] | L:[F=VLOOKUP($B35&"; "&$L$26&", "&L$27,'EF Energy'!$G:$U,9,FALSE)] | M:[F=VLOOKUP($B35&"; "&$L$26&", "&M$27,'EF Energy'!$G:$U,9,FALSE)] | O:[F=VLOOKUP($B35&"; "&$O$26&", "&O$27,'EF Energy'!$G:$U,9,FALSE)] | P:[F=VLOOKUP($B35&"; "&$O$26&", "&P$27,'EF Energy'!$G:$U,9,FALSE)] | R:[F=VLOOKUP($B35&"; "&$R$26&", "&R$27,'EF Energy'!$G:$U,9,FALSE)] | S:[F=VLOOKUP($B35&"; "&$R$26&", "&S$27,'EF Energy'!$G:$U,9,FALSE)]
+  36: B:Total | D:[F=SUM(D28:D36)]
+  38: B:3 - Building, INIES database materials
+  40: D:Emissions | F:Built during  | G:Quantities | I:Unit | J:Depreciat. period | K:kg CO2eq
+  41: D:kg CO2eq | F:this year? | G:used | J:(years)
+  42: B:Therm. insulation lining structure, Mainland France, Base Ca | D:[F=K43] | H:[F=VLOOKUP($B43&"; "&$I43,'EF Capital goods'!$G:$U,9,FALSE)] | I:[F=VLOOKUP(B43,'EF Capital goods'!C39:J55,8,FALSE)] | K:[F=IF(J43=0,0,(G43*H43)/J43)]
+  43: B:Beam in prestressed concrete, Mainland France, Base Carbone | D:[F=K44] | H:[F=VLOOKUP($B44&"; "&$I44,'EF Capital goods'!$G:$U,9,FALSE)] | I:[F=VLOOKUP(B44,'EF Capital goods'!C40:J56,8,FALSE)] | K:[F=IF(J44=0,0,(G44*H44)/J44)]
+  44: B:Masonry wall, Mainland France, Base Carbone | D:[F=K45] | H:[F=VLOOKUP($B45&"; "&$I45,'EF Capital goods'!$G:$U,9,FALSE)] | I:[F=VLOOKUP(B45,'EF Capital goods'!C41:J56,8,FALSE)] | K:[F=IF(J45=0,0,(G45*H45)/J45)]
+  46: B:Total | D:[F=SUM(D43:D46)] | K:[F=SUM(K43:K46)]
+  48: B:4 - Buildings, bulk materials
+  50: D:Emissions | F:Built during  | G:tons | H:kgCO2eq/ton | I:Depreciat. period | J:kg CO2eq
+  51: D:kg CO2eq | F:this year? | G:used | I:(years)
+  52: B:Pre-cracked asphalt binder/gravel mix, Mainland France, Base | D:[F=J53] | F:Yes | H:[F=VLOOKUP($B53&"; "&$H$51,'EF Capital goods'!$G:$U,9,FALSE)] | J:[F=IF(I53=0,0,G53*H53/I53)]
+  53: B:Granulate at quarry gate, Mainland France, Base Carbone | D:[F=J54] | F:Yes | H:[F=VLOOKUP($B54&"; "&$H$51,'EF Capital goods'!$G:$U,9,FALSE)] | J:[F=IF(I54=0,0,G54*H54/I54)]
+  54: B:Soil treated with asphalt binder, Mainland France, Base Carb | D:[F=J55] | F:Yes | H:[F=VLOOKUP($B55&"; "&$H$51,'EF Capital goods'!$G:$U,9,FALSE)] | J:[F=IF(I55=0,0,G55*H55/I55)]
+  56: B:Total | D:[F=SUM(D53:D56)] | J:[F=SUM(J53:J56)]
+  58: B:5 - Buildings, metals
+  60: D:Emissions | F:Built during  | G:tons | H:% from | I:kgCO2eq/ton | K:Depreciat. period | L:kg CO2eq
+  61: D:kg CO2eq | F:this year? | G:used | H:recycled | I:new | J:recycled | K:(years)
+  62: B:Steel or tinplate, Mainland France, Base Carbone | D:[F=L63] | I:[F=VLOOKUP($B63&"; "&$I$61&" "&I$62,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B63&"; "&$I$61&" "&J$62,'EF Inputs'!$G:$U,9,FALSE)] | L:[F=IF(K63=0,0,(G63*((1-H63)*I63+H63*J63))/K63)]
+  63: B:Aluminium, Mainland France, Base Carbone | D:[F=L64] | I:[F=VLOOKUP($B64&"; "&$I$61&" "&I$62,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B64&"; "&$I$61&" "&J$62,'EF Inputs'!$G:$U,9,FALSE)] | L:[F=IF(K64=0,0,(G64*((1-H64)*I64+H64*J64))/K64)]
+  64: B:Copper, Mainland France, Base Carbone | D:[F=L65] | I:[F=VLOOKUP($B65&"; "&$I$61&" "&I$62,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B65&"; "&$I$61&" "&J$62,'EF Inputs'!$G:$U,9,FALSE)] | L:[F=IF(K65=0,0,(G65*((1-H65)*I65+H65*J65))/K65)]
+  65: B:Nickel, Mainland France, Base Carbone | D:[F=L66] | I:[F=VLOOKUP($B66&"; "&$I$61&" "&I$62,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=VLOOKUP($B66&"; "&$I$61&" "&J$62,'EF Inputs'!$G:$U,9,FALSE)] | L:[F=IF(K66=0,0,(G66*((1-H66)*I66+H66*J66))/K66)]
+  67: B:Total | D:[F=SUM(D63:D67)] | L:[F=SUM(L63:L67)]
+  69: B:6 - Buildings, plastics 
+  71: D:Emissions | F:Built during  | G:tons | H:% from | I:kgCO2eq/ton | K:Depreciat. period | L:kg CO2eq
+  72: D:kg CO2eq | F:this year? | G:used | H:recycled | I:new | J:recycled | K:(years)
+  73: B:Plastic (average), Mainland France, Base Carbone | D:[F=L74] | I:[F=VLOOKUP($B74&"; "&$I$72&" "&I$73,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=IF(ISNA(VLOOKUP($B74&"; "&$I$72&" "&J$73,'EF Inputs'!$G:$U,9,FALSE)),I74,VLOOKUP($B74&"; "&$I$72&" "] | L:[F=IF(K74=0,0,(G74*((1-H74)*I74+H74*J74))/K74)]
+  74: B:Plastic (LDPE), Mainland France, Base Carbone | D:[F=L75] | I:[F=VLOOKUP($B75&"; "&$I$72&" "&I$73,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=IF(ISNA(VLOOKUP($B75&"; "&$I$72&" "&J$73,'EF Inputs'!$G:$U,9,FALSE)),I75,VLOOKUP($B75&"; "&$I$72&" "] | L:[F=IF(K75=0,0,(G75*((1-H75)*I75+H75*J75))/K75)]
+  75: B:Plastic (HDPE), Mainland France, Base Carbone | D:[F=L76] | I:[F=VLOOKUP($B76&"; "&$I$72&" "&I$73,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=IF(ISNA(VLOOKUP($B76&"; "&$I$72&" "&J$73,'EF Inputs'!$G:$U,9,FALSE)),I76,VLOOKUP($B76&"; "&$I$72&" "] | L:[F=IF(K76=0,0,(G76*((1-H76)*I76+H76*J76))/K76)]
+  76: B:Plastic (PVC), Mainland France, Base Carbone | D:[F=L77] | I:[F=VLOOKUP($B77&"; "&$I$72&" "&I$73,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=IF(ISNA(VLOOKUP($B77&"; "&$I$72&" "&J$73,'EF Inputs'!$G:$U,9,FALSE)),I77,VLOOKUP($B77&"; "&$I$72&" "] | L:[F=IF(K77=0,0,(G77*((1-H77)*I77+H77*J77))/K77)]
+  78: B:Total | D:[F=SUM(D74:D78)] | L:[F=SUM(L74:L78)]
+  80: B:7 - Buildings, glass
+  82: D:Emissions | F:Built during  | G:Kg | H:kgCO2eq/kg | I:Depreciat. period | J:kg CO2eq
+  83: D:kg CO2eq | F:this year? | G:used | I:(years)
+  84: B:Flat glass with lead, Europe, Base Carbone | D:[F=J85] | H:[F=VLOOKUP($B85&"; "&$H$83,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=IF(I85=0,0,G85*H85/I85)]
+  85: B:Flat glass curved, Europe, Base Carbone | D:[F=J86] | H:[F=VLOOKUP($B86&"; "&$H$83,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=IF(I86=0,0,G86*H86/I86)]
+  86: B:Flat glass security (rolled), Europe, Base Carbone | D:[F=J87] | H:[F=VLOOKUP($B87&"; "&$H$83,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=IF(I87=0,0,G87*H87/I87)]
+  87: B:Flat glass, floated, Europe, Base Carbone | D:[F=J88] | H:[F=VLOOKUP($B88&"; "&$H$83,'EF Inputs'!$G:$U,9,FALSE)] | J:[F=IF(I88=0,0,G88*H88/I88)]
+  89: B:Total | D:[F=SUM(D85:D89)] | J:[F=SUM(J85:J89)]
+
+
+##### EF ENERGY - ALL FACTORS #####
+Header search: row 8 =  |  |  |  |  |  |  |  | Fuels |  |  |  |  |  | 
+Header search: row 9 =  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Header search: row 10 =  | Lists |  | Extraction |  | NAME, Localisation, Source | + Unit+Type |  | NAME | Unit | Source | Localisation | uncertainty | Type | Total consolidated
+  R8: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8]Fuels | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R9: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R10: [0] | [1]Lists | [2] | [3]Extraction | [4] | [5]NAME, Localisation, Source | [6]+ Unit+Type | [7] | [8]NAME | [9]Unit | [10]Source | [11]Localisation | [12]uncertainty | [13]Type | [14]Total consolidated | [15]CO2 | [16]CH4f | [17]CH4b | [18]N2O | [19]Other GHG
+  R11: [0] | [1]Butane_Propane | [2] | [3]0 | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R12: [0] | [1]1 | [2]Butane (maritime included), Europe, Base | [3]1 | [4]Butane (maritime included), Europe, Base | [5]Butane (maritime included), Europe, Base | [6]Butane (maritime included), Europe, Base | [7] | [8]Butane (maritime included) | [9]kgCO2eq/GJ LHV | [10]Base Carbone | [11]Europe | [12]0.05 | [13]Combustion | [14]63.8 | [15]63 | [16]0.09 | [17]0 | [18]0.663 | [19]0
+  R13: [0] | [1]2 | [2]Butane (maritime included), Mainland Fra | [3]1 | [4] | [5]Butane (maritime included), Europe, Base | [6]Butane (maritime included), Europe, Base | [7] | [8]Butane (maritime included) | [9]kgCO2eq/GJ LHV | [10]Base Carbone | [11]Europe | [12]0.05 | [13]Upstream | [14]10.7 | [15]7.7 | [16]3 | [17]0 | [18]0 | [19]0
+  R14: [0] | [1]3 | [2]Propane (maritime included), Europe, Bas | [3]2 | [4]Butane (maritime included), Mainland Fra | [5]Butane (maritime included), Mainland Fra | [6]Butane (maritime included), Mainland Fra | [7] | [8]Butane (maritime included) | [9]kgCO2eq/GJ LHV | [10]Base Carbone | [11]Mainland France | [12]0.05 | [13]Combustion | [14]64.8 | [15]64 | [16]0.09 | [17]0 | [18]0.663 | [19]0
+  R15: [0] | [1]4 | [2]Propane (maritime included), Mainland Fr | [3]2 | [4] | [5]Butane (maritime included), Mainland Fra | [6]Butane (maritime included), Mainland Fra | [7] | [8]Butane (maritime included) | [9]kgCO2eq/GJ LHV | [10]Base Carbone | [11]Mainland France | [12]0.05 | [13]Upstream | [14]10.7 | [15]7.7 | [16]3 | [17]0 | [18]0 | [19]0
+  R10: idx=Extraction | name=NAME | unit=Unit | src=Source | region=Localisation | unc=uncertainty | type=Type | CO2=Total consolidated | total=CO2 | CH4=CH4f | bio=CH4b | N2O=N2O | other=Other GHG
+  R12: idx=1 | name=Butane (maritime included) | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=63.8 | total=63 | CH4=0.09 | bio=0 | N2O=0.663 | other=0
+  R13: idx=1 | name=Butane (maritime included) | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=10.7 | total=7.7 | CH4=3 | bio=0 | N2O=0 | other=0
+  R14: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=64.8 | total=64 | CH4=0.09 | bio=0 | N2O=0.663 | other=0
+  R15: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=10.7 | total=7.7 | CH4=3 | bio=0 | N2O=0 | other=0
+  R16: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/kg | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=3.02 | total=2.98 | CH4=0.00432 | bio=0 | N2O=0.0313 | other=0
+  R17: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/kg | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=0.505 | total=0.363 | CH4=0.142 | bio=0 | N2O=0 | other=0
+  R18: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/kg | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=2.95 | total=2.92 | CH4=0.00417 | bio=0 | N2O=0.0302 | other=0
+  R19: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/kg | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=0.487 | total=0.35 | CH4=0.137 | bio=0 | N2O=0 | other=0
+  R20: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=0.04 | total=0.0228 | CH4=0.012 | bio=0 | N2O=0 | other=0
+  R21: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=0.23 | total=0.227 | CH4=0.00033 | bio=0 | N2O=0.00239 | other=0
+  R22: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=0.04 | total=0.028 | CH4=0.012 | bio=0 | N2O=0 | other=0
+  R23: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=0.233 | total=0.23 | CH4=0.00033 | bio=0 | N2O=0.00239 | other=0
+  R24: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/liter | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=1.76 | total=1.74 | CH4=0.00253 | bio=0 | N2O=0.0183 | other=0
+  R25: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/liter | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=0.281 | total=0.199 | CH4=0.0818 | bio=0 | N2O=0 | other=0
+  R26: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/liter | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=1.73 | total=1.71 | CH4=0.00244 | bio=0 | N2O=0.0177 | other=0
+  R27: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/liter | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=0.271 | total=0.192 | CH4=0.0788 | bio=0 | N2O=0 | other=0
+  R28: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/toe LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=2680 | total=2650 | CH4=3.84 | bio=0 | N2O=27.8 | other=0
+  R29: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/toe LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=448 | total=322 | CH4=126 | bio=0 | N2O=0 | other=0
+  R30: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/toe LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=2720 | total=2690 | CH4=3.84 | bio=0 | N2O=27.8 | other=0
+  R31: idx=2 | name=Butane (maritime included) | unit=kgCO2eq/toe LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=448 | total=322 | CH4=126 | bio=0 | N2O=0 | other=0
+  R33: idx=3 | name=Propane (maritime included) | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=63.8 | total=63 | CH4=0.09 | bio=0 | N2O=0.663 | other=0
+  R34: idx=3 | name=Propane (maritime included) | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=10.6 | total=7.6 | CH4=3 | bio=0 | N2O=0 | other=0
+  R35: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=64.8 | total=64 | CH4=0.09 | bio=0 | N2O=0.663 | other=0
+  R36: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=10.6 | total=7.6 | CH4=3 | bio=0 | N2O=0 | other=0
+  R37: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/kg | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=3.02 | total=2.98 | CH4=0.00432 | bio=0 | N2O=0.0313 | other=0
+  R38: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/kg | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=0.5 | total=0.359 | CH4=0.141 | bio=0 | N2O=0 | other=0
+  R39: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/kg | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=2.97 | total=2.94 | CH4=0.0042 | bio=0 | N2O=0.0305 | other=0
+  R40: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/kg | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=0.487 | total=0.35 | CH4=0.137 | bio=0 | N2O=0 | other=0
+  R41: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=0.039 | total=0.027 | CH4=0.012 | bio=0 | N2O=0 | other=0
+  R42: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=0.23 | total=0.227 | CH4=0.00033 | bio=0 | N2O=0.00239 | other=0
+  R43: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=0.039 | total=0.027 | CH4=0.012 | bio=0 | N2O=0 | other=0
+  R44: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=0.233 | total=0.23 | CH4=0.00033 | bio=0 | N2O=0.00239 | other=0
+  R45: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/liter | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=1.55 | total=1.53 | CH4=0.00223 | bio=0 | N2O=0.0161 | other=0
+  R46: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/liter | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=0.263 | total=0.19 | CH4=0.0731 | bio=0 | N2O=0 | other=0
+  R47: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/liter | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=1.54 | total=1.52 | CH4=0.00217 | bio=0 | N2O=0.0157 | other=0
+  R48: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/liter | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=0.256 | total=0.185 | CH4=0.0711 | bio=0 | N2O=0 | other=0
+  R49: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/toe LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=2680 | total=2650 | CH4=3.84 | bio=0 | N2O=27.8 | other=0
+  R50: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/toe LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=379 | total=319 | CH4=60 | bio=0 | N2O=0 | other=0
+  R51: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/toe LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=2720 | total=2690 | CH4=3.84 | bio=0 | N2O=27.8 | other=0
+  R52: idx=4 | name=Propane (maritime included) | unit=kgCO2eq/toe LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=445 | total=319 | CH4=126 | bio=0 | N2O=0 | other=0
+  R58: idx=1 | name=Natural Gas | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=0.205 | total=0.202 | CH4=0.00054 | bio=0 | N2O=0.00239 | other=0
+  R59: idx=1 | name=Natural Gas | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=0.0389 | total=0.0253 | CH4=0.0136 | bio=0 | N2O=0 | other=0
+  R60: idx=1 | name=Natural Gas | unit=kgCO2eq/toe LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=2390 | total=2360 | CH4=6.3 | bio=0 | N2O=27.8 | other=0
+  R61: idx=1 | name=Natural Gas | unit=kgCO2eq/toe LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=378 | total=219 | CH4=159 | bio=0 | N2O=0 | other=0
+  R62: idx=1 | name=Natural Gas | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=56.9 | total=56.1 | CH4=0.15 | bio=0 | N2O=0.663 | other=0
+  R63: idx=1 | name=Natural Gas | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=10.8 | total=7.01 | CH4=3.78 | bio=0 | N2O=0 | other=0
+  R64: idx=1 | name=Natural Gas | unit=kgCO2eq/GJ HHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=51.2 | total=50.5 | CH4=0.135 | bio=0 | N2O=0.597 | other=0
+  R65: idx=1 | name=Natural Gas | unit=kgCO2eq/GJ HHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=8.11 | total=4.7 | CH4=3.41 | bio=0 | N2O=0 | other=0
+  R66: idx=1 | name=Natural Gas | unit=kgCO2eq/toe HHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=2150 | total=2120 | CH4=5.68 | bio=0 | N2O=25.1 | other=0
+  R67: idx=1 | name=Natural Gas | unit=kgCO2eq/toe HHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=340 | total=197 | CH4=143 | bio=0 | N2O=0 | other=0
+  R68: idx=1 | name=Natural Gas | unit=kgCO2eq/kWh HHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=0.185 | total=0.182 | CH4=0.000486 | bio=0 | N2O=0.00215 | other=0
+  R69: idx=1 | name=Natural Gas | unit=kgCO2eq/kWh HHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=0.0292 | total=0.0169 | CH4=0.0123 | bio=0 | N2O=0 | other=0
+  R71: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/kWh HHV | src=Base Carbone | region=France | unc=0.05 | type=Upstream | CO2=0.0357 | total=0.0214 | CH4=0.00307 | bio=0.0000112 | N2O=0.000239 | other=0.011
+  R72: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/kWh HHV | src=Base Carbone | region=France | unc=0.05 | type=Combustion | CO2=0.168 | total=0.168 | CH4=0 | bio=0 | N2O=0.000429 | other=0
+  R73: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=France | unc=0.05 | type=Upstream | CO2=11 | total=6.58 | CH4=0.947 | bio=0.00372 | N2O=0.075 | other=3.42
+  R74: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=France | unc=0.05 | type=Combustion | CO2=52 | total=51.9 | CH4=0 | bio=0 | N2O=0.133 | other=0
+  R75: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/GJ HHV | src=Base Carbone | region=France | unc=0.05 | type=Upstream | CO2=9.93 | total=5.93 | CH4=0.853 | bio=0.00335 | N2O=0.0676 | other=3.08
+  R76: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/GJ HHV | src=Base Carbone | region=France | unc=0.05 | type=Combustion | CO2=46.9 | total=46.8 | CH4=0 | bio=0 | N2O=0.119 | other=0
+  R77: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/toe LHV | src=Base Carbone | region=France | unc=0.05 | type=Upstream | CO2=462 | total=276 | CH4=39.7 | bio=0.156 | N2O=3.14 | other=143
+  R78: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/toe LHV | src=Base Carbone | region=France | unc=0.05 | type=Combustion | CO2=2180 | total=2174 | CH4=0 | bio=0 | N2O=5.55 | other=0
+  R79: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/toe HHV | src=Base Carbone | region=France | unc=0.05 | type=Upstream | CO2=416 | total=248 | CH4=35.7 | bio=0.14 | N2O=2.83 | other=129
+  R80: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/toe HHV | src=Base Carbone | region=France | unc=0.05 | type=Combustion | CO2=1964 | total=1959 | CH4=0 | bio=0 | N2O=5 | other=0
+  R81: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/m3 | src=Base Carbone | region=France | unc=0.05 | type=Upstream | CO2=0.385 | total=0.23 | CH4=0.033 | bio=0.000129 | N2O=0.00262 | other=0.119
+  R82: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/m3 | src=Base Carbone | region=France | unc=0.05 | type=Combustion | CO2=1.81 | total=1.81 | CH4=0 | bio=0 | N2O=0.00461 | other=0
+  R83: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=France | unc=0.05 | type=Upstream | CO2=0.0397 | total=0.0237 | CH4=0.00341 | bio=0.000014 | N2O=0.000265 | other=0.0123
+  R84: idx=2 | name=Natural gas - 2015 (Consumption mix) | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=France | unc=0.05 | type=Combustion | CO2=0.187 | total=0.187 | CH4=0 | bio=0 | N2O=0.000477 | other=0
+  R86: idx=3 | name=Steel furnace gas | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=183 | total=182 | CH4=0.03 | bio=0 | N2O=0.663 | other=0
+  R87: idx=4 | name=Coke-oven gas | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=47.5 | total=47 | CH4=0.009 | bio=0 | N2O=0.477 | other=0
+  R88: idx=5 | name=Blast furnace gas | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=268 | total=268 | CH4=0.009 | bio=0 | N2O=0.477 | other=0
+  R89: idx=6 | name=Steel furnace gas | unit=kgCO2eq/kWh LHV | src= | region=Mainland France | unc=0.05 | type=Combustion | CO2=0.659314587 | total=0.6553297683 | CH4=0.000108 | bio=0 | N2O=0.00239 | other=0
+  R90: idx=7 | name=Coke-oven gas | unit=kgCO2eq/kWh LHV | src= | region=Mainland France | unc=0.05 | type=Combustion | CO2=0.1711335677 | total=0.1692335116 | CH4=0.0000324 | bio=0 | N2O=0.001719502262 | other=0
+  R91: idx=8 | name=Blast furnace gas | unit=kgCO2eq/kWh LHV | src= | region=Mainland France | unc=0.05 | type=Combustion | CO2=0.9655536028 | total=0.9649910873 | CH4=0.0000324 | bio=0 | N2O=0.001719502262 | other=0
+  R95: idx=1 | name=BioLNG result of cryogenic purification  | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=France | unc=0.3 | type=Combustion | CO2=0.007 | total=0 | CH4=0.005 | bio=0 | N2O=0.002 | other=0
+  R96: idx=1 | name=BioLNG result of cryogenic purification  | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=France | unc=0.3 | type=Upstream | CO2=0.0794 | total=0.013 | CH4=0.047 | bio=0 | N2O=0.00339 | other=0.016
+  R97: idx=2 | name=Bitumens | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=81.4 | total=80.6 | CH4=0.09 | bio=0 | N2O=0.663 | other=0
+  R98: idx=2 | name=Bitumens | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Upstream | CO2=8.1 | total=8.1 | CH4=0 | bio=0 | N2O=0 | other=0
+  R99: idx=3 | name=Bitumens | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Combustion | CO2=81.8 | total=81 | CH4=0.09 | bio=0 | N2O=0.663 | other=0
+  R100: idx=3 | name=Bitumens | unit=kgCO2eq/GJ LHV | src=Base Carbone | region=Mainland France | unc=0.05 | type=Upstream | CO2=8.1 | total=8.1 | CH4=0 | bio=0 | N2O=0 | other=0
+  R101: idx=3 | name=Bitumens | unit=kgCO2eq/kWh LHV | src=Base Carbone | region=Europe | unc=0.05 | type=Combustion | CO2=0.293 | total=0.29 | CH4=0.000324 | bio=0 | N2O=0.00239 | other=0
+Total EF Energy factors printed: 80
+
+
+##### EF NON ENERGY - ALL FACTORS #####
+
+
+##### EF INPUTS - ALL FACTORS #####
+  R8: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8]Metals | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19] | [20] | [21]
+  R9: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19] | [20] | [21]
+  R10: [0] | [1]Lists | [2] | [3]Extraction | [4] | [5]NAME, Localisation, Source | [6]+ Unit+Type | [7] | [8]NAME | [9]Unit | [10]Source | [11]Localisation | [12]uncertainty | [13]Type | [14]Total consolidated | [15]CO2 | [16]CH4f | [17]CH4b | [18]N2O | [19]Other GHG | [20]CO2b | [21]
+  R11: [0] | [1]Metals | [2] | [3]0 | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19] | [20] | [21]
+  R12: [0] | [1]1 | [2]Steel or tinplate, Mainland France, | [3]1 | [4]Steel or tinplate, Mainland France, | [5]Steel or tinplate, Mainland France, | [6]Steel or tinplate, Mainland France, | [7] | [8]Steel or tinplate | [9]kgCO2eq/ton | [10]Base Carbone | [11]Mainland France | [12]0.1 | [13]new | [14]2210 | [15] | [16] | [17] | [18] | [19] | [20] | [21]
+  R10: idx=Extraction | cat= | name=NAME | unit=Unit | src=Source | region=Localisation | unc=uncertainty | total=Total consolidated
+  R12: idx=1 | cat= | name=Steel or tinplate | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.1 | total=2210
+  R13: idx=1 | cat= | name=Steel or tinplate | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.1 | total=938
+  R14: idx=2 | cat= | name=Aluminium | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.3 | total=7800
+  R15: idx=2 | cat= | name=Aluminium | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.3 | total=562
+  R16: idx=3 | cat= | name=Copper | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.5 | total=1450
+  R17: idx=3 | cat= | name=Copper | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.5 | total=1300
+  R18: idx=4 | cat= | name=Nickel | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=9170
+  R19: idx=4 | cat= | name=Nickel | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=9170
+  R20: idx=5 | cat= | name=Lead | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.3 | total=2090
+  R21: idx=5 | cat= | name=Lead | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.3 | total=2090
+  R22: idx=6 | cat= | name=Zinc | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.3 | total=2930
+  R23: idx=6 | cat= | name=Zinc | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.3 | total=2930
+  R30: idx= | cat= | name=Glass | unit= | src= | region= | unc= | total=
+  R32: idx=Extraction | cat= | name=NAME | unit=Unit | src=Source | region=Localisation | unc=uncertainty | total=Total consolidated
+  R34: idx=1 | cat= | name=Fiberglass | unit=kgCO2eq/kg | src=Base Carbone | region=Mainland France | unc=0.2 | total=2.13
+  R35: idx=2 | cat= | name=Fiberglass | unit=kgCO2eq/kg | src=Base Carbone | region=Mainland France | unc=0.2 | total=2.13
+  R36: idx=3 | cat= | name=Glass | unit=kgCO2eq/kg | src=Base Carbone | region=Mainland France | unc=0.2 | total=3.67
+  R37: idx=4 | cat= | name=Glass | unit=kgCO2eq/kg | src=Base Carbone | region=Mainland France | unc=0.5 | total=0.923
+  R38: idx=5 | cat= | name=Glass | unit=kgCO2eq/kg | src=Base Carbone | region=Mainland France | unc=0.5 | total=0.409
+  R39: idx=6 | cat= | name=Packaging glass | unit=kgCO2eq/kg | src=Base Carbone | region=Europe | unc=0.2 | total=0.813
+  R40: idx=7 | cat= | name=Flat glass with pattern | unit=kgCO2eq/kg | src=Base Carbone | region=Europe | unc=0.2 | total=1.18
+  R41: idx=8 | cat= | name=Flat glass with lead | unit=kgCO2eq/kg | src=Base Carbone | region=Europe | unc=0.2 | total=1.86
+  R42: idx=9 | cat= | name=Flat glass curved | unit=kgCO2eq/kg | src=Base Carbone | region=Europe | unc=0.2 | total=2.41
+  R43: idx=10 | cat= | name=Flat glass security (rolled) | unit=kgCO2eq/kg | src=Base Carbone | region=Europe | unc=0.2 | total=3.52
+  R44: idx=11 | cat= | name=Flat glass, floated | unit=kgCO2eq/kg | src=Base Carbone | region=Europe | unc=0.2 | total=1.26
+  R52: idx= | cat= | name=Plastic | unit= | src= | region= | unc= | total=
+  R54: idx=Extraction | cat= | name=NAME | unit=Unit | src=Source | region=Localisation | unc=uncertainty | total=Total consolidated
+  R56: idx=1 | cat= | name=PET Plastic films | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=5500
+  R57: idx=1 | cat= | name=PET Plastic films | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=5500
+  R58: idx=2 | cat= | name=Nylon | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.25 | total=7630
+  R59: idx=3 | cat= | name=Plastic (average) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=2380
+  R60: idx=3 | cat= | name=Plastic (average) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=202
+  R61: idx=4 | cat= | name=Plastic (LDPE) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=2090
+  R62: idx=4 | cat= | name=Plastic (LDPE) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=202
+  R63: idx=5 | cat= | name=Plastic (HDPE) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=1920
+  R64: idx=5 | cat= | name=Plastic (HDPE) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=202
+  R65: idx=6 | cat= | name=Plastic (PET) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=3270
+  R66: idx=6 | cat= | name=Plastic (PET) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=202
+  R67: idx=7 | cat= | name=Plastic (PS) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=2830
+  R68: idx=7 | cat= | name=Plastic (PS) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=2830
+  R69: idx=8 | cat= | name=Plastic (PVC) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=1870
+  R70: idx=8 | cat= | name=Plastic (PVC) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=403
+  R71: idx=9 | cat= | name=Propylene polymers | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=1 | total=2000
+  R79: idx= | cat= | name=GHG gain related to recycling | unit= | src= | region= | unc= | total=
+  R80: idx= | cat= | name=NAME | unit=Unit | src=Source | region=Localisation | unc=uncertainty | total=Total consolidated
+  R82: idx= | cat= | name=Plastic (average) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2828427125 | total=2178
+  R83: idx= | cat= | name=Plastic (LDPE) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2828427125 | total=1888
+  R84: idx= | cat= | name=Plastic (HDPE) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2828427125 | total=1718
+  R85: idx= | cat= | name=Plastic (PET) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2828427125 | total=3068
+  R86: idx= | cat= | name=Plastic (PS) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2828427125 | total=0
+  R87: idx= | cat= | name=Plastic (PVC) | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2828427125 | total=1467
+  R88: idx= | cat= | name=Steel or tinplate | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.1414213562 | total=1272
+  R89: idx= | cat= | name=Aluminium | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.4242640687 | total=7238
+  R90: idx= | cat= | name=Copper | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.7071067812 | total=150
+  R91: idx= | cat= | name=Nickel | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2828427125 | total=0
+  R92: idx= | cat= | name=Lead | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.4242640687 | total=0
+  R93: idx= | cat= | name=Zinc | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.4242640687 | total=0
+  R94: idx= | cat= | name=Glass | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.4242640687 | total=514
+  R95: idx= | cat= | name=Paper | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2828427125 | total=-20
+  R96: idx= | cat= | name=Cardboard | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2828427125 | total=-280
+  R99: idx= | cat= | name=Paper and cardboard | unit= | src= | region= | unc= | total=
+  R101: idx=Extraction | cat= | name=NAME | unit=Unit | src=Source | region=Localisation | unc=uncertainty | total=Total consolidated
+  R103: idx=1 | cat= | name=Cardboard | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=390
+  R104: idx=2 | cat= | name=Cardboard | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=670
+  R105: idx=3 | cat= | name=Printed paper label | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.5 | total=2930
+  R106: idx=4 | cat= | name=300g book | unit=kgCO2eq/unit | src=Base Carbone | region=Mainland France | unc=0.45 | total=1.1
+  R107: idx=5 | cat= | name=Paper | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=919
+  R108: idx=6 | cat= | name=Paper | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=297
+  R109: idx=7 | cat= | name=Paper | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=317
+  R110: idx=8 | cat= | name=Paper ream | unit=kgCO2eq/Unit | src=Base Carbone | region=Mainland France | unc=0.2 | total=2.29
+  R118: idx= | cat= | name=Building materials | unit= | src= | region= | unc= | total=
+  R120: idx=Extraction | cat= | name=NAME | unit=Unit | src=Source | region=Localisation | unc=uncertainty | total=Total consolidated
+  R122: idx=1 | cat= | name=PVC Pipes | unit=kgCO2eq/mL | src=Base Carbone | region=Mainland France | unc=0.1 | total=2.47
+  R123: idx=2 | cat= | name=Therm. insulation lining structure | unit=kgCO2eq/m┬▓ of wall | src=Base Carbone | region=Mainland France | unc=0.1 | total=5.79
+  R124: idx=3 | cat= | name=Terracotta monomur | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.1 | total=44.3
+  R125: idx=4 | cat= | name=Cladding | unit=kgCO2eq/m┬▓ of wall | src=Base Carbone | region=Mainland France | unc=0.1 | total=7.82
+  R126: idx=5 | cat= | name=Masonry wall | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.1 | total=11.1
+  R127: idx=6 | cat= | name=Suspended ceiling panel | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.1 | total=3.95
+  R128: idx=7 | cat= | name=Beam in prestressed concrete | unit=kgCO2eq/mL | src=Base Carbone | region=Mainland France | unc=0.1 | total=3.22
+
+
+##### EF FREIGHT - ALL FACTORS #####
+  R8: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R9: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8]Road | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R10: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R11: [0] | [1]Lists | [2] | [3]Extraction | [4] | [5]NAME, Localisation, Source | [6]+ Unit+Type | [7] | [8]NAME | [9]Unit | [10]Source | [11]Localisation | [12]uncertainty | [13]Type | [14]Total consolidated | [15]CO2 | [16]CH4f | [17]CH4b | [18]N2O | [19]Other GHG
+  R12: [0] | [1]Routier | [2] | [3]0 | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R11: idx=Extraction | name=NAME | unit=Unit | src=Source | region=Localisation | unc=uncertainty | type=Type | total=Total consolidated
+  R13: idx=1 | name=Articulated, 34 to 40 tons, On-road dies | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.0628
+  R14: idx=1 | name=Articulated, 34 to 40 tons, On-road dies | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0165
+  R15: idx=2 | name=Articulated, 34 to 40 tons, CNG | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.066
+  R16: idx=2 | name=Articulated, 34 to 40 tons, CNG | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.01
+  R17: idx=3 | name=Articulated, 34 to 40 tons, GNL | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.065
+  R18: idx=3 | name=Articulated, 34 to 40 tons, GNL | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.023
+  R19: idx=4 | name=Articulated, 34 to 40 tons, LNG, includi | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.052
+  R20: idx=4 | name=Articulated, 34 to 40 tons, LNG, includi | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.023
+  R21: idx=5 | name=Articulated, 40 to 44 tons, On-road dies | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.0527
+  R22: idx=5 | name=Articulated, 40 to 44 tons, On-road dies | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0139
+  R23: idx=6 | name=Articulated, 44 to 60 tons, On-road dies | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.0502
+  R24: idx=6 | name=Articulated, 44 to 60 tons, On-road dies | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0132
+  R25: idx=7 | name=Articulated, 60 to 72 tons, On-road dies | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.0427
+  R26: idx=7 | name=Articulated, 60 to 72 tons, On-road dies | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0112
+  R27: idx=8 | name=Articulated, 90 m3,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.0273
+  R28: idx=8 | name=Articulated, 90 m3,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.00713
+  R29: idx=8 | name=Articulated, 90 m3,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Manufacturing | total=0.00349
+  R30: idx=9 | name=Articulated, < 34 tons, On-road diesel,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.0728
+  R31: idx=9 | name=Articulated, < 34 tons, On-road diesel,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0191
+  R32: idx=10 | name=Straight truck, 45 m3,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.043
+  R33: idx=10 | name=Straight truck, 45 m3,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0112
+  R34: idx=10 | name=Straight truck, 45 m3,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Manufacturing | total=0.00665
+  R35: idx=11 | name=Van, 8 m3,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.144
+  R36: idx=11 | name=Van, 8 m3,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0374
+  R37: idx=11 | name=Van, 8 m3,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Manufacturing | total=0.0171
+  R38: idx=12 | name=Rigid, 12 to 20 tons, On-road diesel, in | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.12
+  R39: idx=12 | name=Rigid, 12 to 20 tons, On-road diesel, in | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0317
+  R40: idx=13 | name=Rigid, 12 to 20 tons, CNG | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.13
+  R41: idx=13 | name=Rigid, 12 to 20 tons, CNG | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.046
+  R42: idx=14 | name=Rigid, 12 to 20 tons, GNL | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.13
+  R43: idx=14 | name=Rigid, 12 to 20 tons, GNL | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.046
+  R44: idx=15 | name=Rigid, 20 to 26 tons, On-road diesel, in | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.0979
+  R45: idx=15 | name=Rigid, 20 to 26 tons, On-road diesel, in | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0257
+  R46: idx=16 | name=Rigid, 20 to 26 tons, CNG | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.12
+  R47: idx=16 | name=Rigid, 20 to 26 tons, CNG | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.015
+  R48: idx=17 | name=Rigid, 20 to 26 tons, GNL | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.14
+  R49: idx=17 | name=Rigid, 20 to 26 tons, GNL | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.036
+  R50: idx=18 | name=Rigid, 26 to 32 tons, On-road diesel, in | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.0778
+  R51: idx=18 | name=Rigid, 26 to 32 tons, On-road diesel, in | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0205
+  R52: idx=19 | name=Rigid, 3,5 to 7,5 tons, On-road diesel,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.296
+  R53: idx=19 | name=Rigid, 3,5 to 7,5 tons, On-road diesel,  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0779
+  R54: idx=20 | name=Rigid, 3,5 to 7,5 tons, Electric | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0
+  R55: idx=20 | name=Rigid, 3,5 to 7,5 tons, Electric | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0467
+  R56: idx=20 | name=Rigid, 3,5 to 7,5 tons, Electric | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Manufacturing | total=0.0974
+  R57: idx=21 | name=Rigid, 3,5 to 7,5 tons, CNG | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.31
+  R58: idx=21 | name=Rigid, 3,5 to 7,5 tons, CNG | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.045
+  R59: idx=22 | name=Rigid, 3,5 to 7,5 tons, Parallel hybrid  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.22
+  R60: idx=22 | name=Rigid, 3,5 to 7,5 tons, Parallel hybrid  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0436
+  R61: idx=22 | name=Rigid, 3,5 to 7,5 tons, Parallel hybrid  | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Manufacturing | total=0.044
+  R62: idx=23 | name=Rigid, 3,5 to 7,5 tons, Serie hybrid┬ápow | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.24
+  R63: idx=23 | name=Rigid, 3,5 to 7,5 tons, Serie hybrid┬ápow | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0475
+  R64: idx=23 | name=Rigid, 3,5 to 7,5 tons, Serie hybrid┬ápow | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Manufacturing | total=0.0501
+  R65: idx=24 | name=Rigid, 7,5 to 12 tons, On-road diesel, i | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.186
+  R66: idx=24 | name=Rigid, 7,5 to 12 tons, On-road diesel, i | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.0488
+  R67: idx=25 | name=Rigid, 7,5 to 12 tons, CNG | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0.19
+  R68: idx=25 | name=Rigid, 7,5 to 12 tons, CNG | unit=kgCO2eq/ton.km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.028
+  R69: idx=26 | name=Utility <3.5t, hydrogen decentralized el | unit=kgCO2eq/km | src=Base Carbone | region=Mainland France | unc= | type=Combustion | total=0
+  R70: idx=26 | name=Utility <3.5t, hydrogen decentralized el | unit=kgCO2eq/km | src=Base Carbone | region=Mainland France | unc= | type=Upstream | total=0.029
+  R71: idx=26 | name=Utility <3.5t, hydrogen decentralized el | unit=kgCO2eq/km | src=Base Carbone | region=Mainland France | unc= | type=Manufacturing | total=0.053
+
+
+##### EF TRANSPORTATION - ALL FACTORS #####
+  R8: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R9: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7]Road | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R10: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R11: [0]Lists | [1] | [2]Extraction | [3] | [4]NAME, Localisation, Source | [5]+ Unit+Type | [6] | [7]NAME | [8]Unit | [9]Source | [10]Localisation | [11]uncertainty | [12]Type | [13]Total consolidated | [14]CO2 | [15]CH4f | [16]CH4b | [17]N2O | [18]Other GHG | [19]CO2b
+  R12: [0]Average_personal_car | [1] | [2]0 | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R11: idx= | name=Unit | unit=Source | src=Localisation | region=uncertainty | unc=Type | type=Total consolidated | total=CO2
+  R13: idx=Passenger car, E85 engine - 2018, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Combustion | type=0.073 | total=0.073
+  R14: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Upstream | type=0.11 | total=0.11
+  R15: idx=Passenger car, Gazoline engine - 2018, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Combustion | type=0.164 | total=0.164
+  R16: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Upstream | type=0.0374 | total=0.0374
+  R17: idx=Passenger car, Diesel engine - 2018, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Combustion | type=0.151 | total=0.151
+  R18: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Upstream | type=0.039 | total=0.039
+  R19: idx=Passenger car, NGV engine - 2018, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Combustion | type=0.159 | total=0.159
+  R20: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Upstream | type=0.0372 | total=0.0372
+  R21: idx=Passenger car, LPG engine - 2018, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Combustion | type=0.165 | total=0.165
+  R22: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Upstream | type=0.0268 | total=0.0268
+  R23: idx=Passenger car, Average motorisation - 2018, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.6 | unc=Combustion | type=0.193 | total=0.193
+  R41: idx=Private car - decentralized electrolysis renewable energy, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Combustion | type=0 | total=0
+  R42: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Upstream | type=0.022 | total=0.022
+  R43: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Manufacturing | type=0.05 | total=0.05
+  R44: idx=Private car - decentralized electrolysis France, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Combustion | type=0 | total=0
+  R45: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Upstream | type=0.031 | total=0.031
+  R46: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Manufacturing | type=0.05 | total=0.05
+  R47: idx=Private car - decentralized electrolysis EU, Europe, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Europe | region=0.5 | unc=Combustion | type=0 | total=0
+  R48: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Europe | region=0.5 | unc=Upstream | type=0.208 | total=0.208
+  R49: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Europe | region=0.5 | unc=Manufacturing | type=0.05 | total=0.05
+  R50: idx=Private car - centralized hydrogen SMR biomethane, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Combustion | type=0 | total=0
+  R51: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Upstream | type=0.075 | total=0.075
+  R52: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Manufacturing | type=0.05 | total=0.05
+  R53: idx=Private car - hydrogen SMR centralized natural gas, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Combustion | type=0 | total=0
+  R54: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Upstream | type=0.166 | total=0.166
+  R55: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Manufacturing | type=0.05 | total=0.05
+  R56: idx=Car - Compact vehicle (segment C) - Electric, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0 | total=0
+  R57: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0198 | total=0.0198
+  R58: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.0836 | total=0.0836
+  R59: idx=Car - Compact vehicle (segment C) - Plug in-hybrid - P2/prius, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0 | total=0
+  R60: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0172 | total=0.0172
+  R61: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.0562 | total=0.0562
+  R62: idx=Car - Compact vehicle (segment C) - Full hybrid P2, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0.106 | total=0.106
+  R63: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0287 | total=0.0287
+  R64: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.0481 | total=0.0481
+  R65: idx=Car - Compact vehicle (segment C) - Full hybrid Prius, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0.078 | total=0.078
+  R66: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0211 | total=0.0211
+  R67: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.0475 | total=0.0475
+  R68: idx=Car - Compact vehicle (segment C) - Mild Hybrid fuel (diesel), Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0.148 | total=0.148
+  R69: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0293 | total=0.0293
+  R70: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.0403 | total=0.0403
+  R71: idx=Car - Compact vehicle (segment C) - Mild Hybrid fuel (gasoline), Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0.151 | total=0.151
+  R72: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0408 | total=0.0408
+  R73: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.04 | total=0.04
+  R74: idx=Car - Light vehicle (Segment A) - Electric, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0 | total=0
+  R75: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0159 | total=0.0159
+  R76: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.0794 | total=0.0794
+  R77: idx=Car - Light vehicle (Segment A) - Plug-in hybrid with auxiliary power unit, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0 | total=0
+  R78: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0144 | total=0.0144
+  R79: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.0573 | total=0.0573
+  R80: idx=Car - Light vehicle (Segment A) - Mild Hybrid fuel, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0.113 | total=0.113
+  R81: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0224 | total=0.0224
+  R82: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.0631 | total=0.0631
+  R83: idx=Car - Sedan car - Electric, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0 | total=0
+  R84: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0273 | total=0.0273
+  R85: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.112 | total=0.112
+  R86: idx=Car - Sedan car - Plug in-hybrid - P2/prius, Mainland France, Base Carbone | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Combustion | type=0 | total=0
+  R87: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Upstream | type=0.0235 | total=0.0235
+  R88: idx= | name=kgCO2eq/km | unit=Base Carbone | src=Mainland France | region=0.7 | unc=Manufacturing | type=0.0787 | total=0.0787
+
+
+##### EF WASTES - ALL FACTORS #####
+  R8: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R9: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7]Dangerous waste | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R10: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R11: [0]Lists | [1] | [2]Extraction | [3] | [4]NAME, Localisation, Source | [5]+ Unit+Type | [6] | [7]NAME | [8]Unit | [9]Source | [10]Localisation | [11]uncertainty | [12]Type | [13]Total consolidated | [14]CO2 | [15]CH4f | [16]CH4b | [17]N2O | [18]Other GHG | [19]CO2b
+  R12: [0]Dangerous | [1] | [2]0 | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19]
+  R11: idx= | name=Unit | unit=Source | src=Localisation | region=uncertainty | unc=Type | type=Total consolidated | total=CO2
+  R13: idx=Health activity waste, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Incineration | type=896 | total=880
+  R14: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18.3 | total=18.3
+  R15: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=20 | total=20
+  R16: idx=Industrial special waste, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=52 | total=18.3
+  R17: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Incineration | type=636 | total=636
+  R18: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=18.3 | total=18.3
+  R29: idx= | name=Unit | unit=Source | src=Localisation | region=uncertainty | unc=Type | type=Total consolidated | total=CO2
+  R31: idx=end of life incineration, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R32: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=18 | total=18
+  R33: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Incineration | type=10.6 | total=0
+  R34: idx=end of life - landfill, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R35: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=15 | total=15
+  R42: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.8660254038 | unc=Total | type=46.6 | total=36
+  R43: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.7071067812 | unc=Total | type=33 | total=33
+  R47: idx= | name=Unit | unit=Source | src=Localisation | region=uncertainty | unc=Type | type=Total consolidated | total=CO2
+  R49: idx=Cardboard - compost end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R50: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=18 | total=18
+  R51: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Leaks | type=50.8 | total=0
+  R52: idx=Cardboard - incineration end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R53: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=18 | total=18
+  R54: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Incineration | type=10.6 | total=0
+  R55: idx=Cardboard - landfill end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R56: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=15 | total=15
+  R57: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Leaks | type=950 | total=0
+  R58: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Incineration | type=0 | total=0
+  R60: idx=Food waste - compost end of life (industrial), Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R61: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=18 | total=18
+  R62: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Leaks | type=50.8 | total=0
+  R63: idx=Food waste - incineration end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R64: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=18 | total=18
+  R65: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Incineration | type=10.6 | total=0
+  R66: idx=Food waste - landfill end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R67: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=15 | total=15
+  R68: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Leaks | type=616 | total=0
+  R69: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Incineration | type=0 | total=0
+  R72: idx=Garden waste and green waste - Compost in closed bin (not stirred) end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=5.25 | total=0
+  R73: idx=Garden waste and green waste - Compost in closed bin (stirred) end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=5.19 | total=0
+  R74: idx=Garden waste and green waste - Compost heap (stirred) end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=24.1 | total=0
+  R75: idx=Garden waste and green waste - Compost heap (not stirred) end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=23.7 | total=0
+  R76: idx=Garden Waste - Compost heap (stirred) end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=15.1 | total=0
+  R78: idx=Paper - compost end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R79: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=18 | total=18
+  R80: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Leaks | type=50.8 | total=0
+  R81: idx=Paper - incineration end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R82: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=18 | total=18
+  R83: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Incineration | type=10.6 | total=0
+  R84: idx=Paper - landfill end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Collection | type=18 | total=18
+  R85: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=15 | total=15
+  R86: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Leaks | type=985 | total=0
+  R87: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Incineration | type=0 | total=0
+  R88: idx=Paper - average end of life, Mainland France, Base Carbone | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Processing | type=43.1 | total=33.6
+  R93: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.5 | unc=Total | type=43.1 | total=33.6
+  R94: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.8660254038 | unc=Total | type=46.6 | total=36
+  R95: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=1 | unc=Total | type=1018 | total=33
+  R96: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.8660254038 | unc=Total | type=86.8 | total=36
+  R97: idx= | name=kgCO2eq/ton | unit= | src=Mainland France | region=0.8660254038 | unc=Total | type=1018 | total=33
+  R98: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.8660254038 | unc=Total | type=46.6 | total=36
+  R99: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=1 | unc=Total | type=649 | total=33
+  R100: idx= | name=kgCO2eq/ton | unit=Base Carbone | src=Mainland France | region=0.8660254038 | unc=Total | type=86.8 | total=36
+
+
+##### EF CAPITAL GOODS - ALL FACTORS #####
+  R8: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19] | [20] | [21]
+  R9: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8]Buildings | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19] | [20] | [21]
+  R10: [0] | [1] | [2] | [3] | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19] | [20] | [21]
+  R11: [0] | [1]Lists | [2] | [3]Extraction | [4] | [5]NAME, Localisation, Source | [6]+ Unit+Type | [7] | [8]NAME | [9]Unit | [10]Source | [11]Localisation | [12]uncertainty | [13]Type | [14]Total consolidated | [15]CO2 | [16]CH4f | [17]CH4b | [18]N2O | [19]Other GHG | [20]CO2b | [21]
+  R12: [0] | [1]Buildings | [2] | [3]0 | [4] | [5] | [6] | [7] | [8] | [9] | [10] | [11] | [12] | [13] | [14] | [15] | [16] | [17] | [18] | [19] | [20] | [21]
+  R11: idx=Extraction | cat= | name=NAME | unit=Unit | src=Source | region=Localisation | unc=uncertainty | total=Total consolidated
+  R13: idx=1 | cat= | name=Agricultural building (concrete structur | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=656
+  R14: idx=2 | cat= | name=Agricultural building (metallic structur | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=220
+  R15: idx=3 | cat= | name=Industrial building (concrete structure) | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=825
+  R16: idx=4 | cat= | name=Industrial building (metallic structure) | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=275
+  R17: idx=5 | cat= | name=Office building | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=650
+  R18: idx=6 | cat= | name=Leisure (concrete structure) | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=506
+  R19: idx=7 | cat= | name=Leisure (metallic structure) | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=169
+  R20: idx=8 | cat= | name=Retail stores (concrete structure) | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=550
+  R21: idx=9 | cat= | name=Retail stores (metallic structure) | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=183
+  R22: idx=10 | cat= | name=Education establishment (concrete struct | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=440
+  R23: idx=11 | cat= | name=Health establishment (metallic structure | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=440
+  R24: idx=12 | cat= | name=Garages (concrete structure) | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=656
+  R25: idx=13 | cat= | name=Garages (metallic structure) | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=220
+  R26: idx=14 | cat= | name=Apartment building | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=525
+  R27: idx=15 | cat= | name="Eco-built" house (wood, stone, etcÔÇª) | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Ard├¿che | unc=0.3 | total=144
+  R28: idx=16 | cat= | name=Individual houses | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.5 | total=425
+  R38: idx=1 | cat= | name=PVC Pipes | unit=kgCO2eq/mL | src=Base Carbone | region=Mainland France | unc=0.1 | total=2.47
+  R39: idx=2 | cat= | name=Therm. insulation lining structure | unit=kgCO2eq/m┬▓ of wall | src=Base Carbone | region=Mainland France | unc=0.1 | total=5.79
+  R40: idx=3 | cat= | name=Terracotta monomur | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.1 | total=44.3
+  R41: idx=4 | cat= | name=Cladding | unit=kgCO2eq/m┬▓ of wall | src=Base Carbone | region=Mainland France | unc=0.1 | total=7.82
+  R42: idx=5 | cat= | name=Masonry wall | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.1 | total=11.1
+  R43: idx=6 | cat= | name=Suspended ceiling panel | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.1 | total=3.95
+  R44: idx=7 | cat= | name=Beam in prestressed concrete | unit=kgCO2eq/mL | src=Base Carbone | region=Mainland France | unc=0.1 | total=3.22
+  R45: idx=8 | cat= | name=Hot in-place recycling | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=42
+  R46: idx=9 | cat= | name=In-place recycling with emulsion | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=10.5
+  R47: idx=10 | cat= | name=Plaster panels | unit=kgCO2eq/m┬▓ of wall | src=Base Carbone | region=Mainland France | unc=0.1 | total=15.3
+  R48: idx=11 | cat= | name=Homogeneous PVC floor covering | unit=kgCO2eq/m┬▓ of floor | src=Base Carbone | region=Mainland France | unc=0.1 | total=5.55
+  R49: idx=12 | cat= | name=Concrete tile | unit=kgCO2eq/m┬▓ of ceiling | src=Base Carbone | region=Mainland France | unc=0.1 | total=9.7
+  R57: idx=1 | cat= | name=Reinforced continued concrete | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=200
+  R58: idx=2 | cat= | name=Cement concrete | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=134
+  R59: idx=3 | cat= | name=Hot mix | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=55.1
+  R60: idx=4 | cat= | name=Hot mix medium temperature | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=52.8
+  R61: idx=5 | cat= | name=Asphalt concrete | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=53.3
+  R62: idx=6 | cat= | name=Cold process asphalt concrete | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=36.2
+  R63: idx=7 | cat= | name=Asphalt concrete with 10% HIR | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=51.1
+  R64: idx=8 | cat= | name=Asphalt concrete with 20% HIR | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=43.7
+  R65: idx=9 | cat= | name=Asphalt concrete with 30% HIR | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=41.5
+  R66: idx=10 | cat= | name=Asphalt concrete with 50% HIR | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=36.9
+  R67: idx=11 | cat= | name=Granulate at quarry gate | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.5 | total=4
+  R68: idx=12 | cat= | name=Granulate (recycled) at quarry gate | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.5 | total=3
+  R69: idx=13 | cat= | name=Gravel/cement mix | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=50.6
+  R70: idx=14 | cat= | name=Bitumen gravel 3 | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=46.5
+  R71: idx=15 | cat= | name=Pre-cracked gravel/cement mix | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=51.6
+  R72: idx=16 | cat= | name=Emulsion gravel | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=30.2
+  R73: idx=17 | cat= | name=Stabilised granular material | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=20.6
+  R74: idx=18 | cat= | name=Pre-cracked asphalt binder/gravel mix | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=21.6
+  R75: idx=19 | cat= | name=Untreated gravel | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=14.5
+  R76: idx=20 | cat= | name=Soil treated with asphalt binder | unit=kgCO2eq/ton | src=Base Carbone | region=Mainland France | unc=0.2 | total=13.6
+  R83: idx= | cat= | name=Roads | unit= | src= | region= | unc= | total=
+  R85: idx=Extraction | cat= | name=NAME | unit=Unit | src=Source | region=Localisation | unc=uncertainty | total=Total consolidated
+  R87: idx=1 | cat= | name=Metal crash barriers, for TC5 type of ro | unit=kgCO2eq/m | src=Base Carbone | region=Mainland France | unc=0.15 | total=321
+  R88: idx=2 | cat= | name=Metal crash barriers, for TC6 type of ro | unit=kgCO2eq/m | src=Base Carbone | region=Mainland France | unc=0.15 | total=1030
+  R89: idx=3 | cat= | name=Metal crash barriers, for TC7 type of ro | unit=kgCO2eq/m | src=Base Carbone | region=Mainland France | unc=0.15 | total=1030
+  R90: idx=4 | cat= | name=Parking area, motorway rest area - reinf | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.15 | total=337
+  R91: idx=5 | cat= | name=Parking area, motorway rest area - bitum | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.15 | total=92
+  R92: idx=6 | cat= | name=Parking area, motorway rest area - Semi- | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.15 | total=165
+  R93: idx=7 | cat= | name=Parking area, classic - reinforced concr | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.15 | total=319
+  R94: idx=8 | cat= | name=Parking area, classic - bituminous | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.15 | total=73
+  R95: idx=9 | cat= | name=Parking area, classic - Semi-rigid | unit=kgCO2eq/m┬▓ | src=Base Carbone | region=Mainland France | unc=0.15 | total=165
+
+
+##### EXPORT POSTES (Bilan Carbone items) #####
+  0: A: 
+  1: B:Export items
+  4: B:Items | C:Emissions, kg CO2eq | D:% export | E:Exported value, kg CO2eq | G:Uncertainties, kg CO2eq | H:Exported value, kg CO2eq
+  5: B:Energy | C:[F=SUM(C7:C11)] | E:[F=SUM(E7:E11)] | G:[F=SQRT(SUMSQ(G7:G11))] | H:[F=SUM(H7:H11)]
+  6: B:[F=Energy!B194] | C:[F=Energy!D194] | D:1 | E:[F=C7*D7] | G:[F=Energy!H194] | H:[F=$D7*G7]
+  7: B:[F=Energy!B195] | C:[F=Energy!D195] | D:1 | E:[F=C8*D8] | G:[F=Energy!H195] | H:[F=$D8*G8]
+  8: B:[F=Energy!B196] | C:[F=Energy!D196] | D:1 | E:[F=C9*D9] | G:[F=Energy!H196] | H:[F=$D9*G9]
+  9: B:[F=Energy!B197] | C:[F=Energy!D197] | D:1 | E:[F=C10*D10] | G:[F=Energy!H197] | H:[F=$D10*G10]
+  10: B:[F=Energy!B198] | C:[F=Energy!D198] | D:1 | E:[F=C11*D11] | G:[F=Energy!H198] | H:[F=$D11*G11]
+  12: B:Energy 2 | C:[F=SUM(C14:C18)] | E:[F=SUM(E14:E18)] | G:[F=SQRT(SUMSQ(G14:G18))] | H:[F=SUM(H14:H18)]
+  13: B:[F='Energy 2'!B194] | C:[F='Energy 2'!D194] | D:1 | E:[F=C14*D14] | G:[F='Energy 2'!H194] | H:[F=$D14*G14]
+  14: B:[F='Energy 2'!B195] | C:[F='Energy 2'!D195] | D:1 | E:[F=C15*D15] | G:[F='Energy 2'!H195] | H:[F=$D15*G15]
+  15: B:[F='Energy 2'!B196] | C:[F='Energy 2'!D196] | D:1 | E:[F=C16*D16] | G:[F='Energy 2'!H196] | H:[F=$D16*G16]
+  16: B:[F='Energy 2'!B197] | C:[F='Energy 2'!D197] | D:1 | E:[F=C17*D17] | G:[F='Energy 2'!H197] | H:[F=$D17*G17]
+  17: B:[F='Energy 2'!B198] | C:[F='Energy 2'!D198] | D:1 | E:[F=C18*D18] | G:[F='Energy 2'!H198] | H:[F=$D18*G18]
+  19: B:Cooling | C:[F=SUM(C21:C26)] | E:[F=SUM(E21:E26)] | G:[F=SQRT(SUMSQ(G21:G26))] | H:[F=SUM(H21:H26)]
+  20: B:[F=Cooling!B109] | C:[F=Cooling!D109] | D:1 | E:[F=C21*D21] | G:[F=Cooling!H109] | H:[F=$D21*G21]
+  21: B:[F=Cooling!B110] | C:[F=Cooling!D110] | D:1 | E:[F=C22*D22] | G:[F=Cooling!H110] | H:[F=$D22*G22]
+  22: B:[F=Cooling!B111] | C:[F=Cooling!D111] | D:1 | E:[F=C23*D23] | G:[F=Cooling!H111] | H:[F=$D23*G23]
+  23: B:[F=Cooling!B112] | C:[F=Cooling!D112] | D:1 | E:[F=C24*D24] | G:[F=Cooling!H112] | H:[F=$D24*G24]
+  24: B:[F=Cooling!B113] | C:[F=Cooling!D113] | D:1 | E:[F=C25*D25] | G:[F=Cooling!H113] | H:[F=$D25*G25]
+  25: B:[F=Cooling!B114] | C:[F=Cooling!D114] | D:1 | E:[F=C26*D26] | G:[F=Cooling!H114] | H:[F=$D26*G26]
+  27: B:Non-energy 2 | C:[F=SUM(C29:C34)] | E:[F=SUM(E29:E34)] | G:[F=SQRT(SUMSQ(G29:G34))] | H:[F=SUM(H29:H34)]
+  28: B:[F='Non-energy 2'!B109] | C:[F='Non-energy 2'!D109] | D:1 | E:[F=C29*D29] | G:[F='Non-energy 2'!H109] | H:[F=$D29*G29]
+  29: B:[F='Non-energy 2'!B110] | C:[F='Non-energy 2'!D110] | D:1 | E:[F=C30*D30] | G:[F='Non-energy 2'!H110] | H:[F=$D30*G30]
+  30: B:[F='Non-energy 2'!B111] | C:[F='Non-energy 2'!D111] | D:1 | E:[F=C31*D31] | G:[F='Non-energy 2'!H111] | H:[F=$D31*G31]
+  31: B:[F='Non-energy 2'!B112] | C:[F='Non-energy 2'!D112] | D:1 | E:[F=C32*D32] | G:[F='Non-energy 2'!H112] | H:[F=$D32*G32]
+  32: B:[F='Non-energy 2'!B113] | C:[F='Non-energy 2'!D113] | D:1 | E:[F=C33*D33] | G:[F='Non-energy 2'!H113] | H:[F=$D33*G33]
+  33: B:[F='Non-energy 2'!B114] | C:[F='Non-energy 2'!D114] | D:1 | E:[F=C34*D34] | G:[F='Non-energy 2'!H114] | H:[F=$D34*G34]
+  35: B:Inputs 1 | C:[F=SUM(C37:C46)] | E:[F=SUM(E37:E46)] | G:[F=SQRT(SUMSQ(G37:G46))] | H:[F=SUM(H37:H46)]
+  36: B:[F='Inputs 1'!B300] | C:[F='Inputs 1'!D300] | D:1 | E:[F=C37*D37] | G:[F='Inputs 1'!H300] | H:[F=$D37*G37]
+  37: B:[F='Inputs 1'!B301] | C:[F='Inputs 1'!D301] | D:1 | E:[F=C38*D38] | G:[F='Inputs 1'!H301] | H:[F=$D38*G38]
+  38: B:[F='Inputs 1'!B302] | C:[F='Inputs 1'!D302] | D:1 | E:[F=C39*D39] | G:[F='Inputs 1'!H302] | H:[F=$D39*G39]
+  39: B:[F='Inputs 1'!B303] | C:[F='Inputs 1'!D303] | D:1 | E:[F=C40*D40] | G:[F='Inputs 1'!H303] | H:[F=$D40*G40]
+  40: B:[F='Inputs 1'!B304] | C:[F='Inputs 1'!D304] | D:1 | E:[F=C41*D41] | G:[F='Inputs 1'!H304] | H:[F=$D41*G41]
+  41: B:[F='Inputs 1'!B305] | C:[F='Inputs 1'!D305] | D:1 | E:[F=C42*D42] | G:[F='Inputs 1'!H305] | H:[F=$D42*G42]
+  42: B:[F='Inputs 1'!B306] | C:[F='Inputs 1'!D306] | D:1 | E:[F=C43*D43] | G:[F='Inputs 1'!H306] | H:[F=$D43*G43]
+  43: B:[F='Inputs 1'!B307] | C:[F='Inputs 1'!D307] | D:1 | E:[F=C44*D44] | G:[F='Inputs 1'!H307] | H:[F=$D44*G44]
+  44: B:[F='Inputs 1'!B308] | C:[F='Inputs 1'!D308] | D:1 | E:[F=C45*D45] | G:[F='Inputs 1'!H308] | H:[F=$D45*G45]
+  45: B:[F='Inputs 1'!B309] | C:[F='Inputs 1'!D309] | D:1 | E:[F=C46*D46] | G:[F='Inputs 1'!H309] | H:[F=$D46*G46]
+  47: B:Inputs 2 | C:[F=SUM(C49:C58)] | E:[F=SUM(E49:E58)] | G:[F=SQRT(SUMSQ(G49:G58))] | H:[F=SUM(H49:H58)]
+  48: B:[F='Inputs 2'!B300] | C:[F='Inputs 2'!D300] | D:1 | E:[F=C49*D49] | G:[F='Inputs 2'!H300] | H:[F=$D49*G49]
+  49: B:[F='Inputs 2'!B301] | C:[F='Inputs 2'!D301] | D:1 | E:[F=C50*D50] | G:[F='Inputs 2'!H301] | H:[F=$D50*G50]
+  50: B:[F='Inputs 2'!B302] | C:[F='Inputs 2'!D302] | D:1 | E:[F=C51*D51] | G:[F='Inputs 2'!H302] | H:[F=$D51*G51]
+  51: B:[F='Inputs 2'!B303] | C:[F='Inputs 2'!D303] | D:1 | E:[F=C52*D52] | G:[F='Inputs 2'!H303] | H:[F=$D52*G52]
+  52: B:[F='Inputs 2'!B304] | C:[F='Inputs 2'!D304] | D:1 | E:[F=C53*D53] | G:[F='Inputs 2'!H304] | H:[F=$D53*G53]
+  53: B:[F='Inputs 2'!B305] | C:[F='Inputs 2'!D305] | D:1 | E:[F=C54*D54] | G:[F='Inputs 2'!H305] | H:[F=$D54*G54]
+  54: B:[F='Inputs 2'!B306] | C:[F='Inputs 2'!D306] | D:1 | E:[F=C55*D55] | G:[F='Inputs 2'!H306] | H:[F=$D55*G55]
+  55: B:[F='Inputs 2'!B307] | C:[F='Inputs 2'!D307] | D:1 | E:[F=C56*D56] | G:[F='Inputs 2'!H307] | H:[F=$D56*G56]
+  56: B:[F='Inputs 2'!B308] | C:[F='Inputs 2'!D308] | D:1 | E:[F=C57*D57] | G:[F='Inputs 2'!H308] | H:[F=$D57*G57]
+  57: B:[F='Inputs 2'!B309] | C:[F='Inputs 2'!D309] | D:1 | E:[F=C58*D58] | G:[F='Inputs 2'!H309] | H:[F=$D58*G58]
+  59: B:Future packaging | C:[F=SUM(C61:C68)] | E:[F=SUM(E61:E68)] | G:[F=SQRT(SUMSQ(G61:G68))] | H:[F=SUM(H61:H68)]
+  60: B:[F=Packaging!B77] | C:[F=Packaging!F77] | D:1 | E:[F=C61*D61] | G:[F=Packaging!J77] | H:[F=$D61*G61]
+  61: B:[F=Packaging!B78] | C:[F=Packaging!F78] | D:1 | E:[F=C62*D62] | G:[F=Packaging!J78] | H:[F=$D62*G62]
+  62: B:[F=Packaging!B79] | C:[F=Packaging!F79] | D:1 | E:[F=C63*D63] | G:[F=Packaging!J79] | H:[F=$D63*G63]
+  63: B:[F=Packaging!B80] | C:[F=Packaging!F80] | D:1 | E:[F=C64*D64] | G:[F=Packaging!J80] | H:[F=$D64*G64]
+  69: B:Freight | C:[F=SUM(C71:C82)] | E:[F=SUM(E71:E82)] | G:[F=SQRT(SUMSQ(G71:G82))] | H:[F=SUM(H71:H82)]
+  70: B:[F=Freight!B564] | C:[F=Freight!D564] | D:1 | E:[F=C71*D71] | G:[F=Freight!H564] | H:[F=$D71*G71]
+  71: B:[F=Freight!B565] | C:[F=Freight!D565] | D:1 | E:[F=C72*D72] | G:[F=Freight!H565] | H:[F=$D72*G72]
+  72: B:[F=Freight!B566] | C:[F=Freight!D566] | D:1 | E:[F=C73*D73] | G:[F=Freight!H566] | H:[F=$D73*G73]
+  73: B:[F=Freight!B567] | C:[F=Freight!D567] | D:1 | E:[F=C74*D74] | G:[F=Freight!H567] | H:[F=$D74*G74]
+  74: B:[F=Freight!B568] | C:[F=Freight!D568] | D:1 | E:[F=C75*D75] | G:[F=Freight!H568] | H:[F=$D75*G75]
+  75: B:[F=Freight!B569] | C:[F=Freight!D569] | D:1 | E:[F=C76*D76] | G:[F=Freight!H569] | H:[F=$D76*G76]
+  76: B:[F=Freight!B570] | C:[F=Freight!D570] | D:1 | E:[F=C77*D77] | G:[F=Freight!H570] | H:[F=$D77*G77]
+  77: B:[F=Freight!B571] | C:[F=Freight!D571] | D:1 | E:[F=C78*D78] | G:[F=Freight!H571] | H:[F=$D78*G78]
+  78: B:[F=Freight!B572] | C:[F=Freight!D572] | D:1 | E:[F=C79*D79] | G:[F=Freight!H572] | H:[F=$D79*G79]
+  79: B:[F=Freight!B573] | C:[F=Freight!D573] | D:1 | E:[F=C80*D80] | G:[F=Freight!H573] | H:[F=$D80*G80]
+  80: B:[F=Freight!B574] | C:[F=Freight!D574] | D:1 | E:[F=C81*D81] | G:[F=Freight!H574] | H:[F=$D81*G81]
+  81: B:[F=Freight!B575] | C:[F=Freight!D575] | D:1 | E:[F=C82*D82] | G:[F=Freight!H575] | H:[F=$D82*G82]
+  83: B:Transporting people | C:[F=SUM(C85:C91)] | E:[F=SUM(E85:E91)] | G:[F=SQRT(SUMSQ(G85:G91))] | H:[F=SUM(H85:H91)]
+  84: B:[F='Transporting people'!B444] | C:[F='Transporting people'!D444] | D:1 | E:[F=C85*D85] | G:[F='Transporting people'!H444] | H:[F=$D85*G85]
+  85: B:[F='Transporting people'!B445] | C:[F='Transporting people'!D445] | D:1 | E:[F=C86*D86] | G:[F='Transporting people'!H445] | H:[F=$D86*G86]
+  86: B:[F='Transporting people'!B446] | C:[F='Transporting people'!D446] | D:1 | E:[F=C87*D87] | G:[F='Transporting people'!H446] | H:[F=$D87*G87]
+  87: B:[F='Transporting people'!B447] | C:[F='Transporting people'!D447] | D:1 | E:[F=C88*D88] | G:[F='Transporting people'!H447] | H:[F=$D88*G88]
+  88: B:[F='Transporting people'!B448] | C:[F='Transporting people'!D448] | D:1 | E:[F=C89*D89] | G:[F='Transporting people'!H448] | H:[F=$D89*G89]
+  89: B:[F='Transporting people'!B449] | C:[F='Transporting people'!D449] | D:1 | E:[F=C90*D90] | G:[F='Transporting people'!H449] | H:[F=$D90*G90]
+  90: B:[F='Transporting people'!B450] | C:[F='Transporting people'!D450] | D:1 | E:[F=C91*D91] | G:[F='Transporting people'!H450] | H:[F=$D91*G91]
+  92: B:Direct waste | C:[F=SUM(C95:C100)] | E:[F=SUM(E95:E100)] | G:[F=SQRT(SUMSQ(G95:G100))] | H:[F=SUM(H95:H100)]
+  93: B:[F='Direct waste'!B134] | C:[F='Direct waste'!D134] | D:1 | E:[F=C94*D94] | G:[F='Direct waste'!H134] | H:[F=$D94*G94]
+  94: B:[F='Direct waste'!B135] | C:[F='Direct waste'!D135] | D:1 | E:[F=C95*D95] | G:[F='Direct waste'!H135] | H:[F=$D95*G95]
+  95: B:[F='Direct waste'!B136] | C:[F='Direct waste'!D136] | D:1 | E:[F=C96*D96] | G:[F='Direct waste'!H136] | H:[F=$D96*G96]
+  96: B:[F='Direct waste'!B137] | C:[F='Direct waste'!D137] | D:1 | E:[F=C97*D97] | G:[F='Direct waste'!H137] | H:[F=$D97*G97]
+  97: B:[F='Direct waste'!B138] | C:[F='Direct waste'!D138] | D:1 | E:[F=C98*D98] | G:[F='Direct waste'!H138] | H:[F=$D98*G98]
+  98: B:[F='Direct waste'!B139] | C:[F='Direct waste'!D139] | D:1 | E:[F=C99*D99] | G:[F='Direct waste'!H139] | H:[F=$D99*G99]
+  99: B:[F='Direct waste'!B140] | C:[F='Direct waste'!D140] | D:1 | E:[F=C100*D100] | G:[F='Direct waste'!H140] | H:[F=$D100*G100]
+  100: B:[F='Direct waste'!B141] | C:[F='Direct waste'!D141] | D:1 | E:[F=C101*D101] | G:[F='Direct waste'!H141] | H:[F=$D101*G101]

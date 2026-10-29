@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CarbonTrack — Guide de Déploiement VPS</title>
+<style>
+  :root{
+    --green:#22c55e;--green-dark:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;
+    --navy:#0f172a;--navy2:#1e293b;--gray:#64748b;--border:#e2e8f0;
+    --red:#ef4444;--red-bg:#fff1f2;--orange:#f97316;--orange-bg:#fff7ed;
+    --blue:#3b82f6;--blue-bg:#eff6ff;--blue-border:#bfdbfe;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--navy2);background:#f8fafc;line-height:1.7;font-size:15px;}
+
+  /* HEADER */
+  .header{background:var(--navy);color:#fff;padding:48px 0 40px;}
+  .header-inner{max-width:900px;margin:0 auto;padding:0 32px;}
+  .logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .logo-box{width:44px;height:44px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:12px;display:flex;align-items:center;justify-content:center;}
+  .logo-box svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  .logo-name{font-size:20px;font-weight:800;color:#fff;}
+  .logo-sub{font-size:10px;color:#4ade80;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;}
+  h1{font-size:34px;font-weight:900;letter-spacing:-1px;margin-bottom:10px;}
+  h1 span{color:#4ade80;}
+  .header-desc{color:rgba(255,255,255,.55);font-size:15px;max-width:600px;line-height:1.65;}
+  .header-meta{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+  .meta-badge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.75);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;}
+  .meta-badge.g{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.3);color:#4ade80;}
+
+  /* LAYOUT */
+  .body{max-width:900px;margin:0 auto;padding:40px 32px;}
+
+  /* PROGRESS BAR */
+  .progress{display:flex;gap:0;margin-bottom:40px;border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+  .prog-item{flex:1;padding:10px 4px;text-align:center;font-size:10px;font-weight:700;background:#fff;color:var(--gray);border-right:1px solid var(--border);cursor:default;letter-spacing:.3px;}
+  .prog-item:last-child{border-right:none;}
+  .prog-item.active{background:var(--navy);color:#fff;}
+  .prog-item span{display:block;font-size:16px;margin-bottom:2px;}
+
+  /* SECTION */
+  .section{background:#fff;border:1px solid var(--border);border-radius:14px;margin-bottom:24px;overflow:hidden;}
+  .section-head{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--border);background:#fafafa;}
+  .step-num{width:36px;height:36px;background:var(--navy);color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;}
+  .step-num.done{background:var(--green-dark);}
+  .section-title{font-size:17px;font-weight:800;color:var(--navy);}
+  .section-sub{font-size:12px;color:var(--gray);margin-top:1px;}
+  .section-body{padding:24px;}
+
+  /* CODE BLOCKS */
+  .cmd{background:var(--navy);color:#e2e8f0;border-radius:10px;padding:14px 18px;font-family:'JetBrains Mono','Fira Code','Courier New',monospace;font-size:13px;margin:10px 0;position:relative;overflow-x:auto;line-height:1.65;}
+  .cmd .comment{color:#64748b;}
+  .cmd .green{color:#4ade80;}
+  .cmd .yellow{color:#fbbf24;}
+  .cmd .blue{color:#60a5fa;}
+  .cmd .red{color:#f87171;}
+  .copy-btn{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;}
+  .copy-btn:hover{background:rgba(255,255,255,.2);color:#fff;}
+
+  /* CALLOUTS */
+  .note{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:10px;padding:14px 18px;margin:14px 0;display:flex;gap:12px;}
+  .note-icon{font-size:18px;flex-shrink:0;line-height:1.5;}
+  .note p{color:#1e3a8a;font-size:13.5px;margin:0;line-height:1.65;}
+  .warn{background:var(--orange-bg);border:1px solid #fed7aa;border-radius:10px;padding:14px 18px;margin:14px 0;display:flex;gap:12px;}
+  .warn p{color:#9a3412;font-size:13.5px;margin:0;line-height:1.65;}
+  .success{background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;padding:14px 18px;margin:14px 0;display:flex;gap:12px;}
+  .success p{color:#14532d;font-size:13.5px;margin:0;line-height:1.65;}
+  .danger{background:var(--red-bg);border:1px solid #fecaca;border-radius:10px;padding:14px 18px;margin:14px 0;display:flex;gap:12px;}
+  .danger p{color:#7f1d1d;font-size:13.5px;margin:0;line-height:1.65;}
+
+  p{margin-bottom:10px;color:#374151;}
+  h3{font-size:14px;font-weight:800;color:var(--navy);margin:20px 0 8px;display:flex;align-items:center;gap:8px;}
+  h3::before{content:'';width:3px;height:14px;background:var(--green);border-radius:2px;display:inline-block;flex-shrink:0;}
+  ul,ol{padding-left:20px;margin-bottom:10px;}
+  li{margin-bottom:5px;color:#374151;font-size:14px;}
+  strong{color:var(--navy2);}
+  .inline-code{background:#f1f5f9;color:#be185d;font-family:monospace;padding:2px 7px;border-radius:5px;font-size:13px;}
+
+  /* FILE BLOCK */
+  .file-block{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:12px 0;}
+  .file-block-head{background:#f1f5f9;padding:8px 16px;font-size:11px;font-weight:700;color:var(--gray);letter-spacing:.8px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+  .file-block-body{background:var(--navy);color:#e2e8f0;padding:16px 18px;font-family:'JetBrains Mono','Courier New',monospace;font-size:12.5px;line-height:1.7;overflow-x:auto;}
+  .file-block-body .k{color:#c084fc;}
+  .file-block-body .s{color:#4ade80;}
+  .file-block-body .c{color:#64748b;}
+
+  /* CHECKLIST */
+  .checklist{list-style:none;padding:0;margin:12px 0;}
+  .checklist li{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:#374151;}
+  .checklist li:last-child{border-bottom:none;}
+  .checklist li::before{content:'☐';font-size:16px;flex-shrink:0;color:var(--gray);line-height:1.4;}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;}
+  thead th{background:var(--navy);color:#fff;padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;}
+  tbody td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:nth-child(even){background:#fafafa;}
+
+  .tag{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;white-space:nowrap;}
+  .t-red{background:var(--red-bg);color:#b91c1c;}
+  .t-green{background:var(--green-bg);color:#166534;}
+  .t-blue{background:var(--blue-bg);color:#1e40af;}
+  .t-gray{background:#f1f5f9;color:var(--navy2);}
+
+  /* ARCHITECTURE DIAGRAM */
+  .arch{background:var(--navy);border-radius:12px;padding:24px;margin:16px 0;color:#fff;font-family:monospace;font-size:13px;line-height:2;}
+  .arch-row{display:flex;align-items:center;gap:12px;}
+  .arch-box{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 14px;white-space:nowrap;}
+  .arch-box.g{border-color:rgba(34,197,94,.4);color:#4ade80;}
+  .arch-box.b{border-color:rgba(96,165,250,.4);color:#60a5fa;}
+  .arch-box.o{border-color:rgba(251,146,60,.4);color:#fb923c;}
+  .arch-arrow{color:rgba(255,255,255,.3);font-size:18px;}
+
+  /* FOOTER */
+  .footer{text-align:center;padding:32px;color:var(--gray);font-size:12px;border-top:1px solid var(--border);margin-top:40px;}
+
+  @media print{.progress,.copy-btn{display:none;}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      </div>
+      <div>
+        <div class="logo-name">CarbonTrack</div>
+        <div class="logo-sub">Guide de Déploiement</div>
+      </div>
+    </div>
+    <h1>Déploiement VPS <span>Étape par Étape</span></h1>
+    <p class="header-desc">Guide complet pour déployer CarbonTrack sur votre serveur <strong style="color:#fff">37.60.240.199</strong> dans <strong style="color:#fff">/var/www/carbontrack/</strong> — sans conflit avec les autres applications.</p>
+    <div class="header-meta">
+      <span class="meta-badge g">✅ Débutant Friendly</span>
+      <span class="meta-badge">🖥️ VPS Ubuntu/Debian</span>
+      <span class="meta-badge">⚡ Next.js 14 + PostgreSQL</span>
+      <span class="meta-badge">🔒 Nginx + PM2</span>
+      <span class="meta-badge">🌐 Port 3001 → isolé</span>
+    </div>
+  </div>
+</div>
+
+<div class="body">
+
+<!-- PROGRESS -->
+<div class="progress">
+  <div class="prog-item active"><span>1️⃣</span>SSH</div>
+  <div class="prog-item active"><span>2️⃣</span>Node.js</div>
+  <div class="prog-item active"><span>3️⃣</span>PostgreSQL</div>
+  <div class="prog-item active"><span>4️⃣</span>App</div>
+  <div class="prog-item active"><span>5️⃣</span>Config</div>
+  <div class="prog-item active"><span>6️⃣</span>Build</div>
+  <div class="prog-item active"><span>7️⃣</span>PM2</div>
+  <div class="prog-item active"><span>8️⃣</span>Nginx</div>
+  <div class="prog-item active"><span>9️⃣</span>Admin</div>
+  <div class="prog-item active"><span>🔟</span>Test</div>
+</div>
+
+<!-- ARCHITECTURE -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num">🏗</div>
+    <div><div class="section-title">Architecture du Déploiement</div><div class="section-sub">Comment tout s'assemble sur votre serveur</div></div>
+  </div>
+  <div class="section-body">
+    <div class="arch">
+      <div class="arch-row"><span style="color:rgba(255,255,255,.4);font-size:11px;letter-spacing:2px;">INTERNET</span></div>
+      <div class="arch-row" style="gap:6px;">
+        <span style="color:rgba(255,255,255,.3);">│</span>
+      </div>
+      <div class="arch-row"><div class="arch-box b">Navigateur / App Mobile</div></div>
+      <div class="arch-row" style="padding-left:16px;"><span class="arch-arrow">↓</span><span style="color:rgba(255,255,255,.4);font-size:12px;">port 80 / 443</span></div>
+      <div class="arch-row"><div class="arch-box g">🔀 Nginx (reverse proxy)</div><span style="color:rgba(255,255,255,.35);font-size:12px;">— /var/www/carbontrack/ (autres apps préservées)</span></div>
+      <div class="arch-row" style="padding-left:16px;"><span class="arch-arrow">↓</span><span style="color:rgba(255,255,255,.4);font-size:12px;">proxy → port 3001</span></div>
+      <div class="arch-row"><div class="arch-box g">⚡ Next.js App (PM2, port 3001)</div></div>
+      <div class="arch-row" style="padding-left:16px;"><span class="arch-arrow">↓</span></div>
+      <div class="arch-row"><div class="arch-box o">🗄️ PostgreSQL (port 5432, local only)</div></div>
+    </div>
+    <div class="note"><div class="note-icon">💡</div><p><strong>Isolation garantie :</strong> CarbonTrack tourne sur le <strong>port 3001</strong>. Nginx redirige vers ce port. Vos autres applications sur le port 80 ne sont pas touchées. Chaque app a son propre bloc Nginx.</p></div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 0 : PRÉREQUIS -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num">0</div>
+    <div><div class="section-title">Prérequis — Ce qu'il vous faut</div><div class="section-sub">Avant de commencer, vérifiez que vous avez tout ça</div></div>
+  </div>
+  <div class="section-body">
+    <ul class="checklist">
+      <li>Accès SSH à votre serveur <strong>37.60.240.199</strong> (utilisateur root ou sudo)</li>
+      <li>Le code de l'application (dossier <strong>carbon-app/</strong>)</li>
+      <li>Un client SSH : <strong>PuTTY</strong> (Windows) ou Terminal (Mac/Linux)</li>
+      <li>Un client SFTP : <strong>FileZilla</strong> ou <strong>WinSCP</strong> (pour uploader les fichiers)</li>
+      <li>Votre mot de passe ou clé SSH du serveur</li>
+    </ul>
+
+    <div class="note"><div class="note-icon">📌</div><p><strong>Vérifiez d'abord le système de votre serveur :</strong> Ce guide est pour <strong>Ubuntu 20.04/22.04</strong> ou <strong>Debian 11/12</strong>. Si vous avez CentOS/Rocky, les commandes apt diffèrent.</p></div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 1 : SSH -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">1</div>
+    <div><div class="section-title">Connexion SSH au Serveur</div><div class="section-sub">Se connecter à votre VPS depuis votre PC</div></div>
+  </div>
+  <div class="section-body">
+    <p>Ouvrez un terminal (ou PuTTY sur Windows) et tapez :</p>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="green">ssh</span> root@37.60.240.199
+    </div>
+    <p>Entrez votre mot de passe quand demandé. Vous verrez quelque chose comme :</p>
+    <div class="cmd">
+      <span class="comment"># Welcome to Ubuntu 22.04.3 LTS</span><br/>
+      root@vps-xxxxx:~#
+    </div>
+
+    <div class="warn"><div class="note-icon">⚠️</div><p><strong>Si vous n'êtes pas root</strong> : connectez-vous avec votre utilisateur normal, puis tapez <span class="inline-code">sudo -i</span> pour passer root. Toutes les commandes ci-dessous s'exécutent en tant que root.</p></div>
+
+    <h3>Mettre à jour le serveur</h3>
+    <p>Toujours commencer par mettre à jour :</p>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      apt update && apt upgrade -y
+    </div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 2 : NODE.JS -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">2</div>
+    <div><div class="section-title">Installation de Node.js 20 LTS</div><div class="section-sub">Le moteur qui fait tourner votre application Next.js</div></div>
+  </div>
+  <div class="section-body">
+    <div class="note"><div class="note-icon">ℹ️</div><p>Vous utilisez peut-être déjà une autre version de Node.js sur le serveur pour d'autres apps. Ne vous inquiétez pas — <strong>nvm</strong> gère plusieurs versions en parallèle sans conflit.</p></div>
+
+    <h3>Option A — Via NodeSource (plus simple, recommandée)</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Télécharger le script d'installation Node.js 20</span><br/>
+      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -<br/>
+      <br/>
+      <span class="comment"># Installer Node.js</span><br/>
+      apt install -y nodejs<br/>
+      <br/>
+      <span class="comment"># Vérifier l'installation</span><br/>
+      node -v   <span class="comment"># doit afficher v20.x.x</span><br/>
+      npm -v    <span class="comment"># doit afficher 10.x.x</span>
+    </div>
+
+    <h3>Installer PM2 (gestionnaire de processus)</h3>
+    <p>PM2 garde votre app en vie 24h/24, la redémarre si elle plante, et la relance après un reboot.</p>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      npm install -g pm2<br/>
+      <br/>
+      <span class="comment"># Vérifier</span><br/>
+      pm2 -v
+    </div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 3 : POSTGRESQL -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">3</div>
+    <div><div class="section-title">Installation &amp; Configuration de PostgreSQL</div><div class="section-sub">La base de données de CarbonTrack</div></div>
+  </div>
+  <div class="section-body">
+
+    <h3>Installer PostgreSQL</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      apt install -y postgresql postgresql-contrib<br/>
+      <br/>
+      <span class="comment"># Vérifier qu'il tourne</span><br/>
+      systemctl status postgresql
+    </div>
+
+    <div class="note"><div class="note-icon">💡</div><p>Si une autre app utilise déjà PostgreSQL sur ce serveur, c'est <strong>parfait</strong> — vous allez juste créer une nouvelle base de données et un nouvel utilisateur dédié à CarbonTrack. Aucun conflit possible.</p></div>
+
+    <h3>Créer la base de données et l'utilisateur</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Se connecter à PostgreSQL</span><br/>
+      sudo -u postgres psql<br/>
+    </div>
+    <p>Vous êtes maintenant dans la console PostgreSQL <span class="inline-code">postgres=#</span>. Tapez exactement :</p>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment">-- Créer un utilisateur dédié (changez le mot de passe !)</span><br/>
+      CREATE USER carbontrack_user WITH PASSWORD '<span class="yellow">MonMotDePasseSecurise2026!</span>';<br/>
+      <br/>
+      <span class="comment">-- Créer la base de données</span><br/>
+      CREATE DATABASE carbontrack OWNER carbontrack_user;<br/>
+      <br/>
+      <span class="comment">-- Donner tous les droits</span><br/>
+      GRANT ALL PRIVILEGES ON DATABASE carbontrack TO carbontrack_user;<br/>
+      <br/>
+      <span class="comment">-- Quitter PostgreSQL</span><br/>
+      \q
+    </div>
+
+    <div class="warn"><div class="note-icon">⚠️</div><p>Remplacez <strong>MonMotDePasseSecurise2026!</strong> par un vrai mot de passe fort. Notez-le bien — vous en aurez besoin à l'Étape 5.</p></div>
+
+    <h3>Initialiser le schéma (créer les tables)</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># On fera ça après avoir uploadé les fichiers (Étape 4)</span><br/>
+      <span class="comment"># La commande sera : psql -U carbontrack_user -d carbontrack -f /var/www/carbontrack/scripts/init-db.sql</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 4 : UPLOAD APP -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">4</div>
+    <div><div class="section-title">Uploader l'Application sur le Serveur</div><div class="section-sub">Copier votre code dans /var/www/carbontrack/</div></div>
+  </div>
+  <div class="section-body">
+
+    <h3>Créer le dossier dédié</h3>
+    <p>Sur le serveur (dans votre SSH) :</p>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Créer le dossier dans www/ — isolé des autres apps</span><br/>
+      mkdir -p /var/www/carbontrack<br/>
+      <br/>
+      <span class="comment"># Vérifier ce qui existe déjà dans www/ (vos autres apps)</span><br/>
+      ls /var/www/
+    </div>
+
+    <h3>Méthode 1 — Via Git (recommandée si vous avez GitHub)</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Installer Git si pas déjà installé</span><br/>
+      apt install -y git<br/>
+      <br/>
+      <span class="comment"># Cloner votre dépôt dans le dossier dédié</span><br/>
+      cd /var/www/carbontrack<br/>
+      git clone https://github.com/<span class="yellow">VOTRE_USER/VOTRE_REPO</span>.git .<br/>
+      <span class="comment"># Le point "." = cloner ici sans créer de sous-dossier</span>
+    </div>
+
+    <h3>Méthode 2 — Via FileZilla / WinSCP (si pas de GitHub)</h3>
+    <div class="note"><div class="note-icon">📁</div><p>
+      1. Ouvrez <strong>FileZilla</strong> → File → Site Manager → Nouveau site<br/>
+      2. Protocole : <strong>SFTP</strong>, Hôte : <strong>37.60.240.199</strong>, Port : <strong>22</strong><br/>
+      3. Connectez-vous avec root + votre mot de passe<br/>
+      4. Naviguez vers <strong>/var/www/carbontrack/</strong> à droite<br/>
+      5. Glissez-déposez tout le dossier <strong>carbon-app/</strong> vers ce dossier<br/>
+      6. <strong>Important :</strong> N'uploadez PAS les dossiers <span class="inline-code">node_modules/</span> et <span class="inline-code">.next/</span> (trop lourds)
+    </p></div>
+
+    <h3>Méthode 3 — Via ZIP + SCP (depuis votre PC)</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Depuis votre PC Windows (PowerShell), envoyez le zip :</span><br/>
+      scp carbon-app.zip root@37.60.240.199:/var/www/carbontrack/<br/>
+      <br/>
+      <span class="comment"># Puis sur le serveur SSH :</span><br/>
+      cd /var/www/carbontrack<br/>
+      apt install -y unzip<br/>
+      unzip carbon-app.zip<br/>
+      mv carbon-app/* . && rm -rf carbon-app carbon-app.zip
+    </div>
+
+    <h3>Vérifier que les fichiers sont là</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      ls /var/www/carbontrack<br/>
+      <span class="comment"># Doit afficher : src/ public/ package.json next.config.js scripts/ ...</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 5 : ENV VARS -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">5</div>
+    <div><div class="section-title">Créer le Fichier de Configuration (.env.production)</div><div class="section-sub">Les variables secrètes de votre application</div></div>
+  </div>
+  <div class="section-body">
+
+    <div class="danger"><div class="note-icon">🚨</div><p><strong>Ne jamais committer ce fichier sur GitHub !</strong> Il contient vos mots de passe. Il doit rester uniquement sur le serveur.</p></div>
+
+    <h3>Créer le fichier</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      nano /var/www/carbontrack/.env.production
+    </div>
+
+    <p>Copiez-collez ce contenu (et remplissez les valeurs) :</p>
+    <div class="file-block">
+      <div class="file-block-head">📄 /var/www/carbontrack/.env.production</div>
+      <div class="file-block-body">
+<span class="c"># ═══════════════════════════════════════</span><br/>
+<span class="c"># CarbonTrack — Variables de Production</span><br/>
+<span class="c"># ═══════════════════════════════════════</span><br/>
+<br/>
+<span class="c"># Environnement</span><br/>
+<span class="k">NODE_ENV</span>=<span class="s">production</span><br/>
+<br/>
+<span class="c"># Base de données PostgreSQL</span><br/>
+<span class="k">PGHOST</span>=<span class="s">localhost</span><br/>
+<span class="k">PGPORT</span>=<span class="s">5432</span><br/>
+<span class="k">PGUSER</span>=<span class="s">carbontrack_user</span><br/>
+<span class="k">PGPASSWORD</span>=<span class="s">MonMotDePasseSecurise2026!</span><br/>
+<span class="k">PGDATABASE</span>=<span class="s">carbontrack</span><br/>
+<br/>
+<span class="c"># Sécurité JWT (clé secrète — générez une valeur unique !)</span><br/>
+<span class="k">JWT_SECRET</span>=<span class="s">remplacez_par_une_longue_chaine_aleatoire_minimum_32_caracteres</span><br/>
+<br/>
+<span class="c"># URL publique de l'app</span><br/>
+<span class="k">NEXTAUTH_URL</span>=<span class="s">http://37.60.240.199:3001</span><br/>
+<span class="k">NEXT_PUBLIC_APP_URL</span>=<span class="s">http://37.60.240.199:3001</span>
+      </div>
+    </div>
+
+    <p>Dans nano : <strong>Ctrl+O</strong> pour sauvegarder → <strong>Entrée</strong> → <strong>Ctrl+X</strong> pour quitter.</p>
+
+    <h3>Générer une clé JWT sécurisée</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Générer une clé aléatoire forte (copiez le résultat dans JWT_SECRET)</span><br/>
+      node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+    </div>
+
+    <h3>Protéger le fichier</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Rendre le fichier lisible uniquement par root</span><br/>
+      chmod 600 /var/www/carbontrack/.env.production
+    </div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 6 : SCHEMA DB -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">6</div>
+    <div><div class="section-title">Initialiser la Base de Données</div><div class="section-sub">Créer toutes les tables de CarbonTrack</div></div>
+  </div>
+  <div class="section-body">
+
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Exécuter le schéma SQL (crée toutes les tables)</span><br/>
+      psql -U carbontrack_user -d carbontrack -h localhost -f /var/www/carbontrack/scripts/init-db.sql<br/>
+      <span class="comment"># Entrez le mot de passe quand demandé</span>
+    </div>
+
+    <div class="success"><div class="note-icon">✅</div><p>Si tout va bien, vous verrez : <strong>CREATE TABLE, CREATE INDEX, INSERT 0 3</strong> (pour les platform_settings). Aucune erreur = parfait.</p></div>
+
+    <h3>Vérifier que les tables existent</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      psql -U carbontrack_user -d carbontrack -h localhost -c "\dt"<br/>
+      <span class="comment"># Doit lister : companies, users, sites, assessments, emission_entries, subscriptions, certification_requests...</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 7 : BUILD -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">7</div>
+    <div><div class="section-title">Installer les Dépendances &amp; Builder l'App</div><div class="section-sub">Compiler Next.js pour la production</div></div>
+  </div>
+  <div class="section-body">
+
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      cd /var/www/carbontrack<br/>
+      <br/>
+      <span class="comment"># Installer les packages npm (sans les devDependencies)</span><br/>
+      npm install --production=false<br/>
+      <br/>
+      <span class="comment"># Builder l'application pour la production</span><br/>
+      npm run build
+    </div>
+
+    <div class="note"><div class="note-icon">⏱️</div><p>Le build prend <strong>2 à 5 minutes</strong> la première fois. C'est normal — Next.js compile tout le code TypeScript et optimise les fichiers. Attendez le message <strong>"✓ Compiled successfully"</strong>.</p></div>
+
+    <div class="warn"><div class="note-icon">⚠️</div><p><strong>Si le build échoue avec "out of memory"</strong>, tapez :<br/>
+    <span class="inline-code">export NODE_OPTIONS="--max-old-space-size=2048"</span> puis relancez <span class="inline-code">npm run build</span></p></div>
+
+    <h3>Vérifier le résultat</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      ls .next/<br/>
+      <span class="comment"># Doit afficher des dossiers : static/ server/ standalone/ ...</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 8 : PM2 -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">8</div>
+    <div><div class="section-title">Lancer l'Application avec PM2</div><div class="section-sub">Garder CarbonTrack en vie 24h/24 sur le port 3001</div></div>
+  </div>
+  <div class="section-body">
+
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      cd /var/www/carbontrack<br/>
+      <br/>
+      <span class="comment"># Lancer l'app sur le port 3001 avec le nom "carbontrack"</span><br/>
+      pm2 start npm --name <span class="yellow">"carbontrack"</span> -- start -- --port 3001<br/>
+      <br/>
+      <span class="comment"># Vérifier qu'elle tourne</span><br/>
+      pm2 status
+    </div>
+
+    <div class="success"><div class="note-icon">✅</div><p>Vous devez voir <strong>carbontrack</strong> avec le statut <strong style="color:#16a34a">online</strong> dans la liste PM2.</p></div>
+
+    <h3>Configurer les variables d'environnement pour PM2</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Arrêter l'instance actuelle</span><br/>
+      pm2 stop carbontrack<br/>
+      pm2 delete carbontrack<br/>
+      <br/>
+      <span class="comment"># Relancer avec le fichier .env.production</span><br/>
+      pm2 start npm --name "carbontrack" \<br/>
+        --env-file /var/www/carbontrack/.env.production \<br/>
+        -- start -- --port 3001
+    </div>
+
+    <div class="note"><div class="note-icon">💡</div><p><strong>Si --env-file ne fonctionne pas</strong> (ancienne version PM2), utilisez cette méthode alternative :</p></div>
+
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Alternative : créer un fichier ecosystem.config.js</span><br/>
+      cat > /var/www/carbontrack/ecosystem.config.js &lt;&lt; 'EOF'<br/>
+      module.exports = {<br/>
+        apps: [{<br/>
+          name: 'carbontrack',<br/>
+          script: 'npm',<br/>
+          args: 'start',<br/>
+          cwd: '/var/www/carbontrack',<br/>
+          env_production: {<br/>
+            NODE_ENV: 'production',<br/>
+            PORT: 3001<br/>
+          }<br/>
+        }]<br/>
+      }<br/>
+      EOF<br/>
+      <br/>
+      <span class="comment"># Charger les variables puis lancer</span><br/>
+      export $(cat /var/www/carbontrack/.env.production | xargs)<br/>
+      pm2 start ecosystem.config.js --env production
+    </div>
+
+    <h3>Démarrage automatique au reboot du serveur</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Sauvegarder la liste des processus PM2</span><br/>
+      pm2 save<br/>
+      <br/>
+      <span class="comment"># Configurer le démarrage automatique</span><br/>
+      pm2 startup<br/>
+      <span class="comment"># La commande affichera une ligne à copier-coller — exécutez-la !</span>
+    </div>
+
+    <h3>Tester que l'app répond</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Depuis le serveur, tester le port 3001</span><br/>
+      curl http://localhost:3001<br/>
+      <span class="comment"># Doit retourner du HTML avec "CarbonTrack"</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 9 : NGINX -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">9</div>
+    <div><div class="section-title">Configurer Nginx (Proxy + Port 80)</div><div class="section-sub">Exposer CarbonTrack sur http://37.60.240.199 sans toucher aux autres apps</div></div>
+  </div>
+  <div class="section-body">
+
+    <h3>Installer Nginx si pas déjà installé</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      apt install -y nginx<br/>
+      systemctl enable nginx<br/>
+      systemctl start nginx
+    </div>
+
+    <div class="note"><div class="note-icon">🔀</div><p><strong>Isolation des apps :</strong> Chaque application a son propre fichier dans <span class="inline-code">/etc/nginx/sites-available/</span>. CarbonTrack aura <span class="inline-code">carbontrack.conf</span>. Les autres apps ne sont pas modifiées.</p></div>
+
+    <h3>Créer la configuration Nginx de CarbonTrack</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      nano /etc/nginx/sites-available/carbontrack.conf
+    </div>
+
+    <p>Copiez-collez cette configuration :</p>
+    <div class="file-block">
+      <div class="file-block-head">📄 /etc/nginx/sites-available/carbontrack.conf</div>
+      <div class="file-block-body">
+<span class="c"># ─── CarbonTrack — Nginx Config ──────────────────────────────</span><br/>
+<span class="c"># App tourne sur port 3001, Nginx proxy sur port 80</span><br/>
+<br/>
+<span class="k">server</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">listen</span> <span class="s">3001</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">server_name</span> <span class="s">37.60.240.199</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c"># Logs dédiés à CarbonTrack (n'interfèrent pas avec autres apps)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">access_log</span> <span class="s">/var/log/nginx/carbontrack_access.log</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">error_log</span>  <span class="s">/var/log/nginx/carbontrack_error.log</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c"># Taille max des uploads (documents de certification)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">client_max_body_size</span> <span class="s">20M</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">location</span> / {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">proxy_pass</span>         <span class="s">http://127.0.0.1:3001</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">proxy_http_version</span> <span class="s">1.1</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">proxy_set_header</span>   Upgrade $http_upgrade;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">proxy_set_header</span>   Connection 'upgrade';<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">proxy_set_header</span>   Host $host;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">proxy_set_header</span>   X-Real-IP $remote_addr;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">proxy_set_header</span>   X-Forwarded-For $proxy_add_x_forwarded_for;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">proxy_cache_bypass</span> $http_upgrade;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+}<br/>
+      </div>
+    </div>
+
+    <div class="note"><div class="note-icon">💡</div><p><strong>Explication :</strong> Le bloc <span class="inline-code">listen 3001</span> veut dire que Nginx écoute sur le port 3001 et route vers votre app Next.js (qui tourne aussi sur 3001). Votre app sera accessible à <strong>http://37.60.240.199:3001</strong>. Les autres apps sur le port 80 ne sont pas touchées.</p></div>
+
+    <h3>Activer la configuration</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Créer le lien symbolique pour activer</span><br/>
+      ln -s /etc/nginx/sites-available/carbontrack.conf /etc/nginx/sites-enabled/<br/>
+      <br/>
+      <span class="comment"># Tester la configuration (IMPORTANT avant de recharger)</span><br/>
+      nginx -t<br/>
+      <span class="comment"># Doit afficher : syntax is ok / test is successful</span><br/>
+      <br/>
+      <span class="comment"># Recharger Nginx (sans couper les autres apps)</span><br/>
+      systemctl reload nginx
+    </div>
+
+    <h3>Ouvrir le port dans le pare-feu</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Autoriser le port 3001 dans UFW</span><br/>
+      ufw allow 3001/tcp<br/>
+      ufw allow 80/tcp<br/>
+      ufw allow 22/tcp   <span class="comment"># IMPORTANT : garder SSH ouvert !</span><br/>
+      ufw enable<br/>
+      ufw status
+    </div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 10 : ADMIN -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">10</div>
+    <div><div class="section-title">Créer le Compte Administrateur</div><div class="section-sub">Votre premier accès à l'interface admin</div></div>
+  </div>
+  <div class="section-body">
+
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      cd /var/www/carbontrack<br/>
+      <br/>
+      <span class="comment"># Charger les variables d'environnement</span><br/>
+      export $(cat .env.production | grep -v '^#' | xargs)<br/>
+      <br/>
+      <span class="comment"># Lancer le script de création d'admin</span><br/>
+      node scripts/seed-admin.js
+    </div>
+
+    <div class="success"><div class="note-icon">✅</div><p>Le script crée un utilisateur admin. <strong>Notez bien l'email et le mot de passe affichés.</strong> Vous pourrez vous connecter sur <span class="inline-code">http://37.60.240.199:3001/admin</span></p></div>
+
+    <div class="note"><div class="note-icon">🔑</div><p>Si le script demande un mot de passe, changez-le immédiatement après votre première connexion via l'interface admin.</p></div>
+  </div>
+</div>
+
+
+<!-- ÉTAPE 11 : TEST -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num done">11</div>
+    <div><div class="section-title">Test Final — Tout Vérifier</div><div class="section-sub">Confirmer que tout fonctionne avant de partager l'URL</div></div>
+  </div>
+  <div class="section-body">
+
+    <table>
+      <thead><tr><th>URL</th><th>Ce que vous devez voir</th><th>Statut</th></tr></thead>
+      <tbody>
+        <tr><td><strong>http://37.60.240.199:3001</strong></td><td>Page d'accueil / login CarbonTrack</td><td><span class="tag t-blue">Tester</span></td></tr>
+        <tr><td><strong>http://37.60.240.199:3001/auth/login</strong></td><td>Formulaire de connexion</td><td><span class="tag t-blue">Tester</span></td></tr>
+        <tr><td><strong>http://37.60.240.199:3001/admin</strong></td><td>Interface admin (avec compte admin)</td><td><span class="tag t-blue">Tester</span></td></tr>
+        <tr><td><strong>http://37.60.240.199:3001/api/health</strong></td><td>{"status":"ok"}</td><td><span class="tag t-blue">Tester</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Commandes de diagnostic utiles</h3>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Voir les logs en temps réel de CarbonTrack</span><br/>
+      pm2 logs carbontrack<br/>
+      <br/>
+      <span class="comment"># Voir le statut de tous les processus</span><br/>
+      pm2 status<br/>
+      <br/>
+      <span class="comment"># Voir les logs Nginx si problème</span><br/>
+      tail -f /var/log/nginx/carbontrack_error.log<br/>
+      <br/>
+      <span class="comment"># Redémarrer l'app si besoin</span><br/>
+      pm2 restart carbontrack<br/>
+      <br/>
+      <span class="comment"># Voir si le port 3001 est bien utilisé</span><br/>
+      ss -tlnp | grep 3001
+    </div>
+  </div>
+</div>
+
+
+<!-- MISE À JOUR -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num">🔄</div>
+    <div><div class="section-title">Mettre à Jour l'Application (après modifications)</div><div class="section-sub">Chaque fois que vous faites des changements dans le code</div></div>
+  </div>
+  <div class="section-body">
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      cd /var/www/carbontrack<br/>
+      <br/>
+      <span class="comment"># Si vous utilisez Git :</span><br/>
+      git pull origin main<br/>
+      <br/>
+      <span class="comment"># Reinstaller les dépendances si package.json a changé</span><br/>
+      npm install --production=false<br/>
+      <br/>
+      <span class="comment"># Rebuilder</span><br/>
+      npm run build<br/>
+      <br/>
+      <span class="comment"># Redémarrer sans downtime</span><br/>
+      pm2 reload carbontrack
+    </div>
+    <div class="success"><div class="note-icon">🎉</div><p><strong>pm2 reload</strong> (pas restart) fait un redémarrage sans coupure — les utilisateurs connectés ne voient rien.</p></div>
+  </div>
+</div>
+
+
+<!-- MOBILE APP -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num">📱</div>
+    <div><div class="section-title">Mettre à Jour l'App Mobile pour Pointer sur le Serveur</div><div class="section-sub">Connecter l'app Expo/React Native à votre VPS</div></div>
+  </div>
+  <div class="section-body">
+    <p>Dans le code de l'app mobile, l'URL de l'API doit pointer vers votre serveur :</p>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Chercher tous les fichiers qui référencent localhost ou l'API</span><br/>
+      grep -r "localhost:3000" /var/www/carbontrack/../mobile/src/ --include="*.ts" --include="*.tsx"
+    </div>
+
+    <p>Dans le fichier de config de l'app mobile (souvent <span class="inline-code">src/lib/api.ts</span> ou <span class="inline-code">constants.ts</span>) :</p>
+    <div class="file-block">
+      <div class="file-block-head">📄 mobile/src/lib/api.ts (ou constants.ts)</div>
+      <div class="file-block-body">
+<span class="c">// Avant (développement)</span><br/>
+<span class="k">const</span> API_URL = <span class="s">'http://localhost:3000'</span><br/>
+<br/>
+<span class="c">// Après (production)</span><br/>
+<span class="k">const</span> API_URL = <span class="s">'http://37.60.240.199:3001'</span>
+      </div>
+    </div>
+
+    <p>Puis rebuilder l'app mobile avec EAS :</p>
+    <div class="cmd">
+      <button class="copy-btn" onclick="copy(this)">Copier</button>
+      <span class="comment"># Dans le dossier mobile, sur votre PC</span><br/>
+      cd mobile<br/>
+      eas build --platform all --profile production
+    </div>
+  </div>
+</div>
+
+
+<!-- CHECKLIST FINALE -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num">✅</div>
+    <div><div class="section-title">Checklist de Déploiement Complète</div><div class="section-sub">Cochez chaque étape avant de déclarer l'app en production</div></div>
+  </div>
+  <div class="section-body">
+    <ul class="checklist">
+      <li>Connexion SSH au serveur réussie</li>
+      <li>Node.js 20 installé (<span class="inline-code">node -v</span> affiche v20.x)</li>
+      <li>PM2 installé (<span class="inline-code">pm2 -v</span> fonctionne)</li>
+      <li>PostgreSQL installé et en cours d'exécution</li>
+      <li>Base de données <strong>carbontrack</strong> créée</li>
+      <li>Utilisateur <strong>carbontrack_user</strong> créé avec mot de passe fort</li>
+      <li>Schéma SQL exécuté (toutes les tables créées)</li>
+      <li>Fichier <strong>.env.production</strong> créé avec toutes les variables</li>
+      <li>JWT_SECRET remplacé par une vraie valeur aléatoire</li>
+      <li>Dossier <strong>/var/www/carbontrack/</strong> contient le code</li>
+      <li><span class="inline-code">npm install</span> et <span class="inline-code">npm run build</span> exécutés sans erreur</li>
+      <li>PM2 démarre l'app, statut <strong>online</strong></li>
+      <li><span class="inline-code">pm2 save && pm2 startup</span> exécuté</li>
+      <li>Configuration Nginx créée et activée</li>
+      <li><span class="inline-code">nginx -t</span> retourne "syntax is ok"</li>
+      <li>Port 3001 ouvert dans le pare-feu</li>
+      <li><strong>http://37.60.240.199:3001</strong> s'affiche dans le navigateur</li>
+      <li>Compte admin créé et connexion testée</li>
+      <li>App mobile mise à jour avec la nouvelle URL</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- PROBLÈMES COURANTS -->
+<div class="section">
+  <div class="section-head">
+    <div class="step-num">🔧</div>
+    <div><div class="section-title">Problèmes Courants &amp; Solutions</div><div class="section-sub">Si quelque chose ne marche pas</div></div>
+  </div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>Erreur</th><th>Cause</th><th>Solution</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag t-red">502 Bad Gateway</span></td>
+          <td>PM2 ne tourne pas ou app plantée</td>
+          <td><span class="inline-code">pm2 status</span> → <span class="inline-code">pm2 restart carbontrack</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag t-red">Connection refused :3001</span></td>
+          <td>Port fermé par pare-feu</td>
+          <td><span class="inline-code">ufw allow 3001/tcp</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag t-red">ECONNREFUSED postgres</span></td>
+          <td>Mauvais mot de passe DB ou service arrêté</td>
+          <td>Vérifier <span class="inline-code">.env.production</span> + <span class="inline-code">systemctl start postgresql</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag t-red">Build out of memory</span></td>
+          <td>RAM insuffisante</td>
+          <td><span class="inline-code">export NODE_OPTIONS=--max-old-space-size=2048</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag t-red">JWT invalid token</span></td>
+          <td>JWT_SECRET non défini en prod</td>
+          <td>Vérifier que <span class="inline-code">JWT_SECRET</span> est dans <span class="inline-code">.env.production</span> et chargé par PM2</td>
+        </tr>
+        <tr>
+          <td><span class="tag t-red">nginx: [emerg] bind() failed</span></td>
+          <td>Port déjà utilisé par autre app</td>
+          <td>Changer le port dans <span class="inline-code">carbontrack.conf</span> et dans PM2</td>
+        </tr>
+        <tr>
+          <td><span class="tag t-red">Permission denied (publickey)</span></td>
+          <td>SSH avec clé refusé</td>
+          <td>Utiliser <span class="inline-code">ssh -o PreferredAuthentications=password root@37.60.240.199</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /body -->
+
+<div class="footer">
+  <strong>CarbonTrack</strong> — Guide de Déploiement VPS · Confidentiel · 2026<br/>
+  En cas de problème : <span style="color:var(--blue)">vérifier pm2 logs carbontrack</span> en premier
+</div>
+
+<script>
+function copy(btn) {
+  const block = btn.parentElement
+  // Get text content without the button text
+  const text = block.innerText.replace(/^Copier\n?/, '').trim()
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copié !'
+    btn.style.background = 'rgba(34,197,94,.3)'
+    btn.style.color = '#4ade80'
+    setTimeout(() => {
+      btn.textContent = 'Copier'
+      btn.style.background = ''
+      btn.style.color = ''
+    }, 2000)
+  })
+}
+</script>
+</body>
+</html>

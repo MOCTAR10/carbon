@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarbonTrack — Architecture & Besoins Technologiques</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green:#22c55e; --green-dark:#16a34a; --green-deeper:#14532d;
+      --green-bg:#f0fdf4; --green-border:#bbf7d0;
+      --navy:#0f172a; --navy2:#1e293b; --navy3:#334155;
+      --gray:#64748b; --gray-light:#f8fafc; --border:#e2e8f0;
+      --blue:#1d4ed8; --blue-bg:#eff6ff; --blue-border:#bfdbfe;
+      --orange:#ea580c; --purple:#7c3aed;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;color:var(--navy2);background:#fff;font-size:10.5pt;line-height:1.65;}
+    .page{width:210mm;min-height:297mm;margin:0 auto 24px;background:#fff;position:relative;}
+
+    /* ── PRINT ── */
+    @page { size: A4; margin: 0; }
+    @media print {
+      *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      html, body { margin: 0; padding: 0; background: #fff; }
+      /* Remove min-height so short pages don't create blank pages */
+      .page {
+        margin: 0;
+        page-break-after: always;
+        break-after: page;
+        width: 210mm;
+        min-height: unset !important;
+        height: auto !important;
+        box-shadow: none !important;
+      }
+      /* Last page: no trailing blank page */
+      .page:last-of-type {
+        page-break-after: auto;
+        break-after: auto;
+      }
+      /* Inner containers: let height be driven by content */
+      .cover, .cp {
+        min-height: unset !important;
+        height: auto !important;
+      }
+      .no-print { display: none !important; }
+    }
+
+    /* ── COVER ── */
+    .cover{background:var(--navy);color:#fff;min-height:297mm;display:flex;flex-direction:column;}
+    .cover-stripe{height:5px;background:linear-gradient(90deg,#22c55e,#4ade80,#86efac);}
+    .cover-inner{flex:1;display:flex;flex-direction:column;padding:56px 56px 40px;}
+
+    /* Real app logo */
+    .app-logo{display:flex;align-items:center;gap:14px;margin-bottom:60px;}
+    .logo-leaf{
+      width:52px;height:52px;
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 0 0 3px rgba(34,197,94,.25);
+    }
+    .logo-leaf svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+    .logo-wordmark{display:flex;flex-direction:column;}
+    .logo-name{font-size:22px;font-weight:800;letter-spacing:-.5px;color:#fff;}
+    .logo-tagline{font-size:10px;color:#4ade80;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin-top:1px;}
+
+    .cover-eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);
+      color:#4ade80;padding:6px 16px;border-radius:999px;
+      font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+      margin-bottom:24px;width:fit-content;
+    }
+    .cover-title{font-size:40px;font-weight:900;line-height:1.1;letter-spacing:-1px;color:#fff;margin-bottom:10px;}
+    .cover-title span{color:#4ade80;}
+    .cover-subtitle{font-size:15px;color:rgba(255,255,255,.55);font-weight:300;max-width:520px;margin-bottom:52px;line-height:1.6;}
+
+    .cover-chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:52px;}
+    .chip{
+      background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+      color:rgba(255,255,255,.75);padding:7px 14px;border-radius:10px;
+      font-size:9.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;
+    }
+    .chip.green{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.2);color:#4ade80;}
+
+    .cover-meta{margin-top:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;border-top:1px solid rgba(255,255,255,.1);padding-top:28px;}
+    .cover-meta-item{}
+    .cover-meta-label{font-size:8.5px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}
+    .cover-meta-value{font-size:13px;font-weight:700;color:rgba(255,255,255,.85);}
+
+    /* ── CONTENT PAGE ── */
+    .cp{padding:48px 52px;min-height:297mm;display:flex;flex-direction:column;}
+    .ph{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid var(--border);margin-bottom:34px;}
+    .ph-left{display:flex;align-items:center;gap:10px;}
+    .ph-tag{background:var(--green-bg);color:var(--green-deeper);font-size:8.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:6px;}
+    .ph-title{font-size:21px;font-weight:900;color:var(--navy);letter-spacing:-.5px;}
+    .ph-num{font-size:9.5px;color:var(--gray);}
+
+    /* App logo small */
+    .logo-sm{display:flex;align-items:center;gap:8px;}
+    .logo-sm-icon{width:28px;height:28px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+    .logo-sm-icon svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+    .logo-sm-text{font-size:12px;font-weight:800;color:var(--navy);}
+
+    h2{font-size:15px;font-weight:800;color:var(--navy);margin:26px 0 12px;display:flex;align-items:center;gap:10px;}
+    h2::before{content:'';display:inline-block;width:4px;height:16px;background:var(--green);border-radius:2px;flex-shrink:0;}
+    h3{font-size:12px;font-weight:700;color:var(--navy2);margin:16px 0 8px;}
+    p{margin-bottom:9px;color:#374151;}
+    ul{padding-left:18px;margin-bottom:12px;}
+    ul li{margin-bottom:4px;color:#374151;font-size:10pt;}
+
+    /* ── ARCH DIAGRAM ── */
+    .arch{background:var(--navy);border-radius:14px;padding:28px;margin:16px 0;color:#fff;}
+    .arch-title{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:2px;margin-bottom:20px;}
+    .arch-layers{display:flex;flex-direction:column;gap:10px;}
+    .arch-layer{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px 18px;}
+    .arch-layer-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;}
+    .arch-layer-title.green{color:#4ade80;}
+    .arch-layer-title.blue{color:#60a5fa;}
+    .arch-layer-title.orange{color:#fb923c;}
+    .arch-layer-title.purple{color:#c084fc;}
+    .arch-layer-items{display:flex;flex-wrap:wrap;gap:7px;}
+    .arch-item{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:5px 11px;font-size:9px;font-weight:600;color:rgba(255,255,255,.8);}
+
+    /* ── TECH TABLE ── */
+    table{width:100%;border-collapse:collapse;margin:14px 0;font-size:10pt;}
+    thead tr{background:var(--navy);}
+    thead th{padding:10px 14px;text-align:left;font-size:8.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#fff;}
+    tbody tr:nth-child(even){background:#f8fafc;}
+    tbody td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+    .tr{text-align:right;}
+    .tc{text-align:center;}
+    .mono{font-family:'JetBrains Mono',monospace;font-size:9.5pt;}
+
+    /* ── BADGE ── */
+    .badge{display:inline-flex;align-items:center;gap:5px;font-size:8.5px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;}
+    .b-green{background:var(--green-bg);color:var(--green-deeper);}
+    .b-blue{background:var(--blue-bg);color:#1e40af;}
+    .b-orange{background:#fff7ed;color:#9a3412;}
+    .b-purple{background:#f5f3ff;color:#5b21b6;}
+    .b-gray{background:#f1f5f9;color:var(--navy2);}
+    .b-red{background:#fff1f2;color:#9f1239;}
+
+    /* ── INFO / HIGHLIGHT ── */
+    .hl{background:var(--green-bg);border-left:4px solid var(--green);border-radius:0 10px 10px 0;padding:15px 20px;margin:14px 0;}
+    .hl p{color:var(--green-deeper);margin:0;font-size:10pt;}
+    .info{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:10px;padding:14px 18px;margin:14px 0;}
+    .info p{color:#1e40af;margin:0;font-size:10pt;}
+    .warn{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin:14px 0;}
+    .warn p{color:#92400e;margin:0;font-size:10pt;}
+
+    /* ── STAT GRID ── */
+    .sg{display:grid;gap:12px;margin:16px 0;}
+    .sg4{grid-template-columns:repeat(4,1fr);}
+    .sg3{grid-template-columns:repeat(3,1fr);}
+    .sg2{grid-template-columns:repeat(2,1fr);}
+    .sc{background:var(--gray-light);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+    .sc-val{font-size:20px;font-weight:900;color:var(--navy);line-height:1;margin-bottom:3px;}
+    .sc-val.g{color:var(--green-dark);}
+    .sc-val.b{color:var(--blue);}
+    .sc-lbl{font-size:9px;color:var(--gray);text-transform:uppercase;letter-spacing:.7px;font-weight:600;}
+
+    /* ── FEATURE CARDS ── */
+    .fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+    .fc{border:1px solid var(--border);border-radius:11px;padding:16px;background:#fff;}
+    .fc-icon{font-size:22px;margin-bottom:8px;}
+    .fc-title{font-size:11px;font-weight:700;color:var(--navy);margin-bottom:5px;}
+    .fc-desc{font-size:9.5px;color:var(--gray);line-height:1.55;}
+
+    /* ── FOOTER ── */
+    .pf{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:8.5px;color:var(--gray);}
+
+    /* TOC */
+    .toc-item{display:flex;align-items:center;padding:9px 0;border-bottom:1px dotted var(--border);gap:12px;}
+    .toc-n{width:26px;height:26px;background:var(--navy);color:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0;}
+    .toc-t{flex:1;font-size:11.5px;font-weight:600;color:var(--navy);}
+    .toc-s{font-size:9px;color:var(--gray);}
+
+    /* justification note */
+    .just-note{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;font-size:9.5px;color:#166534;margin:10px 0;}
+
+    /* summary cards for recap page */
+    .cat-card{border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:10px 0;background:#fff;}
+    .cat-card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .cat-card-icon{font-size:20px;}
+    .cat-card-title{font-size:12px;font-weight:800;color:var(--navy);}
+    .cat-card-services{display:flex;flex-wrap:wrap;gap:6px;}
+    .srv-tag{background:var(--gray-light);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:9px;font-weight:600;color:var(--navy3);}
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     COUVERTURE
+══════════════════════════════════════════ -->
+<div class="page cover">
+  <div class="cover-stripe"></div>
+  <div class="cover-inner">
+
+    <div class="app-logo">
+      <div class="logo-leaf">
+        <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      </div>
+      <div class="logo-wordmark">
+        <div class="logo-name">CarbonTrack</div>
+        <div class="logo-tagline">Plateforme Carbone — Web &amp; Mobile</div>
+      </div>
+    </div>
+
+    <div class="cover-eyebrow">📐 Document Technique</div>
+
+    <h1 class="cover-title">
+      Architecture &amp; Besoins<br/>
+      <span>Technologiques</span>
+    </h1>
+    <p class="cover-subtitle">
+      Spécifications complètes de l'infrastructure, des services tiers, des licences logicielles et des outils nécessaires au déploiement et à l'exploitation en production de la plateforme CarbonTrack — Application Web &amp; Application Mobile.
+    </p>
+
+    <div class="cover-chips">
+      <span class="chip green">⚛️ Next.js 14</span>
+      <span class="chip green">📱 React Native · Expo</span>
+      <span class="chip">🗄️ PostgreSQL 17</span>
+      <span class="chip">☁️ AWS Cloud</span>
+      <span class="chip">🔒 Sécurité Enterprise</span>
+      <span class="chip">📊 Monitoring Temps Réel</span>
+      <span class="chip green">💳 Mobile Money API</span>
+      <span class="chip">🔔 Push Notifications</span>
+      <span class="chip">🐳 Docker · CI/CD</span>
+      <span class="chip">📄 PDF · QR Code</span>
+      <span class="chip green">🏅 Certification ISO 14064</span>
+      <span class="chip">🛡️ WAF · SSL/TLS</span>
+    </div>
+
+    <div class="cover-meta">
+      <div class="cover-meta-item">
+        <div class="cover-meta-label">Plateformes</div>
+        <div class="cover-meta-value">Web + iOS + Android</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="cover-meta-label">Version du document</div>
+        <div class="cover-meta-value">v1.0 — Février 2026</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="cover-meta-label">Classification</div>
+        <div class="cover-meta-value">Confidentiel</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TABLE DES MATIÈRES
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="cp">
+    <div class="ph">
+      <div class="ph-left">
+        <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+        <span class="ph-tag">Navigation</span>
+        <h1 class="ph-title">Table des Matières</h1>
+      </div>
+      <span class="ph-num">Page 2</span>
+    </div>
+
+    <div class="toc-item"><div class="toc-n">01</div><div class="toc-t">Vue d'Ensemble de l'Architecture</div><div class="toc-s">p. 3</div></div>
+    <div class="toc-item"><div class="toc-n">02</div><div class="toc-t">Stack Technologique — Application Web</div><div class="toc-s">p. 4</div></div>
+    <div class="toc-item"><div class="toc-n">03</div><div class="toc-t">Stack Technologique — Application Mobile iOS &amp; Android</div><div class="toc-s">p. 5</div></div>
+    <div class="toc-item"><div class="toc-n">04</div><div class="toc-t">Infrastructure Cloud &amp; Hébergement</div><div class="toc-s">p. 6</div></div>
+    <div class="toc-item"><div class="toc-n">05</div><div class="toc-t">Sécurité, Monitoring &amp; DevOps</div><div class="toc-s">p. 7</div></div>
+    <div class="toc-item"><div class="toc-n">06</div><div class="toc-t">Services Tiers &amp; Intégrations</div><div class="toc-s">p. 8</div></div>
+    <div class="toc-item"><div class="toc-n">07</div><div class="toc-t">Distribution Mobile &amp; App Stores</div><div class="toc-s">p. 9</div></div>
+    <div class="toc-item"><div class="toc-n">08</div><div class="toc-t">Outils de Développement &amp; Licences Logicielles</div><div class="toc-s">p. 10</div></div>
+    <div class="toc-item"><div class="toc-n">09</div><div class="toc-t">Récapitulatif des Besoins Technologiques</div><div class="toc-s">p. 11</div></div>
+
+    <div class="pf">
+      <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+      <span>Architecture &amp; Besoins Technologiques — Document Technique Confidentiel</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 3 — VUE D'ENSEMBLE ARCHITECTURE
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="cp">
+    <div class="ph">
+      <div class="ph-left"><span class="ph-tag">Section 01</span><h1 class="ph-title">Vue d'Ensemble de l'Architecture</h1></div>
+      <span class="ph-num">Page 3</span>
+    </div>
+
+    <p>CarbonTrack est une plateforme <strong>full-stack SaaS</strong> à architecture distribuée, composée de deux applications client (Web et Mobile) partageant un backend commun et une base de données centralisée. L'ensemble est déployé sur infrastructure cloud haute disponibilité.</p>
+
+    <div class="arch">
+      <div class="arch-title">⬛ Schéma d'Architecture — CarbonTrack Platform</div>
+      <div class="arch-layers">
+        <div class="arch-layer">
+          <div class="arch-layer-title green">🖥️ Couche Client — Interfaces Utilisateur</div>
+          <div class="arch-layer-items">
+            <span class="arch-item">Application Web (Next.js 14)</span>
+            <span class="arch-item">Dashboard Entreprise</span>
+            <span class="arch-item">Panel Admin</span>
+            <span class="arch-item">Espace Expert Certifieur</span>
+            <span class="arch-item">Application Mobile iOS (Expo)</span>
+            <span class="arch-item">Application Mobile Android (Expo)</span>
+          </div>
+        </div>
+        <div class="arch-layer">
+          <div class="arch-layer-title blue">⚡ Couche API — Backend &amp; Logique Métier</div>
+          <div class="arch-layer-items">
+            <span class="arch-item">Next.js API Routes (REST)</span>
+            <span class="arch-item">Authentification JWT / bcrypt</span>
+            <span class="arch-item">RBAC (user · expert · admin)</span>
+            <span class="arch-item">Calcul GES (Scope 1/2/3)</span>
+            <span class="arch-item">Génération PDF / QR Code</span>
+            <span class="arch-item">Gestion Certifications</span>
+          </div>
+        </div>
+        <div class="arch-layer">
+          <div class="arch-layer-title orange">🗄️ Couche Données — Persistance</div>
+          <div class="arch-layer-items">
+            <span class="arch-item">PostgreSQL 17 (AWS RDS Managed)</span>
+            <span class="arch-item">Tables : users · companies · sites · assessments</span>
+            <span class="arch-item">emission_entries · certifications · subscriptions</span>
+            <span class="arch-item">AWS S3 (documents · PDFs · backups)</span>
+          </div>
+        </div>
+        <div class="arch-layer">
+          <div class="arch-layer-title purple">☁️ Couche Infrastructure — Cloud &amp; Services</div>
+          <div class="arch-layer-items">
+            <span class="arch-item">AWS EC2 (Application Server)</span>
+            <span class="arch-item">AWS CloudFront (CDN)</span>
+            <span class="arch-item">AWS WAF (Security)</span>
+            <span class="arch-item">Airtel Money API</span>
+            <span class="arch-item">Moov Money API</span>
+            <span class="arch-item">Firebase (Push)</span>
+            <span class="arch-item">SendGrid (Email)</span>
+            <span class="arch-item">Twilio (SMS)</span>
+            <span class="arch-item">Datadog (Monitoring)</span>
+            <span class="arch-item">Sentry (Error Tracking)</span>
+            <span class="arch-item">GitHub Actions (CI/CD)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sg sg4" style="margin-top:18px;">
+      <div class="sc"><div class="sc-val g">2</div><div class="sc-lbl">Applications (Web + Mobile)</div></div>
+      <div class="sc"><div class="sc-val">9</div><div class="sc-lbl">Tables PostgreSQL</div></div>
+      <div class="sc"><div class="sc-val g">+100</div><div class="sc-lbl">Facteurs d'émission intégrés</div></div>
+      <div class="sc"><div class="sc-val b">3</div><div class="sc-lbl">Rôles utilisateurs (RBAC)</div></div>
+    </div>
+
+    <div class="pf">
+      <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+      <span>Architecture &amp; Besoins Technologiques — Document Technique Confidentiel</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 4 — STACK WEB
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="cp">
+    <div class="ph">
+      <div class="ph-left"><span class="ph-tag">Section 02</span><h1 class="ph-title">Stack Technologique — Application Web</h1></div>
+      <span class="ph-num">Page 4</span>
+    </div>
+
+    <h2>Framework &amp; Runtime</h2>
+    <table>
+      <thead><tr><th>Technologie</th><th>Version</th><th>Rôle</th><th>Justification du Choix</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Next.js</strong> <span class="badge b-green">Core</span></td><td class="mono">14.x (App Router)</td><td>Framework full-stack</td><td>SSR, API Routes intégrées, lazy-loading, optimisation mémoire — leader du marché React</td></tr>
+        <tr><td><strong>React</strong></td><td class="mono">18.x</td><td>UI Library</td><td>Concurrent rendering, hooks, composants réutilisables</td></tr>
+        <tr><td><strong>TypeScript</strong></td><td class="mono">5.x</td><td>Typage statique</td><td>Sécurité du code, autocomplétion, détection d'erreurs à la compilation</td></tr>
+        <tr><td><strong>Node.js</strong></td><td class="mono">20 LTS</td><td>Runtime serveur</td><td>Version LTS stable, support long terme garanti jusqu'en 2026</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Interface Utilisateur &amp; Visualisation</h2>
+    <table>
+      <thead><tr><th>Bibliothèque</th><th>Usage</th><th>Justification</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tailwind CSS v3</strong> <span class="badge b-blue">UI</span></td><td>Styling utilitaire</td><td>Design system cohérent, pas de CSS custom à maintenir, bundle minimal</td></tr>
+        <tr><td><strong>Lucide React</strong></td><td>Icônes SVG</td><td>500+ icônes optimisées, tree-shakeable, licence MIT</td></tr>
+        <tr><td><strong>Recharts</strong></td><td>Graphiques &amp; Charts</td><td>Visualisation des émissions (barres, courbes, camemberts) — natif React</td></tr>
+        <tr><td><strong>jsPDF</strong></td><td>Génération PDF</td><td>Export rapports carbone en PDF côté client, sans dépendance serveur</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Backend &amp; Sécurité</h2>
+    <table>
+      <thead><tr><th>Module</th><th>Usage</th><th>Justification</th></tr></thead>
+      <tbody>
+        <tr><td><strong>pg (node-postgres)</strong></td><td>Driver PostgreSQL</td><td>Driver officiel PostgreSQL pour Node.js, pool de connexions intégré</td></tr>
+        <tr><td><strong>jose</strong></td><td>JWT — Authentification</td><td>Implémentation JWT Web Standard, compatible Edge Runtime Next.js</td></tr>
+        <tr><td><strong>bcryptjs</strong></td><td>Hachage des mots de passe</td><td>Algorithme bcrypt — hachage irréversible, salt configurable (12 rounds)</td></tr>
+        <tr><td><strong>next/dynamic</strong></td><td>Lazy-loading composants</td><td>Optimisation mémoire : modules lourds (52KB facteurs d'émission) chargés à la demande</td></tr>
+      </tbody>
+    </table>
+
+    <div class="hl">
+      <p>🏗️ <strong>Architecture App Router :</strong> L'application utilise le nouveau paradigme App Router de Next.js 14 avec Server Components, permettant un rendu hybride (SSR/SSG/CSR) et une réduction significative du bundle JavaScript envoyé au client. Les routes API sont des Edge Functions stateless, scalables horizontalement sans configuration.</p>
+    </div>
+
+    <div class="pf">
+      <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+      <span>Architecture &amp; Besoins Technologiques — Document Technique Confidentiel</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 5 — STACK MOBILE
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="cp">
+    <div class="ph">
+      <div class="ph-left"><span class="ph-tag">Section 03</span><h1 class="ph-title">Stack Technologique — Application Mobile</h1></div>
+      <span class="ph-num">Page 5</span>
+    </div>
+
+    <p>L'application mobile CarbonTrack est développée en <strong>React Native via Expo</strong>, permettant un code unique déployé simultanément sur iOS et Android — réduisant le coût de développement de 50% par rapport à deux applications natives distinctes.</p>
+
+    <h2>Framework &amp; Navigation</h2>
+    <table>
+      <thead><tr><th>Technologie</th><th>Version</th><th>Rôle</th><th>Justification</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Expo SDK</strong> <span class="badge b-green">Core</span></td><td class="mono">54</td><td>Framework mobile cross-platform</td><td>iOS + Android depuis un seul codebase. Accès natif caméra, notifications, système de fichiers</td></tr>
+        <tr><td><strong>React Native</strong></td><td class="mono">0.76</td><td>UI native</td><td>Composants natifs réels (non WebView), performance proche du natif</td></tr>
+        <tr><td><strong>Expo Router v3</strong></td><td class="mono">3.x</td><td>Navigation file-based</td><td>Routage déclaratif basé sur les fichiers — même paradigme que Next.js, deep linking natif</td></tr>
+        <tr><td><strong>TypeScript</strong></td><td class="mono">5.x</td><td>Typage statique</td><td>Partagé avec le web — types cohérents sur toute la plateforme</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Interface &amp; Animations</h2>
+    <table>
+      <thead><tr><th>Bibliothèque</th><th>Version</th><th>Usage</th><th>Justification</th></tr></thead>
+      <tbody>
+        <tr><td><strong>NativeWind v4</strong></td><td class="mono">4.x</td><td>Styling Tailwind mobile</td><td>Même syntaxe Tailwind que le web — cohérence design, pas de StyleSheet custom</td></tr>
+        <tr><td><strong>React Native Reanimated</strong></td><td class="mono">3.16.7</td><td>Animations fluides</td><td>Animations 60fps sur le thread UI natif — transitions, gestes, micro-interactions</td></tr>
+        <tr><td><strong>Ionicons</strong></td><td class="mono">via @expo/vector-icons</td><td>Icônes natives</td><td>1300+ icônes vectorielles, rendu natif optimisé iOS/Android</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Fonctionnalités Natives Critiques</h2>
+    <table>
+      <thead><tr><th>Module Expo</th><th>Usage</th><th>Nécessité</th></tr></thead>
+      <tbody>
+        <tr><td><strong>expo-print</strong></td><td>Génération PDF depuis HTML</td><td><span class="badge b-orange">Indispensable</span> — Export rapport carbone en PDF sur mobile</td></tr>
+        <tr><td><strong>expo-sharing</strong></td><td>Partage de fichiers natif</td><td><span class="badge b-orange">Indispensable</span> — Partage du PDF via WhatsApp, email, Drive</td></tr>
+        <tr><td><strong>expo-notifications</strong></td><td>Push notifications</td><td>Alertes expiration abonnement, validation certification</td></tr>
+        <tr><td><strong>react-native-qrcode-svg</strong></td><td>Génération QR Code</td><td>QR code d'authenticité intégré dans les PDFs et rapports</td></tr>
+        <tr><td><strong>react-native-safe-area-context</strong></td><td>Safe areas iOS/Android</td><td>Adaptation automatique aux encoches, barres de statut</td></tr>
+        <tr><td><strong>react-native-svg</strong></td><td>Graphiques SVG natifs</td><td>Rendu charts et icônes vectorielles sur mobile</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info">
+      <p>📱 <strong>Compatibilité :</strong> iOS 16+ et Android 10+ (API 29+). L'application est soumise sur l'Apple App Store (iOS) et le Google Play Store (Android), nécessitant des comptes développeurs actifs et des processus de révision continus.</p>
+    </div>
+
+    <div class="pf">
+      <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+      <span>Architecture &amp; Besoins Technologiques — Document Technique Confidentiel</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 6 — INFRASTRUCTURE CLOUD
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="cp">
+    <div class="ph">
+      <div class="ph-left"><span class="ph-tag">Section 04</span><h1 class="ph-title">Infrastructure Cloud &amp; Hébergement</h1></div>
+      <span class="ph-num">Page 6</span>
+    </div>
+
+    <p>Le déploiement en production de CarbonTrack requiert une infrastructure cloud managée garantissant <strong>haute disponibilité, sécurité des données et scalabilité automatique</strong>. Amazon Web Services (AWS) a été retenu comme fournisseur principal pour sa présence mondiale et son SLA de 99,9%.</p>
+
+    <h2>Services AWS — Détail &amp; Justification</h2>
+    <table>
+      <thead><tr><th>Service AWS</th><th>Spécification</th><th>Nécessité Technique</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>EC2 — Serveur Application</strong> <span class="badge b-orange">Critique</span></td>
+          <td class="mono">t3.medium (2 vCPU, 4GB RAM)</td>
+          <td>Hébergement du serveur Next.js. t3.medium requis : gestion des workers Node.js concurrents, compilation PDF, calculs GES en temps réel</td>
+        </tr>
+        <tr>
+          <td><strong>RDS PostgreSQL — Base de données managée</strong> <span class="badge b-orange">Critique</span></td>
+          <td class="mono">db.t3.small · Multi-AZ</td>
+          <td>Gestion automatique des sauvegardes (rétention 7 jours), réplication Multi-AZ pour haute disponibilité, mises à jour de sécurité automatiques</td>
+        </tr>
+        <tr>
+          <td><strong>CloudFront — CDN Global</strong></td>
+          <td class="mono">Distribution globale</td>
+          <td>Livraison rapide des assets statiques (JS, CSS, images) depuis des edge locations proches des utilisateurs africains. Réduit la latence de 60%</td>
+        </tr>
+        <tr>
+          <td><strong>S3 — Stockage Objet</strong></td>
+          <td class="mono">Standard + Intelligent-Tiering</td>
+          <td>Stockage des documents de certification, PDFs générés, pièces jointes (jusqu'à 10GB/mois estimés)</td>
+        </tr>
+        <tr>
+          <td><strong>Elastic Load Balancer</strong></td>
+          <td class="mono">Application LB</td>
+          <td>Répartition de charge entre instances EC2, terminaison SSL, health checks automatiques</td>
+        </tr>
+        <tr>
+          <td><strong>Route 53 — DNS &amp; Domaine</strong></td>
+          <td class="mono">carbontrack.africa</td>
+          <td>Gestion DNS haute disponibilité, routage géographique, enregistrement du domaine professionnel</td>
+        </tr>
+        <tr>
+          <td><strong>AWS Backup</strong></td>
+          <td class="mono">Rétention 30 jours</td>
+          <td>Sauvegardes automatiques cross-région (BDD + S3). Obligatoire pour conformité et continuité d'activité</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="just-note">
+      💡 <strong>Pourquoi AWS et non un hébergeur local ?</strong> Aucun hébergeur local en Afrique Centrale ne propose de base de données managée avec sauvegardes automatiques, haute disponibilité Multi-AZ et SLA garanti. AWS est la norme industrielle mondiale et la seule option fiable pour une application de ce niveau de criticité.
+    </div>
+
+    <div class="pf">
+      <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+      <span>Architecture &amp; Besoins Technologiques — Document Technique Confidentiel</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 7 — SÉCURITÉ & DEVOPS
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="cp">
+    <div class="ph">
+      <div class="ph-left"><span class="ph-tag">Section 05</span><h1 class="ph-title">Sécurité, Monitoring &amp; DevOps</h1></div>
+      <span class="ph-num">Page 7</span>
+    </div>
+
+    <p>La nature critique des données traitées par CarbonTrack (données financières, informations d'entreprises, documents de certification) impose une infrastructure de sécurité et de surveillance de niveau entreprise.</p>
+
+    <h2>Sécurité &amp; Protection</h2>
+    <table>
+      <thead><tr><th>Outil / Service</th><th>Fournisseur</th><th>Rôle &amp; Nécessité</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>AWS WAF — Pare-feu Applicatif</strong> <span class="badge b-red">Sécurité</span></td>
+          <td>Amazon Web Services</td>
+          <td>Protection contre SQLi, XSS, DDoS, bots malveillants. Obligatoire pour toute application SaaS exposée sur Internet</td>
+        </tr>
+        <tr>
+          <td><strong>AWS Secrets Manager</strong> <span class="badge b-red">Sécurité</span></td>
+          <td>Amazon Web Services</td>
+          <td>Stockage sécurisé des clés API (Airtel Money, Moov Money, SendGrid…). Rotation automatique des secrets. Interdit de stocker les clés en clair dans le code</td>
+        </tr>
+        <tr>
+          <td><strong>Snyk Team — Analyse de vulnérabilités</strong></td>
+          <td>Snyk</td>
+          <td>Scan continu des dépendances npm (600+ packages). Alerte et patch automatique des CVE (failles de sécurité connues) dans les librairies tierces</td>
+        </tr>
+        <tr>
+          <td><strong>SSL/TLS — Certificats HTTPS</strong></td>
+          <td>AWS Certificate Manager</td>
+          <td>Chiffrement de toutes les communications. Obligatoire pour App Store Apple (ATS) et Play Store Google (HTTPS enforced)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Monitoring &amp; Observabilité</h2>
+    <table>
+      <thead><tr><th>Outil</th><th>Fournisseur</th><th>Rôle &amp; Nécessité</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Datadog APM &amp; Logs</strong> <span class="badge b-orange">Monitoring</span></td>
+          <td>Datadog Inc.</td>
+          <td>Surveillance temps réel : performance API, latence base de données, alertes de surcharge. Dashboards opérationnels. SLA monitoring. Indispensable pour une application en production 24h/24</td>
+        </tr>
+        <tr>
+          <td><strong>Sentry — Error Tracking</strong></td>
+          <td>Functional Software</td>
+          <td>Capture et agrégation des erreurs JavaScript (web + mobile) en production. Stack traces complètes, contexte utilisateur, alertes email/Slack. Permet de corriger les bugs avant que les clients les signalent</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>CI/CD — Intégration &amp; Déploiement Continus</h2>
+    <table>
+      <thead><tr><th>Outil</th><th>Fournisseur</th><th>Rôle</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>GitHub Actions — CI/CD Pipeline</strong></td>
+          <td>GitHub (Microsoft)</td>
+          <td>Automatisation complète : tests unitaires à chaque commit, build de l'application, déploiement automatique en production à chaque release validée. Zéro downtime deployments</td>
+        </tr>
+        <tr>
+          <td><strong>Docker + Docker Compose</strong></td>
+          <td>Docker Inc.</td>
+          <td>Conteneurisation de l'application. Environnements identiques dev/staging/production. Déploiements reproductibles et isolés</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pf">
+      <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+      <span>Architecture &amp; Besoins Technologiques — Document Technique Confidentiel</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 8 — SERVICES TIERS & INTÉGRATIONS
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="cp">
+    <div class="ph">
+      <div class="ph-left"><span class="ph-tag">Section 06</span><h1 class="ph-title">Services Tiers &amp; Intégrations</h1></div>
+      <span class="ph-num">Page 8</span>
+    </div>
+
+    <h2>Paiements — Mobile Money (Indispensable)</h2>
+    <p>L'intégration des API de paiement mobile est <strong>le cœur du modèle de monétisation</strong> de CarbonTrack. Airtel Money et Moov Money représentent plus de 85% des transactions numériques en Afrique Centrale.</p>
+    <table>
+      <thead><tr><th>Service</th><th>Fournisseur</th><th>Usage &amp; Justification</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Airtel Money API</strong> <span class="badge b-red">Critique</span></td>
+          <td>Airtel Africa</td>
+          <td>API officielle de paiement Airtel Money. Frais de mise en place + certification partenaire + maintenance annuelle. Sans cette intégration, 60% des clients potentiels ne peuvent pas payer</td>
+        </tr>
+        <tr>
+          <td><strong>Moov Money API</strong> <span class="badge b-red">Critique</span></td>
+          <td>Moov Africa</td>
+          <td>API officielle Moov Money. Même structure tarifaire. Couvre les utilisateurs Gabon, Congo, Cameroun ne disposant pas d'Airtel</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Communication &amp; Notifications</h2>
+    <table>
+      <thead><tr><th>Service</th><th>Fournisseur</th><th>Usage &amp; Justification</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Firebase Cloud Messaging</strong></td>
+          <td>Google Firebase</td>
+          <td>Notifications push iOS et Android. Obligatoire pour alertes expiration abonnement, validation certification, mises à jour réglementaires</td>
+        </tr>
+        <tr>
+          <td><strong>SendGrid — Email transactionnel</strong></td>
+          <td>Twilio SendGrid</td>
+          <td>Envoi des emails critiques : confirmation d'abonnement, certificats, alertes administrateur, reset de mot de passe. 40 000 emails/mois inclus</td>
+        </tr>
+        <tr>
+          <td><strong>Africa's Talking — SMS</strong></td>
+          <td>Africa's Talking</td>
+          <td>SMS de confirmation de paiement, code OTP, alertes urgentes. Spécialiste Afrique avec numéros locaux Gabon/Congo/Cameroun</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Authentification &amp; Sécurité Identité</h2>
+    <table>
+      <thead><tr><th>Service</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>reCAPTCHA Enterprise (Google)</strong></td>
+          <td>Protection formulaires de connexion et d'inscription contre les bots et attaques par force brute</td>
+        </tr>
+        <tr>
+          <td><strong>Cloudflare Turnstile</strong></td>
+          <td>Alternative CAPTCHA pour les formulaires de contact et téléchargement de rapports</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pf">
+      <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+      <span>Architecture &amp; Besoins Technologiques — Document Technique Confidentiel</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 9 — DISTRIBUTION MOBILE & STORES
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="cp">
+    <div class="ph">
+      <div class="ph-left"><span class="ph-tag">Section 07</span><h1 class="ph-title">Distribution Mobile &amp; App Stores</h1></div>
+      <span class="ph-num">Page 9</span>
+    </div>
+
+    <p>La distribution de l'application mobile sur l'App Store d'Apple et le Google Play Store est <strong>obligatoire</strong> pour atteindre les utilisateurs iOS et Android. Ces deux plateformes représentent 100% du marché mobile mondial.</p>
+
+    <h2>Comptes Développeurs &amp; Distribution</h2>
+    <table>
+      <thead><tr><th>Service</th><th>Fournisseur</th><th>Nécessité</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Apple Developer Program</strong> <span class="badge b-red">Obligatoire</span></td>
+          <td>Apple Inc.</td>
+          <td>Sans ce compte, l'application iOS ne peut PAS être publiée sur l'App Store ni testée sur des iPhones physiques. Renouvellement annuel obligatoire</td>
+        </tr>
+        <tr>
+          <td><strong>Google Play Console</strong> <span class="badge b-red">Obligatoire</span></td>
+          <td>Google LLC</td>
+          <td>Sans ce compte, l'application Android ne peut PAS être publiée sur le Play Store. Frais unique d'enregistrement</td>
+        </tr>
+        <tr>
+          <td><strong>Expo Application Services (EAS)</strong></td>
+          <td>Expo (Meta)</td>
+          <td>Build cloud iOS/Android sans Mac physique. Obligatoire pour compiler les binaires iOS (.ipa) sans posséder un Mac. Submit automatisé vers les stores</td>
+        </tr>
+        <tr>
+          <td><strong>TestFlight (iOS Beta)</strong></td>
+          <td>Apple Inc.</td>
+          <td>Distribution de versions bêta aux testeurs avant publication officielle. Inclus dans l'Apple Developer Program</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Outils de Build &amp; Compilation</h2>
+    <table>
+      <thead><tr><th>Outil</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>EAS Build (Expo)</strong></td>
+          <td>Compilation cloud des binaires iOS (.ipa) et Android (.aab/.apk). Indispensable sans infrastructure Mac locale</td>
+        </tr>
+        <tr>
+          <td><strong>EAS Update (OTA Updates)</strong></td>
+          <td>Mises à jour Over-The-Air sans passer par le store review. Corrections de bugs immédiates (JS layer)</td>
+        </tr>
+        <tr>
+          <td><strong>Fastlane</strong></td>
+          <td>Automatisation des soumissions store, captures d'écran automatisées, gestion des certificats iOS</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <p>⚠️ <strong>Contrainte critique iOS :</strong> Apple impose une révision humaine de chaque mise à jour (3–5 jours). Le renouvellement annuel du compte Apple Developer est non négociable — l'expiration entraîne le retrait immédiat de l'application de l'App Store.</p>
+    </div>
+
+    <div class="pf">
+      <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+      <span>Architecture &amp; Besoins Technologiques — Document Technique Confidentiel</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 10 — OUTILS DEV & LICENCES
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="cp">
+    <div class="ph">
+      <div class="ph-left"><span class="ph-tag">Section 08</span><h1 class="ph-title">Outils de Développement &amp; Licences Logicielles</h1></div>
+      <span class="ph-num">Page 10</span>
+    </div>
+
+    <h2>Contrôle de Version &amp; Collaboration</h2>
+    <table>
+      <thead><tr><th>Outil</th><th>Fournisseur</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>GitHub Team</strong></td>
+          <td>GitHub (Microsoft)</td>
+          <td>Hébergement du code source privé, historique complet, gestion des versions, code review, intégration CI/CD. Standard de l'industrie</td>
+        </tr>
+        <tr>
+          <td><strong>Git LFS (Large File Storage)</strong></td>
+          <td>GitHub</td>
+          <td>Versioning des assets volumineux (images, vidéos, bases de facteurs d'émission)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Design &amp; Prototypage UI/UX</h2>
+    <table>
+      <thead><tr><th>Outil</th><th>Fournisseur</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Figma Professional</strong></td>
+          <td>Figma Inc.</td>
+          <td>Conception des maquettes UI, design system, prototypes interactifs, collaboration. Outil référence mondial du design d'application</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Tests &amp; Qualité</h2>
+    <table>
+      <thead><tr><th>Outil</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Postman Team</strong></td>
+          <td>Tests des APIs, documentation interactive des endpoints, collections partagées</td>
+        </tr>
+        <tr>
+          <td><strong>Jest + Testing Library</strong></td>
+          <td>Tests unitaires et d'intégration automatisés (open source)</td>
+        </tr>
+        <tr>
+          <td><strong>Playwright</strong></td>
+          <td>Tests end-to-end automatisés de l'interface web (open source)</td>
+        </tr>
+        <tr>
+          <td><strong>Detox</strong></td>
+          <td>Tests end-to-end automatisés de l'application mobile React Native</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Documentation &amp; Gestion de Projet</h2>
+    <table>
+      <thead><tr><th>Outil</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Notion Team</strong></td>
+          <td>Documentation technique, roadmap, gestion des sprints, base de connaissance interne</td>
+        </tr>
+        <tr>
+          <td><strong>Linear (Gestion d'issues)</strong></td>
+          <td>Suivi des bugs, issues, sprints — intégration GitHub native</td>
+        </tr>
+        <tr>
+          <td><strong>Loom Pro (Vidéo async)</strong></td>
+          <td>Démonstrations vidéo pour clients, formation équipe, walkthroughs fonctionnalités</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pf">
+      <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+      <span>Architecture &amp; Besoins Technologiques — Document Technique Confidentiel</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 11 — RÉCAPITULATIF
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="cp">
+    <div class="ph">
+      <div class="ph-left"><span class="ph-tag">Section 09</span><h1 class="ph-title">Récapitulatif des Besoins Technologiques</h1></div>
+      <span class="ph-num">Page 11</span>
+    </div>
+
+    <p>Synthèse de l'ensemble des services, outils et licences nécessaires au déploiement et à l'exploitation en production de la plateforme CarbonTrack.</p>
+
+    <div class="cat-card">
+      <div class="cat-card-head"><div class="cat-card-icon">☁️</div><div class="cat-card-title">Infrastructure Cloud — Amazon Web Services (AWS)</div></div>
+      <div class="cat-card-services">
+        <span class="srv-tag">EC2 Application Server</span><span class="srv-tag">RDS PostgreSQL Multi-AZ</span><span class="srv-tag">S3 Object Storage</span><span class="srv-tag">CloudFront CDN</span><span class="srv-tag">Elastic Load Balancer</span><span class="srv-tag">Route 53 DNS</span><span class="srv-tag">AWS Backup</span>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-card-head"><div class="cat-card-icon">🔒</div><div class="cat-card-title">Sécurité &amp; Protection</div></div>
+      <div class="cat-card-services">
+        <span class="srv-tag">AWS WAF Pare-feu Applicatif</span><span class="srv-tag">AWS Secrets Manager</span><span class="srv-tag">Snyk Vulnerability Scanner</span><span class="srv-tag">SSL/TLS Certificate Manager</span>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-card-head"><div class="cat-card-icon">📊</div><div class="cat-card-title">Monitoring &amp; Observabilité</div></div>
+      <div class="cat-card-services">
+        <span class="srv-tag">Datadog APM &amp; Logs</span><span class="srv-tag">Sentry Error Tracking</span>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-card-head"><div class="cat-card-icon">💳</div><div class="cat-card-title">Services Tiers &amp; Intégrations Paiement / Communication</div></div>
+      <div class="cat-card-services">
+        <span class="srv-tag">Airtel Money API</span><span class="srv-tag">Moov Money API</span><span class="srv-tag">Firebase Cloud Messaging</span><span class="srv-tag">SendGrid Email</span><span class="srv-tag">Africa's Talking SMS</span><span class="srv-tag">reCAPTCHA Enterprise</span><span class="srv-tag">Cloudflare Turnstile</span>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-card-head"><div class="cat-card-icon">📱</div><div class="cat-card-title">Distribution Mobile &amp; App Stores</div></div>
+      <div class="cat-card-services">
+        <span class="srv-tag">Apple Developer Program</span><span class="srv-tag">Google Play Console</span><span class="srv-tag">Expo EAS Build &amp; Update</span><span class="srv-tag">TestFlight Beta</span><span class="srv-tag">Fastlane</span>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-card-head"><div class="cat-card-icon">🚀</div><div class="cat-card-title">CI/CD &amp; DevOps</div></div>
+      <div class="cat-card-services">
+        <span class="srv-tag">GitHub Actions CI/CD</span><span class="srv-tag">Docker + Docker Compose</span><span class="srv-tag">GitHub Team</span><span class="srv-tag">Git LFS</span>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-card-head"><div class="cat-card-icon">🛠️</div><div class="cat-card-title">Outils de Développement &amp; Licences Logicielles</div></div>
+      <div class="cat-card-services">
+        <span class="srv-tag">Figma Professional</span><span class="srv-tag">Postman Team</span><span class="srv-tag">Jest + Testing Library</span><span class="srv-tag">Playwright</span><span class="srv-tag">Detox</span><span class="srv-tag">Notion Team</span><span class="srv-tag">Linear</span><span class="srv-tag">Loom Pro</span>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding:20px 24px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;">
+      <p style="font-size:8.5px;color:#94a3b8;line-height:1.8;">
+        <strong>Document confidentiel — CarbonTrack © 2026.</strong> Ce document technique est destiné exclusivement à l'usage interne et aux partenaires autorisés. Il ne peut être reproduit ou divulgué sans accord écrit préalable. Les spécifications techniques sont susceptibles d'évoluer en fonction des besoins opérationnels.
+      </p>
+    </div>
+
+    <div class="pf">
+      <div class="logo-sm"><div class="logo-sm-icon"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="logo-sm-text">CarbonTrack</span></div>
+      <span>Architecture &amp; Besoins Technologiques — Document Technique Confidentiel</span>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT BUTTON -->
+<div class="no-print" style="text-align:center;padding:28px;background:#f1f5f9;border-top:1px solid #e2e8f0;">
+  <p style="color:#64748b;font-size:12px;margin-bottom:8px;">Pour un export PDF fidèle : cliquez le bouton ci-dessous puis choisissez <strong>"Enregistrer en PDF"</strong>.<br/>Dans les options d'impression, activez <strong>"Arrière-plans graphiques"</strong> (Background graphics) pour conserver les couleurs.</p>
+  <button onclick="window.print()" style="background:#22c55e;color:#fff;border:none;padding:11px 30px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">🖨️ Exporter en PDF</button>
+</div>
+
+</body>
+</html>

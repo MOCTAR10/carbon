@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>CarbonTrack — Guide Complet des Fonctionnalites | GreenLeaves</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+:root{--b50:#f0fdf4;--b100:#dcfce7;--b200:#bbf7d0;--b500:#22c55e;--b600:#16a34a;--b700:#15803d;--b800:#166534;--g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;--g800:#1f2937;--g900:#111827}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;color:var(--g800);line-height:1.7;font-size:10.5pt;background:#e5e7eb}
+@media print{
+  body{font-size:10pt;background:white;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  .page-break{page-break-before:always}
+  .no-break{page-break-inside:avoid}
+  @page{margin:18mm 20mm;size:A4}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+}
+@media screen{.page{max-width:210mm;margin:0 auto 10px;background:white;padding:28mm 24mm;box-shadow:0 2px 8px rgba(0,0,0,.1)}}
+h1{font-size:20pt;font-weight:800;color:var(--b800);margin-bottom:6px}
+h2{font-size:14pt;font-weight:700;color:var(--g900);margin-top:20px;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid var(--b200)}
+h3{font-size:11pt;font-weight:700;color:var(--b700);margin-top:14px;margin-bottom:5px}
+h4{font-size:9.5pt;font-weight:700;color:var(--g900);margin-bottom:3px}
+p{margin-bottom:7px;color:var(--g700);font-size:9.5pt}
+.sh{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:10px;border-bottom:3px solid var(--b500)}
+.sh h1{border:none;margin:0;padding:0}
+.si{width:44px;height:44px;background:var(--b50);border:2px solid var(--b200);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.si svg{width:22px;height:22px;color:var(--b600)}
+.sn{font-size:8.5pt;color:var(--b600);font-weight:600;margin:0}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.fc{background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:12px}
+.fc h4{font-size:9pt;font-weight:700;color:var(--g900);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.fc p{font-size:8.5pt;color:var(--g600);margin:0;line-height:1.5}
+.hb{background:linear-gradient(135deg,var(--b50),var(--b100));border:1px solid var(--b200);border-radius:12px;padding:14px;margin:12px 0}
+.hb h4{font-weight:700;color:var(--b800);margin-bottom:3px;font-size:9.5pt}
+.hb p{color:var(--b700);font-size:8.5pt;margin:0}
+table{width:100%;border-collapse:collapse;font-size:9pt;margin:8px 0}
+thead th{background:var(--b600);color:white;padding:6px 10px;text-align:left;font-size:8pt;text-transform:uppercase;letter-spacing:.5px}
+thead th:first-child{border-radius:6px 0 0 0}thead th:last-child{border-radius:0 6px 0 0}
+tbody td{padding:6px 10px;border-bottom:1px solid var(--g100)}
+tbody tr:nth-child(even){background:var(--g50)}
+.cl{list-style:none;padding:0;margin:6px 0}
+.cl li{display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:9pt;color:var(--g700)}
+.cl li::before{content:'✓';display:flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--b100);color:var(--b700);border-radius:50%;font-size:8pt;font-weight:700;flex-shrink:0;margin-top:2px}
+.screenshot{border:2px dashed var(--g400);border-radius:10px;padding:20px;text-align:center;color:var(--g400);font-size:9pt;font-style:italic;margin:12px 0;background:var(--g50);min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}
+.screenshot-lg{min-height:180px}
+.screenshot svg{width:32px;height:32px;opacity:.4}
+.step{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
+.step-num{width:30px;height:30px;background:var(--b100);border:2px solid var(--b200);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--b700);font-size:9pt;flex-shrink:0;margin-top:2px}
+.step-content h4{font-size:9.5pt;font-weight:700;color:var(--g900);margin-bottom:2px}
+.step-content p{font-size:8.5pt;color:var(--g600);margin:0}
+.badge{display:inline-block;background:var(--b100);color:var(--b700);border-radius:6px;padding:2px 8px;font-size:7.5pt;font-weight:600}
+.toc-i{display:flex;align-items:center;padding:7px 0;border-bottom:1px dashed var(--g200)}
+.toc-n{width:26px;height:26px;background:var(--b100);color:var(--b700);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:9pt;margin-right:10px;flex-shrink:0}
+.toc-l{font-weight:500;font-size:9.5pt;flex:1}
+.toc-d{flex:1;border-bottom:1px dotted var(--g200);margin:0 8px;height:1px}
+.toc-p{font-weight:600;color:var(--b600);font-size:9pt}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--g50);border:1px solid var(--g200);border-radius:8px;margin-bottom:6px}
+.nav-icon{width:28px;height:28px;background:var(--b100);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-label{font-size:9pt;font-weight:600;color:var(--g800)}
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="page" style="background:linear-gradient(135deg,var(--b800) 0%,var(--b600) 40%,#4ade80 100%);color:white;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:100vh;text-align:center">
+
+<div style="width:90px;height:90px;background:#16a34a;border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:50px;height:50px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 17 3.5s1.5 2.5 1.5 6c0 4-2.5 7-7.5 10.5"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+</div>
+
+<h1 style="font-size:32pt;font-weight:900;color:white;margin-bottom:8px;letter-spacing:-.5px">CarbonTrack</h1>
+<div style="display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:100px;padding:6px 20px;font-size:9pt;font-weight:500;letter-spacing:.5px;margin-bottom:20px">GUIDE COMPLET DES FONCTIONNALITES</div>
+<p style="font-size:14pt;font-weight:300;color:rgba(255,255,255,.9);max-width:480px;margin:0 auto 30px">Presentation detaillee de toutes les fonctionnalites de la plateforme de bilan carbone</p>
+
+<div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:30px">
+<div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 18px;font-size:8.5pt">📋 ISO 14064-1:2018</div>
+<div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 18px;font-size:8.5pt">📋 ISO 14069:2013</div>
+<div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 18px;font-size:8.5pt">📋 GHG Protocol</div>
+</div>
+
+<div style="font-size:8.5pt;opacity:.7;margin-top:20px">
+<p style="color:rgba(255,255,255,.7);font-size:8.5pt">GreenLeaves | Version 1.0 | Gabon, Afrique & Monde</p>
+<p style="color:rgba(255,255,255,.5);font-size:8pt">Document confidentiel — www.greenleaves.ga/carbontrack</p>
+</div>
+</div>
+
+<!-- TABLE DES MATIERES -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div><div><p class="sn">SOMMAIRE</p><h1>Table des Matieres</h1></div></div>
+
+<div style="margin-top:16px">
+<div class="toc-i"><div class="toc-n">1</div><span class="toc-l">Vue d'Ensemble de l'Application</span><span class="toc-d"></span><span class="toc-p">3</span></div>
+<div class="toc-i"><div class="toc-n">2</div><span class="toc-l">Inscription & Connexion</span><span class="toc-d"></span><span class="toc-p">4</span></div>
+<div class="toc-i"><div class="toc-n">3</div><span class="toc-l">Abonnement & Paiement</span><span class="toc-d"></span><span class="toc-p">5</span></div>
+<div class="toc-i"><div class="toc-n">4</div><span class="toc-l">Tableau de Bord</span><span class="toc-d"></span><span class="toc-p">6</span></div>
+<div class="toc-i"><div class="toc-n">5</div><span class="toc-l">Gestion des Sites & Entites</span><span class="toc-d"></span><span class="toc-p">7</span></div>
+<div class="toc-i"><div class="toc-n">6</div><span class="toc-l">Bilans Carbone — Creation & Gestion</span><span class="toc-d"></span><span class="toc-p">8</span></div>
+<div class="toc-i"><div class="toc-n">7</div><span class="toc-l">Saisie des Donnees d'Emission</span><span class="toc-d"></span><span class="toc-p">9-10</span></div>
+<div class="toc-i"><div class="toc-n">8</div><span class="toc-l">Rapports & Graphiques Interactifs</span><span class="toc-d"></span><span class="toc-p">11-13</span></div>
+<div class="toc-i"><div class="toc-n">9</div><span class="toc-l">Generation de Rapports PDF</span><span class="toc-d"></span><span class="toc-p">14</span></div>
+<div class="toc-i"><div class="toc-n">10</div><span class="toc-l">Systeme de Certification</span><span class="toc-d"></span><span class="toc-p">15</span></div>
+<div class="toc-i"><div class="toc-n">11</div><span class="toc-l">Documents & Pieces Justificatives</span><span class="toc-d"></span><span class="toc-p">16</span></div>
+<div class="toc-i"><div class="toc-n">12</div><span class="toc-l">Navigation & Interface</span><span class="toc-d"></span><span class="toc-p">17</span></div>
+</div>
+
+<div class="hb" style="margin-top:24px">
+<h4>📌 A propos de ce document</h4>
+<p>Ce guide presente l'ensemble des fonctionnalites de CarbonTrack, la plateforme de bilan carbone concue pour les entreprises au Gabon, en Afrique et dans le monde. Chaque section inclut un espace prevu pour inserer des captures d'ecran de l'application.</p>
+</div>
+</div>
+
+<!-- SECTION 1: VUE D'ENSEMBLE -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><p class="sn">SECTION 1</p><h1>Vue d'Ensemble de l'Application</h1></div></div>
+
+<p style="font-size:10.5pt;line-height:1.8"><strong>CarbonTrack</strong> est une plateforme SaaS (Software as a Service) qui permet aux entreprises de <strong>mesurer, analyser, certifier et rapporter</strong> leurs emissions de gaz a effet de serre, conformement aux normes internationales ISO 14064-1, ISO 14069 et GHG Protocol.</p>
+
+<h2>Architecture Fonctionnelle</h2>
+<p>L'application est organisee autour de 5 modules principaux accessibles depuis un tableau de bord centralise :</p>
+
+<div class="fg">
+<div class="fc"><h4>📊 Tableau de Bord</h4><p>Vue globale des emissions, sites recents, bilans en cours. Point d'entree principal de l'application.</p></div>
+<div class="fc"><h4>🏢 Sites & Entites</h4><p>Gestion des sites physiques de l'entreprise : bureaux, usines, entrepots, points de vente.</p></div>
+<div class="fc"><h4>📝 Bilans Carbone</h4><p>Creation et saisie des bilans d'emissions par site et par annee, avec plus de 200 facteurs d'emission.</p></div>
+<div class="fc"><h4>📈 Rapports & Graphiques</h4><p>Visualisation interactive, 4 onglets d'analyse, export PDF professionnel avec QR code.</p></div>
+<div class="fc"><h4>🏅 Certification</h4><p>Demande de certification officielle, suivi du processus, assignation d'expert, documents.</p></div>
+<div class="fc"><h4>💳 Abonnement</h4><p>Gestion de l'abonnement, paiement Airtel Money et Visa/Mastercard.</p></div>
+</div>
+
+<h2>Page d'Accueil</h2>
+<p>La page d'accueil presente la plateforme aux visiteurs avec les principales fonctionnalites, la tarification et un appel a l'action pour s'inscrire.</p>
+
+<div class="screenshot screenshot-lg">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Page d'accueil de CarbonTrack<br>(Section Hero + fonctionnalites principales)
+</div>
+</div>
+
+<!-- SECTION 2: INSCRIPTION & CONNEXION -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><p class="sn">SECTION 2</p><h1>Inscription & Connexion</h1></div></div>
+
+<h2>2.1 — Inscription</h2>
+<p>L'inscription permet a une nouvelle entreprise de creer son compte sur CarbonTrack. Les informations demandees sont :</p>
+
+<table>
+<thead><tr><th>Champ</th><th>Description</th><th>Obligatoire</th></tr></thead>
+<tbody>
+<tr><td><strong>Nom de l'entreprise</strong></td><td>Raison sociale de la societe</td><td>Oui</td></tr>
+<tr><td><strong>RCCM</strong></td><td>Registre du Commerce et du Credit Mobilier</td><td>Non</td></tr>
+<tr><td><strong>Secteur d'activite</strong></td><td>Industrie, services, energie, mines, etc.</td><td>Oui</td></tr>
+<tr><td><strong>Nom complet</strong></td><td>Nom et prenom de l'utilisateur</td><td>Oui</td></tr>
+<tr><td><strong>Email</strong></td><td>Adresse email professionnelle</td><td>Oui</td></tr>
+<tr><td><strong>Telephone</strong></td><td>Numero de telephone</td><td>Oui</td></tr>
+<tr><td><strong>Mot de passe</strong></td><td>Minimum 6 caracteres, hache avec bcrypt</td><td>Oui</td></tr>
+</tbody>
+</table>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Formulaire d'inscription
+</div>
+
+<h2>2.2 — Connexion</h2>
+<p>La connexion se fait par email et mot de passe. L'authentification utilise des tokens JWT stockes dans des cookies HTTP-Only securises.</p>
+
+<div class="fg">
+<div class="fc"><h4>🔐 Securite</h4><p>Mots de passe haches avec bcrypt (salt rounds = 12). Cookies HTTP-Only. Verification de propriete sur chaque requete.</p></div>
+<div class="fc"><h4>🔄 Session</h4><p>La session reste active tant que le cookie JWT est valide. Deconnexion possible a tout moment depuis le menu lateral.</p></div>
+</div>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Page de connexion
+</div>
+</div>
+
+<!-- SECTION 3: ABONNEMENT & PAIEMENT -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><p class="sn">SECTION 3</p><h1>Abonnement & Paiement</h1></div></div>
+
+<p>Apres l'inscription, l'utilisateur doit souscrire a un abonnement pour acceder au tableau de bord et a toutes les fonctionnalites de la plateforme.</p>
+
+<div style="background:linear-gradient(135deg,var(--b700),var(--b600));border-radius:14px;padding:22px;color:white;text-align:center;margin:14px 0">
+<p style="color:rgba(255,255,255,.8);font-size:9pt;margin:0">Abonnement Entreprise</p>
+<div style="font-size:26pt;font-weight:900;margin:6px 0">2.500.000 FCFA</div>
+<div style="font-size:9pt;opacity:.8">par mois — sans engagement</div>
+</div>
+
+<h2>3.1 — Ce qui est inclus</h2>
+<ul class="cl">
+<li>Nombre illimite de sites et de bilans carbone</li>
+<li>Plus de 200 facteurs d'emission valides (ADEME, DEFRA, GHG Protocol)</li>
+<li>Rapports interactifs avec graphiques (4 onglets d'analyse)</li>
+<li>Export PDF professionnel avec QR code de verification</li>
+<li>Systeme de certification par expert accredite</li>
+<li>Upload de documents justificatifs</li>
+<li>Saisie mensuelle et annuelle des emissions</li>
+<li>Conformite ISO 14064-1, ISO 14069, GHG Protocol</li>
+</ul>
+
+<h2>3.2 — Methodes de Paiement</h2>
+<div class="fg">
+<div class="fc" style="text-align:center"><h4 style="justify-content:center">📱 Airtel Money</h4><p>Paiement mobile instantane. Saisissez votre numero de telephone et confirmez. <span class="badge">Disponible</span></p></div>
+<div class="fc" style="text-align:center"><h4 style="justify-content:center">💳 Visa / Mastercard</h4><p>Paiement par carte bancaire internationale. <span class="badge" style="background:#fef3c7;color:#92400e">Bientot disponible</span></p></div>
+</div>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Page d'abonnement et formulaire de paiement
+</div>
+</div>
+
+<!-- SECTION 4: TABLEAU DE BORD -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></div><div><p class="sn">SECTION 4</p><h1>Tableau de Bord</h1></div></div>
+
+<p>Le tableau de bord est la page principale apres connexion. Il offre une vue synthetique de l'activite carbone de l'entreprise.</p>
+
+<h2>4.1 — Indicateurs Principaux</h2>
+<p>Quatre cartes de synthese sont affichees en haut du tableau de bord :</p>
+
+<div class="fg">
+<div class="fc"><h4>🌍 Total des Emissions</h4><p>Somme de toutes les emissions de tous les bilans de l'entreprise, exprimee en kgCO2eq, tCO2eq ou ktCO2eq.</p></div>
+<div class="fc"><h4>🏢 Nombre de Sites</h4><p>Nombre total de sites physiques enregistres dans l'application.</p></div>
+<div class="fc"><h4>📝 Bilans Actifs</h4><p>Nombre total de bilans carbone en cours ou completes.</p></div>
+<div class="fc"><h4>📊 Derniere Mise a Jour</h4><p>Date et heure de la derniere modification de donnees d'emission.</p></div>
+</div>
+
+<div class="screenshot screenshot-lg">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Tableau de bord — Vue complete avec les 4 indicateurs
+</div>
+
+<h2>4.2 — Sites Recents & Bilans Recents</h2>
+<p>Sous les indicateurs, deux sections affichent :</p>
+<ul class="cl">
+<li><strong>Sites recents :</strong> Les derniers sites crees avec leur type (Bureau, Usine, Entrepot, etc.) et adresse</li>
+<li><strong>Bilans recents :</strong> Les derniers bilans carbone avec le nom, l'annee, le site associe et les emissions totales</li>
+</ul>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Sections sites recents et bilans recents
+</div>
+</div>
+
+<!-- SECTION 5: SITES & ENTITES -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 012-2h8a2 2 0 012 2v18z"/><path d="M6 12H4a2 2 0 00-2 2v6a2 2 0 002 2h2"/><path d="M18 9h2a2 2 0 012 2v9a2 2 0 01-2 2h-2"/></svg></div><div><p class="sn">SECTION 5</p><h1>Gestion des Sites & Entites</h1></div></div>
+
+<p>Cette section permet de gerer l'ensemble des sites physiques de l'entreprise. Chaque bilan carbone est rattache a un site specifique.</p>
+
+<h2>5.1 — Creation d'un Site</h2>
+<p>Le formulaire de creation de site comprend les champs suivants :</p>
+
+<table>
+<thead><tr><th>Champ</th><th>Description</th><th>Exemple</th></tr></thead>
+<tbody>
+<tr><td><strong>Nom du site</strong></td><td>Nom identifiant le site</td><td>Siege Social Libreville</td></tr>
+<tr><td><strong>Type de site</strong></td><td>Categorie du site</td><td>Bureau, Usine, Entrepot, Magasin, etc.</td></tr>
+<tr><td><strong>Adresse</strong></td><td>Localisation physique</td><td>Boulevard Triomphal, Libreville</td></tr>
+<tr><td><strong>Surface (m²)</strong></td><td>Surface totale du site</td><td>2500 m²</td></tr>
+<tr><td><strong>Description</strong></td><td>Notes complementaires</td><td>Siege administratif principal</td></tr>
+</tbody>
+</table>
+
+<h2>5.2 — Types de Sites Disponibles</h2>
+<div class="fg">
+<div class="fc"><h4>🏢 Bureau</h4><p>Locaux administratifs et espaces de travail</p></div>
+<div class="fc"><h4>🏭 Usine</h4><p>Sites de production et de fabrication</p></div>
+<div class="fc"><h4>📦 Entrepot</h4><p>Zones de stockage et de logistique</p></div>
+<div class="fc"><h4>🏪 Magasin / Point de vente</h4><p>Espaces de commerce et de distribution</p></div>
+</div>
+
+<div class="screenshot screenshot-lg">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Page Sites — Liste des sites + formulaire de creation
+</div>
+
+<h2>5.3 — Fiche Site</h2>
+<p>Chaque site affiche une carte avec : le nom, le type (avec icone), l'adresse, la surface, et le nombre de bilans associes. Un clic permet d'acceder aux bilans de ce site.</p>
+</div>
+
+<!-- SECTION 6: BILANS CARBONE -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div><div><p class="sn">SECTION 6</p><h1>Bilans Carbone — Creation & Gestion</h1></div></div>
+
+<p>Les bilans carbone sont le coeur de l'application. Chaque bilan represente l'inventaire des emissions de gaz a effet de serre d'un site pour une annee donnee.</p>
+
+<h2>6.1 — Creation d'un Bilan</h2>
+<div class="step"><div class="step-num">1</div><div class="step-content"><h4>Selectionner un site</h4><p>Choisissez le site pour lequel vous souhaitez creer un bilan carbone.</p></div></div>
+<div class="step"><div class="step-num">2</div><div class="step-content"><h4>Nommer le bilan</h4><p>Donnez un nom descriptif (ex: "Bilan 2025 - Siege Libreville").</p></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-content"><h4>Choisir l'annee de reference</h4><p>Selectionnez l'annee du bilan (2023, 2024, 2025, etc.).</p></div></div>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Liste des bilans carbone + formulaire de creation
+</div>
+
+<h2>6.2 — Liste des Bilans</h2>
+<p>La page affiche tous les bilans de l'entreprise sous forme de cartes avec :</p>
+<ul class="cl">
+<li>Nom du bilan et annee de reference</li>
+<li>Site associe et type de site</li>
+<li>Emissions totales en kgCO2eq / tCO2eq</li>
+<li>Repartition par scope (Scope 1, 2, 3) avec barres de couleur</li>
+<li>Badge de certification (si certifie)</li>
+<li>Bouton d'acces rapide aux rapports</li>
+</ul>
+
+<h2>6.3 — Statuts d'un Bilan</h2>
+<table>
+<thead><tr><th>Statut</th><th>Description</th><th>Couleur</th></tr></thead>
+<tbody>
+<tr><td><strong>Brouillon</strong></td><td>Bilan en cours de saisie, non finalise</td><td><span style="color:#eab308">🟡 Jaune</span></td></tr>
+<tr><td><strong>En cours de certification</strong></td><td>Demande de certification soumise</td><td><span style="color:#3b82f6">🔵 Bleu</span></td></tr>
+<tr><td><strong>Certifie</strong></td><td>Bilan valide par un expert accredite</td><td><span style="color:#22c55e">🟢 Vert</span></td></tr>
+<tr><td><strong>Rejete</strong></td><td>Certification refusee, corrections demandees</td><td><span style="color:#ef4444">🔴 Rouge</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- SECTION 7: SAISIE DES DONNEES (page 1) -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div><p class="sn">SECTION 7</p><h1>Saisie des Donnees d'Emission</h1></div></div>
+
+<p>La page de saisie est l'ecran principal de travail. Elle permet d'ajouter, modifier et organiser toutes les lignes d'emission d'un bilan carbone.</p>
+
+<h2>7.1 — Interface de Saisie</h2>
+<p>L'interface est organisee en onglets par categorie d'emission, avec un systeme de saisie mensuelle ou annuelle.</p>
+
+<div class="screenshot screenshot-lg">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Page de saisie d'un bilan — Vue complete avec onglets et tableau
+</div>
+
+<h2>7.2 — Categories d'Emissions</h2>
+<p>Les emissions sont organisees en 7 grandes categories couvrant les 3 scopes du GHG Protocol :</p>
+
+<table>
+<thead><tr><th>Categorie</th><th>Scope</th><th>Exemples de Facteurs</th></tr></thead>
+<tbody>
+<tr><td><strong>🔥 Energie</strong></td><td>Scope 1</td><td>Diesel, essence, GPL, bois, charbon, gaz naturel, fioul</td></tr>
+<tr><td><strong>⚡ Electricite & Reseaux</strong></td><td>Scope 2</td><td>Electricite par pays (Gabon, France, etc.), vapeur, gaz refrigerants</td></tr>
+<tr><td><strong>📦 Intrants & Materiaux</strong></td><td>Scope 3</td><td>Acier, aluminium, cuivre, plastiques (PET, HDPE), papier, verre, ciment</td></tr>
+<tr><td><strong>🚛 Fret</strong></td><td>Scope 3</td><td>Fret routier, ferroviaire, maritime, aerien</td></tr>
+<tr><td><strong>🚗 Transport de Personnes</strong></td><td>Scope 3</td><td>Voiture, bus, train, avion (court/moyen/long courrier)</td></tr>
+<tr><td><strong>🗑️ Dechets</strong></td><td>Scope 3</td><td>Decharge, incineration, recyclage, compostage, eaux usees</td></tr>
+<tr><td><strong>🏗️ Immobilisations</strong></td><td>Scope 3</td><td>Batiments, vehicules, equipements informatiques, mobilier</td></tr>
+</tbody>
+</table>
+
+<div class="hb"><h4>📊 Plus de 200 facteurs d'emission</h4><p>Base de donnees validee provenant de sources reconnues : ADEME (France), DEFRA (UK), GHG Protocol (WRI/WBCSD), IEA. Chaque facteur inclut les composantes amont et combustion.</p></div>
+</div>
+
+<!-- SECTION 7 (suite): SAISIE DES DONNEES (page 2) -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div><p class="sn">SECTION 7 (suite)</p><h1>Saisie des Donnees — Details</h1></div></div>
+
+<h2>7.3 — Processus de Saisie</h2>
+<div class="step"><div class="step-num">1</div><div class="step-content"><h4>Selectionner une categorie</h4><p>Cliquez sur l'onglet de la categorie souhaitee (Energie, Electricite, Intrants, Fret, Transport, Dechets, Immobilisations).</p></div></div>
+<div class="step"><div class="step-num">2</div><div class="step-content"><h4>Choisir le facteur d'emission</h4><p>Utilisez la liste filtrable pour trouver le facteur d'emission adapte. La recherche permet de filtrer par nom.</p></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-content"><h4>Saisir la quantite</h4><p>Entrez la quantite consommee avec l'unite appropriee (kWh, litres, tonnes, km, etc.).</p></div></div>
+<div class="step"><div class="step-num">4</div><div class="step-content"><h4>Saisie mensuelle ou annuelle</h4><p>Saisissez les donnees mois par mois (Janvier a Decembre) ou directement en total annuel.</p></div></div>
+<div class="step"><div class="step-num">5</div><div class="step-content"><h4>Calcul automatique</h4><p>Les emissions en kgCO2eq sont calculees automatiquement : quantite x facteur d'emission.</p></div></div>
+<div class="step"><div class="step-num">6</div><div class="step-content"><h4>Sauvegarder</h4><p>Cliquez sur "Sauvegarder" pour enregistrer toutes les donnees. La synthese est mise a jour en temps reel.</p></div></div>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Saisie mensuelle des donnees d'emission
+</div>
+
+<h2>7.4 — Synthese en Temps Reel</h2>
+<p>Un panneau de synthese affichable affiche en permanence :</p>
+<ul class="cl">
+<li>Total des emissions du bilan (kgCO2eq)</li>
+<li>Repartition par scope avec pourcentages et barres de couleur</li>
+<li>Scope 1 (rouge), Scope 2 (orange), Scope 3 (bleu)</li>
+<li>Nombre de postes d'emission saisis</li>
+</ul>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Panneau de synthese (Scope 1, 2, 3)
+</div>
+</div>
+
+<!-- SECTION 8: RAPPORTS & GRAPHIQUES (page 1) -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></div><div><p class="sn">SECTION 8</p><h1>Rapports & Graphiques Interactifs</h1></div></div>
+
+<p style="font-size:10.5pt;line-height:1.8">Le module de rapports est l'un des points forts de CarbonTrack. Il offre une visualisation riche et interactive des resultats du bilan carbone a travers <strong>4 onglets d'analyse</strong> complementaires.</p>
+
+<h2>8.1 — Cartes de Synthese</h2>
+<p>En haut de la page, 4 cartes affichent les emissions totales et par scope :</p>
+<div class="fg">
+<div class="fc" style="border-left:3px solid var(--b500)"><h4>🌍 Total Emissions</h4><p>Somme totale de toutes les emissions du bilan, avec formatage intelligent (kg, t, kt).</p></div>
+<div class="fc" style="border-left:3px solid #ef4444"><h4>🔴 Scope 1 — Direct</h4><p>Emissions directes : combustion de carburants, fuites de gaz, vehicules propres.</p></div>
+<div class="fc" style="border-left:3px solid #f97316"><h4>🟠 Scope 2 — Energie</h4><p>Emissions indirectes liees a l'achat d'electricite, de vapeur ou de chaleur.</p></div>
+<div class="fc" style="border-left:3px solid #3b82f6"><h4>🔵 Scope 3 — Indirect</h4><p>Autres emissions indirectes : achats, fret, transport, dechets, immobilisations.</p></div>
+</div>
+
+<h2>8.2 — Onglet « Vue d'Ensemble »</h2>
+<p>Cet onglet principal propose plusieurs graphiques :</p>
+
+<h3>Repartition par Scope (Donut Chart)</h3>
+<p>Un graphique en forme de donut montrant la proportion de chaque scope avec legende detaillee, barres de progression et pourcentages.</p>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Graphique donut — Repartition par Scope
+</div>
+
+<h3>Emissions par Categorie (Bar Chart)</h3>
+<p>Barres horizontales colorees montrant la contribution de chaque categorie (Energie, Fret, Intrants, etc.) au bilan total.</p>
+
+<h3>Top Sources d'Emissions</h3>
+<p>Classement des 15 principales sources d'emission avec code couleur par scope, quantite, unite et valeur en kgCO2eq.</p>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Emissions par categorie + Top sources
+</div>
+</div>
+
+<!-- SECTION 8 (suite): RAPPORTS (page 2) -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></div><div><p class="sn">SECTION 8 (suite)</p><h1>Rapports — Onglets Avances</h1></div></div>
+
+<h2>8.3 — Onglet « Suivi Mensuel »</h2>
+<p>Ce module analyse l'evolution des emissions mois par mois :</p>
+<ul class="cl">
+<li><strong>Barres empilees :</strong> Emissions mensuelles par scope (Scope 1 rouge, Scope 2 orange, Scope 3 bleu)</li>
+<li><strong>Courbe cumulative :</strong> Graphique en aire montrant l'evolution cumulee des emissions sur l'annee</li>
+<li><strong>Tableau mensuel :</strong> Detail chiffre mois par mois avec totaux par scope et pourcentages</li>
+</ul>
+
+<div class="screenshot screenshot-lg">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Onglet Suivi Mensuel — Barres empilees + courbe cumulative
+</div>
+
+<h2>8.4 — Onglet « GHG Protocol »</h2>
+<p>Analyse detaillee selon les categories du GHG Protocol :</p>
+
+<table>
+<thead><tr><th>Categorie GHG</th><th>Scope</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>1- Emissions directes</strong></td><td>Scope 1</td><td>Combustion fixe et mobile, fuites de gaz</td></tr>
+<tr><td><strong>2- Electricite</strong></td><td>Scope 2</td><td>Electricite, vapeur, chaleur achetee</td></tr>
+<tr><td><strong>3-1 Achats</strong></td><td>Scope 3</td><td>Biens et services achetes</td></tr>
+<tr><td><strong>3-2 Immobilisations</strong></td><td>Scope 3</td><td>Biens d'equipement</td></tr>
+<tr><td><strong>3-3 Energie amont</strong></td><td>Scope 3</td><td>Extraction et transport de combustibles</td></tr>
+<tr><td><strong>3-4 Fret amont</strong></td><td>Scope 3</td><td>Transport de marchandises</td></tr>
+<tr><td><strong>3-5 Dechets</strong></td><td>Scope 3</td><td>Traitement des dechets generes</td></tr>
+<tr><td><strong>3-6 Deplacements</strong></td><td>Scope 3</td><td>Deplacements professionnels et domicile-travail</td></tr>
+</tbody>
+</table>
+
+<h2>8.5 — Onglet « ISO 14064 / ISO 14069 »</h2>
+<p>Classification des emissions selon les postes definis par les normes ISO 14064-1 et ISO 14069 :</p>
+<ul class="cl">
+<li>Tableau detaille par poste ISO avec scope, nombre de postes et part relative</li>
+<li>Graphique en barres montrant la repartition par poste ISO</li>
+<li>Conformite garantie avec les exigences normatives</li>
+</ul>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Onglet GHG Protocol ou ISO 14064
+</div>
+</div>
+
+<!-- SECTION 9: GENERATION PDF -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15l3 3 3-3"/></svg></div><div><p class="sn">SECTION 9</p><h1>Generation de Rapports PDF</h1></div></div>
+
+<p>CarbonTrack permet de generer des rapports PDF professionnels et complets, prets a etre presentes a des investisseurs, auditeurs ou partenaires.</p>
+
+<h2>9.1 — Types de Rapports</h2>
+<div class="fg">
+<div class="fc"><h4>📄 Rapport Annuel Complet</h4><p>Synthese annuelle avec toutes les donnees par categorie, scope, GHG Protocol et ISO. Ideal pour les audits et les investisseurs.</p></div>
+<div class="fc"><h4>📅 Rapport Mensuel Detaille</h4><p>Inclut en plus le suivi mensuel avec tableau mois par mois. Ideal pour le reporting interne et le suivi operationnel.</p></div>
+</div>
+
+<h2>9.2 — Contenu du Rapport PDF</h2>
+<div class="step"><div class="step-num">1</div><div class="step-content"><h4>Page de Couverture</h4><p>Design professionnel avec degradade vert, logo CarbonTrack, nom de l'entreprise, badges ISO/GHG, QR code centre.</p></div></div>
+<div class="step"><div class="step-num">2</div><div class="step-content"><h4>Synthese des Emissions</h4><p>Cartes Scope 1/2/3, total des emissions, graphiques donut et barres, suivi mensuel.</p></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-content"><h4>Tableaux Detailles</h4><p>Repartition par categorie, GHG Protocol, ISO 14064, top sources d'emission.</p></div></div>
+<div class="step"><div class="step-num">4</div><div class="step-content"><h4>Donnees Completes de Calcul</h4><p>Tableau avec chaque poste d'emission : source, categorie, scope, quantite, unite, facteur, resultat.</p></div></div>
+<div class="step"><div class="step-num">5</div><div class="step-content"><h4>Methodologie & References</h4><p>Normes utilisees (ISO 14064, ISO 14069, GHG Protocol), sources des facteurs d'emission.</p></div></div>
+
+<div class="screenshot screenshot-lg">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Fenetre de telechargement PDF + apercu du rapport genere
+</div>
+
+<h2>9.3 — QR Code de Verification</h2>
+<p>Chaque rapport PDF contient un QR code unique qui redirige vers le rapport en ligne, permettant de verifier l'authenticite et la provenance du document.</p>
+</div>
+
+<!-- SECTION 10: CERTIFICATION -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg></div><div><p class="sn">SECTION 10</p><h1>Systeme de Certification</h1></div></div>
+
+<p>La certification est l'element differenciateur majeur de CarbonTrack. Elle garantit la credibilite et la fiabilite des bilans carbone aupres des auditeurs et des investisseurs.</p>
+
+<h2>10.1 — Processus de Certification</h2>
+<div class="step"><div class="step-num">1</div><div class="step-content"><h4>Demande de Certification</h4><p>Depuis la page du bilan, cliquez sur "Certifier ce bilan". Ajoutez un message optionnel. Statut : <strong style="color:#eab308">En attente</strong></p></div></div>
+<div class="step"><div class="step-num">2</div><div class="step-content"><h4>Assignation d'un Expert</h4><p>L'equipe CarbonTrack assigne un expert accredite a votre demande. Notification envoyee. Statut : <strong style="color:#3b82f6">Assigne</strong></p></div></div>
+<div class="step"><div class="step-num">3</div><div class="step-content"><h4>Audit & Inspection</h4><p>L'expert examine les donnees, demande des justificatifs si necessaire. Statut : <strong style="color:#8b5cf6">En cours d'examen</strong></p></div></div>
+<div class="step"><div class="step-num">4</div><div class="step-content"><h4>Decision Finale</h4><p>L'expert certifie le bilan ou le rejette avec motif. Statut : <strong style="color:#22c55e">Certifie</strong> ou <strong style="color:#ef4444">Rejete</strong></p></div></div>
+
+<h2>10.2 — Page des Certifications</h2>
+<p>La page "Bilans Certifies" affiche l'ensemble des demandes de certification groupees par statut :</p>
+
+<div class="fg">
+<div class="fc"><h4>🟡 En attente</h4><p>Demandes soumises, en attente d'assignation d'un expert.</p></div>
+<div class="fc"><h4>🔵 Assignees / En cours</h4><p>Un expert est assigne et examine les donnees du bilan.</p></div>
+<div class="fc"><h4>🟢 Certifiees</h4><p>Bilans certifies avec numero de certificat et date de certification.</p></div>
+<div class="fc"><h4>🔴 Rejetees</h4><p>Bilans rejetes avec motif de rejet et recommandations.</p></div>
+</div>
+
+<div class="screenshot screenshot-lg">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Page Bilans Certifies — Liste des demandes et detail
+</div>
+</div>
+
+<!-- SECTION 11: DOCUMENTS -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div><div><p class="sn">SECTION 11</p><h1>Documents & Pieces Justificatives</h1></div></div>
+
+<p>CarbonTrack permet de joindre des pieces justificatives a chaque bilan carbone pour faciliter l'audit et la certification.</p>
+
+<h2>11.1 — Types de Documents Acceptes</h2>
+<table>
+<thead><tr><th>Type</th><th>Exemples</th><th>Utilite</th></tr></thead>
+<tbody>
+<tr><td><strong>Factures</strong></td><td>Factures d'electricite, de carburant, d'achats</td><td>Justifier les quantites saisies</td></tr>
+<tr><td><strong>Releves</strong></td><td>Releves de compteurs, bordereaux de livraison</td><td>Prouver les consommations reelles</td></tr>
+<tr><td><strong>Rapports</strong></td><td>Rapports d'audit externe, etudes d'impact</td><td>Appuyer la certification</td></tr>
+<tr><td><strong>Contrats</strong></td><td>Contrats fournisseurs, baux immobiliers</td><td>Documenter le perimetre du bilan</td></tr>
+</tbody>
+</table>
+
+<h2>11.2 — Fonctionnalites</h2>
+<ul class="cl">
+<li>Upload de fichiers directement depuis la page du bilan</li>
+<li>Visualisation des documents dans le navigateur (PDF, images)</li>
+<li>Telechargement individuel de chaque document</li>
+<li>Suppression des documents obsoletes</li>
+<li>Verification des droits d'acces (seuls les utilisateurs de l'entreprise ont acces)</li>
+</ul>
+
+<div class="screenshot">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Section Documents — Upload et liste des pieces jointes
+</div>
+
+<h2>11.3 — Securite des Documents</h2>
+<div class="hb">
+<h4>🔒 Protection des Donnees</h4>
+<p>Tous les documents sont stockes de maniere securisee sur le serveur. L'acces est controle par verification du company_id sur chaque requete. Aucun utilisateur exterieur ne peut acceder aux documents d'une autre entreprise.</p>
+</div>
+</div>
+
+<!-- SECTION 12: NAVIGATION & INTERFACE -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div><div><p class="sn">SECTION 12</p><h1>Navigation & Interface</h1></div></div>
+
+<p>L'interface de CarbonTrack est concue pour etre intuitive, rapide et agreable. Elle utilise un design moderne avec une barre laterale fixe et un contenu central.</p>
+
+<h2>12.1 — Barre Laterale (Sidebar)</h2>
+<p>Le menu de navigation principal est organise comme suit :</p>
+
+<div style="max-width:300px;margin:12px 0">
+<div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--b700)" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></div><span class="nav-label">Tableau de Bord</span></div>
+<div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--b700)" stroke-width="2"><path d="M6 22V4a2 2 0 012-2h8a2 2 0 012 2v18z"/></svg></div><span class="nav-label">Sites & Entites</span></div>
+<div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--b700)" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg></div><span class="nav-label">Bilans Carbone</span></div>
+<div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--b700)" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></div><span class="nav-label">Rapports & Graphiques</span></div>
+<div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--b700)" stroke-width="2"><circle cx="12" cy="8" r="7"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg></div><span class="nav-label">Bilans Certifies</span></div>
+</div>
+
+<h2>12.2 — Design & Ergonomie</h2>
+<div class="fg">
+<div class="fc"><h4>🎨 Charte Graphique</h4><p>Palette de verts naturels coherente avec l'identite ecologique. Couleurs par scope : rouge (S1), orange (S2), bleu (S3).</p></div>
+<div class="fc"><h4>📱 Responsive</h4><p>Interface adaptee aux ecrans de bureau, tablettes et mobiles. Sidebar repliable sur petit ecran.</p></div>
+<div class="fc"><h4>⚡ Performance</h4><p>Chargement rapide grace a Next.js 14 avec rendu cote serveur et client. Pas de temps d'attente superflu.</p></div>
+<div class="fc"><h4>🔤 Francais</h4><p>Interface entierement en francais. Toutes les etiquettes, boutons et messages sont localises.</p></div>
+</div>
+
+<div class="screenshot screenshot-lg">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+📸 Capture d'ecran : Interface complete avec sidebar ouverte et contenu principal
+</div>
+
+<h2>12.3 — Informations de l'Utilisateur</h2>
+<p>En bas de la sidebar, l'utilisateur connecte voit :</p>
+<ul class="cl">
+<li>Son nom complet et son email</li>
+<li>Le nom de son entreprise</li>
+<li>Un bouton de deconnexion</li>
+</ul>
+</div>
+
+<!-- DERNIERE PAGE: CONTACT -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><div><p class="sn">CONTACT</p><h1>Information & Support</h1></div></div>
+
+<div class="hb" style="margin-top:16px">
+<h4>🌿 GreenLeaves — CarbonTrack</h4>
+<p>Plateforme de bilan carbone pour les entreprises au Gabon, en Afrique et dans le monde. Conforme ISO 14064-1, ISO 14069 et GHG Protocol.</p>
+</div>
+
+<div class="fg" style="max-width:480px;margin:16px auto">
+<div class="fc" style="text-align:center"><h4 style="justify-content:center">🌐 Site Web</h4><p>www.greenleaves.ga/carbontrack</p></div>
+<div class="fc" style="text-align:center"><h4 style="justify-content:center">📍 Adresse</h4><p>Libreville, Gabon</p></div>
+</div>
+
+<div style="margin-top:16px">
+<h3 style="text-align:center;margin-bottom:12px">Equipe de Direction</h3>
+<div class="fg" style="max-width:480px;margin:0 auto">
+<div class="fc"><h4>👤 Sabine ANOTHO</h4><p>📧 sabine-anotho@greenleaves.ga<br>📱 077 52 37 17 / 065 46 16 25</p></div>
+<div class="fc"><h4>👤 Moctar SIDIBE</h4><p>📧 moctar-sidibe@greenleaves.ga<br>📱 077 72 44 99 / 062 95 13 17</p></div>
+</div>
+</div>
+
+<div style="margin-top:30px;text-align:center;padding-top:16px;border-top:2px solid var(--g200)">
+<p style="font-size:8pt;color:var(--g400)">© 2026 GreenLeaves / CarbonTrack — Tous droits reserves</p>
+<p style="font-size:7.5pt;color:var(--g400)">Ce document est confidentiel et destine aux partenaires et clients de GreenLeaves.</p>
+</div>
+</div>
+
+</body>
+</html>

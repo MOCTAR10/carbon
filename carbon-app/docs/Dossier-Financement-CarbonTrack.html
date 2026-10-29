@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dossier de Financement — CarbonTrack</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap');
+
+    :root {
+      --green: #16a34a;
+      --green-light: #dcfce7;
+      --green-dark: #14532d;
+      --navy: #0f172a;
+      --navy-mid: #1e293b;
+      --blue: #1d4ed8;
+      --gray: #64748b;
+      --gray-light: #f8fafc;
+      --border: #e2e8f0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #1e293b;
+      background: #fff;
+      font-size: 10.5pt;
+      line-height: 1.65;
+    }
+
+    /* ── PAGE BREAKS ── */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto 20px;
+      background: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media print {
+      body { margin: 0; }
+      .page { margin: 0; page-break-after: always; width: 100%; min-height: 100vh; }
+      .no-print { display: none; }
+    }
+
+    /* ── COVER PAGE ── */
+    .cover {
+      background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 50%, #14532d 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      min-height: 297mm;
+    }
+
+    .cover-top-bar {
+      background: rgba(255,255,255,0.06);
+      padding: 16px 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .cover-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+
+    .logo-text { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+    .logo-sub { font-size: 10px; opacity: 0.6; letter-spacing: 2px; text-transform: uppercase; margin-top: -2px; }
+
+    .cover-date { font-size: 11px; opacity: 0.5; letter-spacing: 1px; }
+
+    .cover-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 50px;
+    }
+
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(34,197,94,0.15);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #86efac;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      width: fit-content;
+    }
+
+    .cover-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 46px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .cover-title span { color: #4ade80; }
+
+    .cover-subtitle {
+      font-size: 18px;
+      opacity: 0.7;
+      margin-bottom: 50px;
+      font-weight: 300;
+    }
+
+    .cover-divider {
+      width: 60px; height: 3px;
+      background: linear-gradient(90deg, #22c55e, #4ade80);
+      border-radius: 2px;
+      margin-bottom: 50px;
+    }
+
+    .cover-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+
+    .cover-stat {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px 20px;
+    }
+
+    .cover-stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #4ade80;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .cover-stat-label {
+      font-size: 10px;
+      opacity: 0.55;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cover-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .cover-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .cover-info-label {
+      font-size: 9px;
+      opacity: 0.45;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cover-info-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .cover-bottom {
+      padding: 24px 50px;
+      background: rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .cover-bottom p { font-size: 10px; opacity: 0.4; }
+
+    .confidential-badge {
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    /* ── CONTENT PAGES ── */
+    .content-page {
+      padding: 50px;
+      min-height: 297mm;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 18px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 36px;
+    }
+
+    .page-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page-section-tag {
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.5px;
+    }
+
+    .page-num {
+      font-size: 10px;
+      color: var(--gray);
+      font-weight: 500;
+    }
+
+    /* ── SECTION HEADINGS ── */
+    h2 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 28px 0 14px;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px; height: 18px;
+      background: var(--green);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy-mid);
+      margin: 18px 0 10px;
+    }
+
+    p { margin-bottom: 10px; color: #374151; }
+
+    ul { padding-left: 20px; margin-bottom: 14px; }
+    ul li { margin-bottom: 5px; color: #374151; }
+
+    /* ── HIGHLIGHT BOX ── */
+    .highlight {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border-left: 4px solid var(--green);
+      border-radius: 0 12px 12px 0;
+      padding: 18px 22px;
+      margin: 18px 0;
+    }
+
+    .highlight-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--green-dark);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .highlight p { color: #166534; margin: 0; }
+
+    /* ── INFO BOX ── */
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin: 18px 0;
+    }
+
+    .info-box p { color: #1e40af; margin: 0; }
+
+    /* ── STAT GRID ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .stat-grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stat-card {
+      background: var(--gray-light);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 16px;
+      text-align: center;
+    }
+
+    .stat-card-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-card-value.green { color: var(--green); }
+    .stat-card-value.blue { color: var(--blue); }
+
+    .stat-card-label {
+      font-size: 9.5px;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+    }
+
+    /* ── TABLES ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 10pt;
+    }
+
+    thead tr {
+      background: var(--navy);
+      color: white;
+    }
+
+    thead th {
+      padding: 11px 14px;
+      text-align: left;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    tbody tr:nth-child(even) { background: #f8fafc; }
+    tbody tr:hover { background: #f0fdf4; }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .td-right { text-align: right; font-weight: 600; }
+    .td-center { text-align: center; }
+
+    tfoot tr {
+      background: var(--navy-mid);
+      color: white;
+      font-weight: 700;
+    }
+
+    tfoot td {
+      padding: 12px 14px;
+      border: none;
+      font-size: 11pt;
+    }
+
+    /* ── FEATURE CARDS ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 16px 0;
+    }
+
+    .feature-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .feature-card-icon {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .feature-card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .feature-card-desc {
+      font-size: 10px;
+      color: var(--gray);
+      line-height: 1.55;
+    }
+
+    /* ── TECH BADGE ── */
+    .tech-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .tech-badge {
+      background: var(--navy);
+      color: #e2e8f0;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 9.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tech-badge.green { background: #14532d; color: #bbf7d0; }
+    .tech-badge.blue { background: #1e3a8a; color: #bfdbfe; }
+    .tech-badge.orange { background: #7c2d12; color: #fed7aa; }
+    .tech-badge.purple { background: #4c1d95; color: #ddd6fe; }
+
+    /* ── SCREENSHOT PLACEHOLDER ── */
+    .screenshot-placeholder {
+      background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+      border: 2px dashed #94a3b8;
+      border-radius: 12px;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      font-size: 11px;
+      text-align: center;
+      padding: 20px;
+      margin: 14px 0;
+    }
+
+    .screenshot-placeholder-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.5; }
+    .screenshot-placeholder-text { font-weight: 600; color: #64748b; }
+    .screenshot-placeholder-sub { font-size: 9px; margin-top: 4px; opacity: 0.7; }
+
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 14px 0;
+    }
+
+    /* ── TIMELINE ── */
+    .timeline {
+      position: relative;
+      padding-left: 28px;
+      margin: 16px 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 5px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--green);
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 2px var(--green);
+    }
+
+    .timeline-phase {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .timeline-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+      font-size: 10px;
+      color: var(--gray);
+    }
+
+    /* ── RISK MATRIX ── */
+    .risk-card {
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .risk-low { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .risk-medium { background: #fffbeb; border: 1px solid #fde68a; }
+    .risk-high { background: #fff1f2; border: 1px solid #fecdd3; }
+
+    .risk-badge {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    .risk-low .risk-badge { background: #dcfce7; color: #15803d; }
+    .risk-medium .risk-badge { background: #fef3c7; color: #92400e; }
+    .risk-high .risk-badge { background: #fee2e2; color: #b91c1c; }
+
+    .risk-content-title { font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .risk-content-desc { font-size: 10px; color: var(--gray); }
+
+    /* ── PROJECTION TABLE ── */
+    .projection-bar {
+      height: 8px;
+      background: var(--green-light);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .projection-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #4ade80);
+      border-radius: 4px;
+    }
+
+    /* ── FOOTER ── */
+    .page-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--gray);
+    }
+
+    /* ── TOC ── */
+    .toc-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px dotted var(--border);
+      gap: 12px;
+    }
+
+    .toc-num {
+      width: 28px; height: 28px;
+      background: var(--navy);
+      color: white;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .toc-title { flex: 1; font-size: 12px; font-weight: 600; color: var(--navy); }
+    .toc-page { font-size: 10px; color: var(--gray); font-weight: 500; }
+
+    /* ── AMOUNT BOX ── */
+    .amount-box {
+      background: linear-gradient(135deg, var(--navy), #1e3a5f);
+      color: white;
+      border-radius: 16px;
+      padding: 30px 36px;
+      text-align: center;
+      margin: 24px 0;
+    }
+
+    .amount-box-label {
+      font-size: 11px;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .amount-box-value {
+      font-size: 42px;
+      font-weight: 900;
+      color: #4ade80;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .amount-box-sub { font-size: 13px; opacity: 0.65; }
+
+    /* ── ROI BOX ── */
+    .roi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .roi-card {
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    .roi-card.y1 { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .roi-card.y2 { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .roi-card.y3 { background: #fef3c7; border: 1px solid #fde68a; }
+
+    .roi-year { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .roi-card.y1 .roi-year { color: #15803d; }
+    .roi-card.y2 .roi-year { color: #1d4ed8; }
+    .roi-card.y3 .roi-year { color: #92400e; }
+
+    .roi-revenue { font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 2px; }
+    .roi-label { font-size: 9px; color: var(--gray); text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 1 — COUVERTURE
+═══════════════════════════════════════════════════ -->
+<div class="page cover">
+  <div class="cover-top-bar">
+    <div class="cover-logo">
+      <div class="logo-icon">🌿</div>
+      <div>
+        <div class="logo-text">CarbonTrack</div>
+        <div class="logo-sub">Plateforme Carbone Intelligente</div>
+      </div>
+    </div>
+    <div class="cover-date">Dossier de Financement — Février 2026</div>
+  </div>
+
+  <div class="cover-body">
+    <div class="cover-badge">🏦 Dossier de Demande de Crédit Bancaire</div>
+
+    <h1 class="cover-title">
+      CarbonTrack<br/>
+      <span>Plateforme SaaS de</span><br/>
+      Bilan Carbone
+    </h1>
+    <p class="cover-subtitle">
+      Solution numérique intégrée — Web &amp; Mobile — dédiée à la gestion,<br/>
+      la mesure et la certification des émissions de gaz à effet de serre<br/>
+      pour les entreprises d'Afrique Centrale et de l'Ouest.
+    </p>
+
+    <div class="cover-divider"></div>
+
+    <div class="cover-stats">
+      <div class="cover-stat">
+        <div class="cover-stat-value">35 M</div>
+        <div class="cover-stat-label">FCFA — Crédit demandé</div>
+      </div>
+      <div class="cover-stat">
+        <div class="cover-stat-value">2 Apps</div>
+        <div class="cover-stat-label">Web &amp; Mobile déjà développées</div>
+      </div>
+      <div class="cover-stat">
+        <div class="cover-stat-value">130 M</div>
+        <div class="cover-stat-label">FCFA de CA projeté — An 3</div>
+      </div>
+    </div>
+
+    <div class="cover-info-grid">
+      <div class="cover-info-item">
+        <span class="cover-info-label">Porteur de projet</span>
+        <span class="cover-info-value">[ NOM DU PORTEUR ]</span>
+      </div>
+      <div class="cover-info-item">
+        <span class="cover-info-label">Structure juridique</span>
+        <span class="cover-info-value">[ SARL / SAS — À COMPLÉTER ]</span>
+      </div>
+      <div class="cover-info-item">
+        <span class="cover-info-label">Secteur d'activité</span>
+        <span class="cover-info-value">Tech / SaaS / Développement Durable</span>
+      </div>
+      <div class="cover-info-item">
+        <span class="cover-info-label">Marché cible</span>
+        <span class="cover-info-value">Afrique Centrale &amp; de l'Ouest</span>
+      </div>
+      <div class="cover-info-item">
+        <span class="cover-info-label">Date de création</span>
+        <span class="cover-info-value">[ DATE DE CRÉATION ]</span>
+      </div>
+      <div class="cover-info-item">
+        <span class="cover-info-label">Durée du crédit souhaitée</span>
+        <span class="cover-info-value">36 mois (3 ans)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-bottom">
+    <p>Document strictement confidentiel — Usage bancaire exclusif</p>
+    <div class="confidential-badge">🔒 Confidentiel</div>
+    <p>CarbonTrack © 2026 — Tous droits réservés</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 2 — TABLE DES MATIÈRES
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Navigation</span>
+        <h1 class="page-title">Table des Matières</h1>
+      </div>
+      <span class="page-num">Page 2</span>
+    </div>
+
+    <div class="toc-item">
+      <div class="toc-num">01</div>
+      <div class="toc-title">Résumé Exécutif</div>
+      <div class="toc-page">p. 3</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">02</div>
+      <div class="toc-title">Présentation du Porteur de Projet</div>
+      <div class="toc-page">p. 4</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">03</div>
+      <div class="toc-title">Analyse du Marché — Opportunité &amp; Contexte</div>
+      <div class="toc-page">p. 5</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">04</div>
+      <div class="toc-title">Description Détaillée du Produit</div>
+      <div class="toc-page">p. 6–7</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">05</div>
+      <div class="toc-title">Architecture Technique &amp; Stack Technologique</div>
+      <div class="toc-page">p. 8</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">06</div>
+      <div class="toc-title">Licences, Outils &amp; Services Tiers</div>
+      <div class="toc-page">p. 9</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">07</div>
+      <div class="toc-title">Modèle Économique &amp; Revenus</div>
+      <div class="toc-page">p. 10</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">08</div>
+      <div class="toc-title">Plan Financier Détaillé — Justification du Crédit</div>
+      <div class="toc-page">p. 11–12</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">09</div>
+      <div class="toc-title">Projections Financières sur 3 Ans</div>
+      <div class="toc-page">p. 13</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">10</div>
+      <div class="toc-title">Plan de Remboursement</div>
+      <div class="toc-page">p. 14</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">11</div>
+      <div class="toc-title">Analyse des Risques &amp; Mesures de Mitigation</div>
+      <div class="toc-page">p. 15</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">12</div>
+      <div class="toc-title">Roadmap &amp; Plan de Déploiement</div>
+      <div class="toc-page">p. 16</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">13</div>
+      <div class="toc-title">Captures d'Écran de l'Application</div>
+      <div class="toc-page">p. 17</div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num">14</div>
+      <div class="toc-title">Conclusion &amp; Engagement du Porteur</div>
+      <div class="toc-page">p. 18</div>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 3 — RÉSUMÉ EXÉCUTIF
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 01</span>
+        <h1 class="page-title">Résumé Exécutif</h1>
+      </div>
+      <span class="page-num">Page 3</span>
+    </div>
+
+    <div class="highlight">
+      <div class="highlight-title">💡 La Vision CarbonTrack</div>
+      <p>CarbonTrack est la <strong>première plateforme SaaS africaine</strong> dédiée à la gestion complète du bilan carbone des entreprises, conforme aux standards internationaux ISO 14064 et GHG Protocol. Elle réunit en une seule solution : la mesure des émissions, le reporting règlementaire, la visualisation analytique et la certification carbone.</p>
+    </div>
+
+    <h2>Le Projet en Bref</h2>
+    <p>
+      Le projet CarbonTrack est une <strong>solution numérique à double plateforme</strong> — une application web accessible depuis tout navigateur, et une application mobile native iOS/Android — permettant aux entreprises d'Afrique Centrale et de l'Ouest de mesurer, suivre, analyser et certifier leurs émissions de gaz à effet de serre (GES).
+    </p>
+    <p>
+      Le développement des deux applications est <strong>déjà réalisé à plus de 85%</strong> par le porteur de projet. Le crédit bancaire sollicité vise à financer la <strong>mise en production commerciale</strong>, l'acquisition des licences et services tiers nécessaires à l'exploitation, le lancement commercial et le recrutement de l'équipe opérationnelle.
+    </p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-card-value green">85%</div>
+        <div class="stat-card-label">Développement réalisé</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-value">2 000+</div>
+        <div class="stat-card-label">Heures de développement investies</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-value green">2 Apps</div>
+        <div class="stat-card-label">Web + Mobile (iOS &amp; Android)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-value blue">+100</div>
+        <div class="stat-card-label">Facteurs d'émission intégrés</div>
+      </div>
+    </div>
+
+    <h2>Pourquoi Maintenant ?</h2>
+    <p>
+      L'Accord de Paris, les directives de la CEMAC, et l'essor du marché volontaire du carbone en Afrique créent une <strong>fenêtre d'opportunité unique</strong>. Le Gabon, premier pays africain à recevoir des paiements pour ses crédits carbone (17 millions USD de la Banque Mondiale en 2021), est un terrain idéal pour lancer une solution de ce type. Les entreprises sont de plus en plus contraintes légalement et éthiquement de mesurer leur impact environnemental.
+    </p>
+
+    <div class="amount-box">
+      <div class="amount-box-label">Montant du Crédit Sollicité</div>
+      <div class="amount-box-value">35 000 000 FCFA</div>
+      <div class="amount-box-sub">Soit environ 53 400 EUR — Durée souhaitée : 36 mois</div>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 4 — PORTEUR DE PROJET
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 02</span>
+        <h1 class="page-title">Présentation du Porteur de Projet</h1>
+      </div>
+      <span class="page-num">Page 4</span>
+    </div>
+
+    <div class="feature-grid">
+      <div>
+        <h2>Identité du Porteur</h2>
+        <table>
+          <tbody>
+            <tr><td><strong>Nom complet</strong></td><td>[ À COMPLÉTER ]</td></tr>
+            <tr><td><strong>Date de naissance</strong></td><td>[ À COMPLÉTER ]</td></tr>
+            <tr><td><strong>Nationalité</strong></td><td>[ À COMPLÉTER ]</td></tr>
+            <tr><td><strong>Adresse</strong></td><td>[ À COMPLÉTER ]</td></tr>
+            <tr><td><strong>Téléphone</strong></td><td>[ À COMPLÉTER ]</td></tr>
+            <tr><td><strong>Email</strong></td><td>[ À COMPLÉTER ]</td></tr>
+            <tr><td><strong>Formation</strong></td><td>[ À COMPLÉTER ]</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h2>Compétences Clés</h2>
+        <ul>
+          <li>Développement Full-Stack (Web &amp; Mobile)</li>
+          <li>Architecture logicielle et bases de données</li>
+          <li>Conception UX/UI d'applications professionnelles</li>
+          <li>Gestion de projet technique</li>
+          <li>Connaissance des marchés carbone africains</li>
+          <li>Standards ISO 14064 &amp; GHG Protocol</li>
+          <li>Développement d'applications SaaS B2B</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Réalisations Démontrées</h2>
+    <p>
+      Le porteur de projet a conçu, architecturé et développé de manière autonome l'intégralité de la plateforme CarbonTrack — aussi bien l'application web que l'application mobile. Cette réalisation représente <strong>plus de 2 000 heures de travail</strong> de développement expert, valorisées au tarif d'un développeur senior (2 500 000 FCFA/mois), soit une valeur investie personnellement estimée à <strong>plus de 12 500 000 FCFA</strong> en capital humain.
+    </p>
+
+    <div class="highlight">
+      <div class="highlight-title">🎯 Atout Majeur</div>
+      <p>Le fait que le porteur de projet soit lui-même le développeur principal représente une économie considérable pour le projet et garantit une <strong>maîtrise technique totale</strong> du produit. Cette expertise réduit drastiquement les risques techniques et les coûts d'externalisation.</p>
+    </div>
+
+    <h2>Structure Juridique</h2>
+    <table>
+      <tbody>
+        <tr><td><strong>Forme juridique</strong></td><td>[ SARL / SAS — À COMPLÉTER ]</td></tr>
+        <tr><td><strong>Dénomination sociale</strong></td><td>CarbonTrack [ À COMPLÉTER ]</td></tr>
+        <tr><td><strong>Capital social</strong></td><td>[ À COMPLÉTER ]</td></tr>
+        <tr><td><strong>RCCM / N° fiscal</strong></td><td>[ À COMPLÉTER ]</td></tr>
+        <tr><td><strong>Siège social</strong></td><td>[ À COMPLÉTER ]</td></tr>
+        <tr><td><strong>Date d'immatriculation</strong></td><td>[ À COMPLÉTER ]</td></tr>
+      </tbody>
+    </table>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 5 — ANALYSE DU MARCHÉ
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 03</span>
+        <h1 class="page-title">Analyse du Marché</h1>
+      </div>
+      <span class="page-num">Page 5</span>
+    </div>
+
+    <h2>Le Marché Mondial du Carbone</h2>
+    <p>Le marché volontaire du carbone représente une opportunité de croissance exceptionnelle. Selon les données de Bloomberg NEF et McKinsey :</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-card-value green">2 Mds $</div>
+        <div class="stat-card-label">Valeur marché carbone 2021</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-value">50 Mds $</div>
+        <div class="stat-card-label">Valeur projetée en 2030</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-value green">+35%</div>
+        <div class="stat-card-label">Croissance annuelle (CAGR)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-value blue">136</div>
+        <div class="stat-card-label">Pays avec engagements Net Zéro</div>
+      </div>
+    </div>
+
+    <h2>L'Afrique Centrale : Un Terrain Fertile</h2>
+    <p>L'Afrique Centrale concentre <strong>30% des forêts tropicales mondiales</strong>, faisant de cette région un acteur incontournable du marché carbone. Plusieurs facteurs créent une demande immédiate :</p>
+    <ul>
+      <li><strong>Gabon :</strong> premier pays africain à recevoir des paiements carbone (17 M USD — Banque Mondiale, 2021). Objectif : neutralité carbone totale d'ici 2050.</li>
+      <li><strong>Congo, Cameroun, RDC :</strong> engagement REDD+ massif et nouveaux mécanismes de compensation carbone.</li>
+      <li><strong>OHADA :</strong> évolution de la règlementation vers le reporting ESG obligatoire pour les entreprises cotées et publiques.</li>
+      <li><strong>Multinationales :</strong> Total Energies, Perenco, CIB et autres grands groupes présents en Afrique Centrale sont déjà soumis à des obligations de reporting carbone dans leurs pays d'origine (EU CSRD, Loi Grenelle).</li>
+    </ul>
+
+    <h2>Cible Commerciale</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-icon">🏭</div>
+        <div class="feature-card-title">PME Industrielles</div>
+        <div class="feature-card-desc">Secteurs pétrolier, minier, forestier, BTP — déjà soumis à des audits environnementaux et cherchant à se conformer.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🏢</div>
+        <div class="feature-card-title">Entreprises de Services</div>
+        <div class="feature-card-desc">Banques, assurances, télécoms qui doivent intégrer des critères ESG dans leur reporting annuel.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🏛️</div>
+        <div class="feature-card-title">Administrations Publiques</div>
+        <div class="feature-card-desc">Ministères, agences gouvernementales devant produire des inventaires GES dans le cadre des NDC (Nationally Determined Contributions).</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🌍</div>
+        <div class="feature-card-title">ONG &amp; Organisations Int.</div>
+        <div class="feature-card-desc">Organisations internationales opérant en Afrique avec des engagements de neutralité carbone.</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <p>📊 <strong>Marché adressable initial estimé :</strong> 5 000+ entreprises en Afrique Centrale éligibles à la certification carbone ou soumises à un reporting GES. Avec un taux de conversion de 2% la première année (100 clients), CarbonTrack atteint sa rentabilité opérationnelle.</p>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 6 — DESCRIPTION DU PRODUIT (1/2)
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 04</span>
+        <h1 class="page-title">Description du Produit — Application Web</h1>
+      </div>
+      <span class="page-num">Page 6</span>
+    </div>
+
+    <p>CarbonTrack se compose de <strong>deux plateformes complémentaires</strong> : une application web accessible depuis tout navigateur, et une application mobile native. Elles partagent le même backend et la même base de données, garantissant une cohérence totale des données.</p>
+
+    <h2>Application Web — Dashboard Entreprise</h2>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-icon">🏢</div>
+        <div class="feature-card-title">Gestion Multi-Sites</div>
+        <div class="feature-card-desc">Création et gestion de plusieurs sites/entités au sein d'une même entreprise. Consolidation automatique des données entre sites.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">📊</div>
+        <div class="feature-card-title">Bilan Carbone Complet</div>
+        <div class="feature-card-desc">Saisie et calcul automatique des émissions Scope 1, 2 et 3 selon le GHG Protocol. Plus de 100 facteurs d'émission de la Base Carbone ADEME.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">📈</div>
+        <div class="feature-card-title">Rapports &amp; Graphiques</div>
+        <div class="feature-card-desc">Visualisations interactives : répartition par scope, évolution mensuelle, top émetteurs. Export PDF professionnel avec QR code de vérification.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🏅</div>
+        <div class="feature-card-title">Certification Intégrée</div>
+        <div class="feature-card-desc">Workflow de demande de certification en ligne, upload de documents, suivi du statut, attribution d'un expert certifieur, numéro de certificat.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">👑</div>
+        <div class="feature-card-title">Panel Administrateur</div>
+        <div class="feature-card-desc">Interface complète de gestion : entreprises, utilisateurs, abonnements, certifications, experts certifieur, paramètres tarifaires.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🔐</div>
+        <div class="feature-card-title">Espace Expert Certifieur</div>
+        <div class="feature-card-desc">Portail dédié aux experts : consultation des dossiers assignés, checklist d'inspection, notes, émission de certificats ou rejet motivé.</div>
+      </div>
+    </div>
+
+    <div class="screenshot-placeholder">
+      <div class="screenshot-placeholder-icon">🖥️</div>
+      <div class="screenshot-placeholder-text">[ CAPTURE D'ÉCRAN — Tableau de bord principal ]</div>
+      <div class="screenshot-placeholder-sub">Insérer ici une capture du dashboard web CarbonTrack</div>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot-placeholder" style="min-height:120px;">
+        <div class="screenshot-placeholder-icon" style="font-size:24px;">📊</div>
+        <div class="screenshot-placeholder-text">[ Rapports &amp; Graphiques ]</div>
+      </div>
+      <div class="screenshot-placeholder" style="min-height:120px;">
+        <div class="screenshot-placeholder-icon" style="font-size:24px;">🏅</div>
+        <div class="screenshot-placeholder-text">[ Gestion Certifications ]</div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 7 — DESCRIPTION DU PRODUIT (2/2)
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 04</span>
+        <h1 class="page-title">Description du Produit — Application Mobile</h1>
+      </div>
+      <span class="page-num">Page 7</span>
+    </div>
+
+    <h2>Application Mobile iOS &amp; Android</h2>
+    <p>L'application mobile CarbonTrack permet aux responsables environnementaux d'accéder à leur tableau de bord, de saisir des données d'émission et de suivre leurs bilans carbone <strong>depuis n'importe où sur le terrain</strong>.</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-icon">📱</div>
+        <div class="feature-card-title">Interface Native Optimisée</div>
+        <div class="feature-card-desc">Application React Native avec navigation fluide, mode sombre, interface adaptée aux contraintes réseau d'Afrique Centrale.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">✍️</div>
+        <div class="feature-card-title">Saisie d'Émissions Mobile</div>
+        <div class="feature-card-desc">Saisie complète des entrées d'émission par scope et catégorie, avec sélection des facteurs d'émission et calcul automatique en temps réel.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">📄</div>
+        <div class="feature-card-title">Génération PDF Mobile</div>
+        <div class="feature-card-desc">Export du rapport de bilan carbone en PDF directement depuis le mobile. QR code intégré pour vérification de l'authenticité.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🔗</div>
+        <div class="feature-card-title">QR Code de Certification</div>
+        <div class="feature-card-desc">Chaque bilan est identifié par un QR code unique permettant aux partenaires et auditeurs de vérifier l'authenticité du document.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">💳</div>
+        <div class="feature-card-title">Paiement Mobile Money</div>
+        <div class="feature-card-desc">Souscription à l'abonnement directement depuis l'application via Airtel Money et Moov Money — les deux principaux opérateurs de la région.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🔔</div>
+        <div class="feature-card-title">Notifications Push</div>
+        <div class="feature-card-desc">Alertes automatiques : expiration d'abonnement, avancement de la certification, nouvelles réglementations carbone.</div>
+      </div>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot-placeholder">
+        <div class="screenshot-placeholder-icon">📱</div>
+        <div class="screenshot-placeholder-text">[ CAPTURE MOBILE — Accueil ]</div>
+        <div class="screenshot-placeholder-sub">Insérer capture de l'écran d'accueil mobile</div>
+      </div>
+      <div class="screenshot-placeholder">
+        <div class="screenshot-placeholder-icon">📱</div>
+        <div class="screenshot-placeholder-text">[ CAPTURE MOBILE — Saisie émissions ]</div>
+        <div class="screenshot-placeholder-sub">Insérer capture de l'écran de saisie</div>
+      </div>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot-placeholder" style="min-height:100px;">
+        <div class="screenshot-placeholder-icon" style="font-size:20px;">📄</div>
+        <div class="screenshot-placeholder-text">[ Export PDF Mobile ]</div>
+      </div>
+      <div class="screenshot-placeholder" style="min-height:100px;">
+        <div class="screenshot-placeholder-icon" style="font-size:20px;">🏅</div>
+        <div class="screenshot-placeholder-text">[ Suivi Certification Mobile ]</div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 8 — ARCHITECTURE TECHNIQUE
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 05</span>
+        <h1 class="page-title">Architecture Technique &amp; Stack</h1>
+      </div>
+      <span class="page-num">Page 8</span>
+    </div>
+
+    <h2>Application Web — Frontend &amp; Backend</h2>
+    <div class="tech-badges">
+      <span class="tech-badge">⚛️ Next.js 14 (App Router)</span>
+      <span class="tech-badge">🔷 TypeScript</span>
+      <span class="tech-badge green">🗄️ PostgreSQL 17</span>
+      <span class="tech-badge blue">🎨 Tailwind CSS v3</span>
+      <span class="tech-badge purple">🔐 JWT / jose</span>
+      <span class="tech-badge orange">📈 Recharts</span>
+      <span class="tech-badge">📄 jsPDF</span>
+      <span class="tech-badge green">🔑 bcryptjs</span>
+      <span class="tech-badge blue">🌿 Node.js 20 LTS</span>
+      <span class="tech-badge">🔍 Lucide Icons</span>
+    </div>
+
+    <h2>Application Mobile</h2>
+    <div class="tech-badges">
+      <span class="tech-badge">📱 React Native (Expo SDK 54)</span>
+      <span class="tech-badge blue">🧭 Expo Router v3</span>
+      <span class="tech-badge green">🎨 NativeWind v4</span>
+      <span class="tech-badge purple">⚡ Reanimated v3</span>
+      <span class="tech-badge orange">📄 expo-print</span>
+      <span class="tech-badge">📤 expo-sharing</span>
+      <span class="tech-badge blue">📷 QR Code SVG</span>
+      <span class="tech-badge green">🔔 Expo Notifications</span>
+    </div>
+
+    <h2>Infrastructure &amp; Déploiement (Production)</h2>
+    <div class="tech-badges">
+      <span class="tech-badge orange">☁️ AWS EC2 / Azure App Service</span>
+      <span class="tech-badge blue">🐘 AWS RDS PostgreSQL (Managed)</span>
+      <span class="tech-badge green">🌐 CloudFront CDN</span>
+      <span class="tech-badge">🔒 SSL/TLS Let's Encrypt</span>
+      <span class="tech-badge purple">🔄 GitHub Actions (CI/CD)</span>
+      <span class="tech-badge orange">📦 Docker / Docker Compose</span>
+      <span class="tech-badge blue">📊 Datadog Monitoring</span>
+      <span class="tech-badge green">🛡️ Sentry Error Tracking</span>
+    </div>
+
+    <h2>Sécurité &amp; Conformité</h2>
+    <ul>
+      <li><strong>Authentification :</strong> JWT signés (tokens d'accès) + sessions sécurisées par cookies HTTPOnly</li>
+      <li><strong>Mots de passe :</strong> Hachage bcrypt (salt rounds 12) — irréversible</li>
+      <li><strong>HTTPS obligatoire :</strong> chiffrement TLS 1.3 sur toutes les communications</li>
+      <li><strong>Contrôle d'accès :</strong> RBAC (Role-Based Access Control) — rôles user, expert, admin</li>
+      <li><strong>Base de données :</strong> PostgreSQL avec accès restreint par IP, backups automatiques quotidiens</li>
+      <li><strong>Conformité RGPD / données personnelles :</strong> hébergement en zone sécurisée</li>
+    </ul>
+
+    <div class="info-box">
+      <p>🏗️ <strong>Architecture Microservices :</strong> CarbonTrack est conçu pour être scalable. Le backend Next.js API Routes est stateless, permettant une mise à l'échelle horizontale automatique. La base de données PostgreSQL managée garantit la disponibilité (99,9% SLA) et les sauvegardes automatiques.</p>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 9 — LICENCES & OUTILS TIERS
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 06</span>
+        <h1 class="page-title">Licences, Outils &amp; Services Tiers</h1>
+      </div>
+      <span class="page-num">Page 9</span>
+    </div>
+
+    <p>L'exploitation commerciale de CarbonTrack nécessite un ensemble de services, licences et abonnements tiers indispensables au bon fonctionnement, à la sécurité et à la distribution de la plateforme.</p>
+
+    <h2>Services Cloud &amp; Infrastructure</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Fournisseur</th>
+          <th>Usage</th>
+          <th class="td-right">Coût Annuel (FCFA)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Serveur Cloud (EC2 t3.medium)</td><td>Amazon Web Services</td><td>Hébergement backend &amp; API</td><td class="td-right">1 980 000</td></tr>
+        <tr><td>Base de données managée (RDS PostgreSQL)</td><td>AWS RDS</td><td>Stockage sécurisé des données</td><td class="td-right">1 320 000</td></tr>
+        <tr><td>CDN &amp; Distribution</td><td>AWS CloudFront</td><td>Livraison rapide des assets</td><td class="td-right">360 000</td></tr>
+        <tr><td>Stockage fichiers &amp; documents</td><td>AWS S3</td><td>Documents de certification, PDF</td><td class="td-right">240 000</td></tr>
+        <tr><td>Équilibrage de charge</td><td>AWS ELB</td><td>Haute disponibilité</td><td class="td-right">480 000</td></tr>
+        <tr><td>Registre de domaine + DNS</td><td>AWS Route 53</td><td>carbontrack.africa (domaine)</td><td class="td-right">65 000</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3">Total Infrastructure Cloud</td><td class="td-right">4 445 000 FCFA/an</td></tr>
+      </tfoot>
+    </table>
+
+    <h2>Sécurité, Monitoring &amp; DevOps</h2>
+    <table>
+      <thead>
+        <tr><th>Service</th><th>Fournisseur</th><th>Usage</th><th class="td-right">Coût Annuel (FCFA)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Monitoring &amp; APM</td><td>Datadog</td><td>Surveillance performance, alertes</td><td class="td-right">1 310 000</td></tr>
+        <tr><td>Suivi d'erreurs (Error Tracking)</td><td>Sentry (Business)</td><td>Détection &amp; suivi des bugs en production</td><td class="td-right">785 000</td></tr>
+        <tr><td>Analyse de sécurité (SAST/DAST)</td><td>Snyk Team</td><td>Analyse des vulnérabilités du code</td><td class="td-right">655 000</td></tr>
+        <tr><td>CI/CD Pipeline</td><td>GitHub Actions (Pro)</td><td>Déploiement automatisé</td><td class="td-right">195 000</td></tr>
+        <tr><td>Gestionnaire de secrets</td><td>AWS Secrets Manager</td><td>Sécurisation des clés API</td><td class="td-right">130 000</td></tr>
+        <tr><td>Pare-feu applicatif (WAF)</td><td>AWS WAF</td><td>Protection contre attaques web</td><td class="td-right">460 000</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3">Total Sécurité &amp; DevOps</td><td class="td-right">3 535 000 FCFA/an</td></tr>
+      </tfoot>
+    </table>
+
+    <h2>Distribution Mobile &amp; Communication</h2>
+    <table>
+      <thead>
+        <tr><th>Service</th><th>Fournisseur</th><th>Usage</th><th class="td-right">Coût (FCFA)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Apple Developer Program</td><td>Apple Inc.</td><td>Publication App Store iOS</td><td class="td-right">55 000/an</td></tr>
+        <tr><td>Google Play Console</td><td>Google</td><td>Publication Play Store Android</td><td class="td-right">17 000 (unique)</td></tr>
+        <tr><td>Notifications Push</td><td>Firebase (Blaze)</td><td>Notifications iOS &amp; Android</td><td class="td-right">250 000/an</td></tr>
+        <tr><td>SMS Transactionnels</td><td>Twilio / Africa's Talking</td><td>Alertes &amp; confirmations par SMS</td><td class="td-right">395 000/an</td></tr>
+        <tr><td>Service d'emailing</td><td>SendGrid (Essentials)</td><td>Emails transactionnels, factures</td><td class="td-right">260 000/an</td></tr>
+        <tr><td>Intégration API Airtel Money</td><td>Airtel Africa</td><td>Paiements mobiles — setup + maintenance</td><td class="td-right">850 000</td></tr>
+        <tr><td>Intégration API Moov Money</td><td>Moov Africa</td><td>Paiements mobiles — setup + maintenance</td><td class="td-right">850 000</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3">Total Distribution &amp; Communication</td><td class="td-right">2 677 000 FCFA</td></tr>
+      </tfoot>
+    </table>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 10 — MODÈLE ÉCONOMIQUE
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 07</span>
+        <h1 class="page-title">Modèle Économique &amp; Revenus</h1>
+      </div>
+      <span class="page-num">Page 10</span>
+    </div>
+
+    <h2>Sources de Revenus</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Source de Revenu</th>
+          <th>Description</th>
+          <th>Prix Unitaire</th>
+          <th>Fréquence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>💳 Abonnement SaaS mensuel</strong></td>
+          <td>Accès complet à la plateforme web + mobile</td>
+          <td>250 000 FCFA</td>
+          <td>Mensuel / Récurrent</td>
+        </tr>
+        <tr>
+          <td><strong>🏅 Certification carbone</strong></td>
+          <td>Frais de dossier de certification + expertise</td>
+          <td>150 000 FCFA</td>
+          <td>Par bilan certifié</td>
+        </tr>
+        <tr>
+          <td><strong>📊 Plan Enterprise</strong></td>
+          <td>Multi-sites, API dédiée, support prioritaire</td>
+          <td>500 000+ FCFA</td>
+          <td>Mensuel / Négocié</td>
+        </tr>
+        <tr>
+          <td><strong>🎓 Formation &amp; Conseil</strong></td>
+          <td>Formation aux méthodologies GHG Protocol / ISO 14064</td>
+          <td>Sur devis</td>
+          <td>Ponctuel</td>
+        </tr>
+        <tr>
+          <td><strong>📄 Rapports sur mesure</strong></td>
+          <td>Rapports réglementaires personnalisés pour auditeurs</td>
+          <td>75 000 FCFA</td>
+          <td>Par rapport</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Avantages Concurrentiels</h2>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-icon">🌍</div>
+        <div class="feature-card-title">Première Solution Locale</div>
+        <div class="feature-card-desc">Aucune solution SaaS de gestion carbone n'existe actuellement en Afrique Centrale, avec les facteurs d'émission adaptés à la région et le paiement Mobile Money.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">💰</div>
+        <div class="feature-card-title">Prix Adapté au Marché</div>
+        <div class="feature-card-desc">Les solutions internationales équivalentes (Watershed, Persefoni, Plan A) coûtent entre 2 000 et 10 000 USD/mois. CarbonTrack propose une alternative à 250 000 FCFA (~380 EUR).</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🔄</div>
+        <div class="feature-card-title">Revenus Récurrents (MRR)</div>
+        <div class="feature-card-desc">Le modèle par abonnement mensuel génère des revenus prévisibles et cumulatifs. Chaque client acquis représente un revenu annuel garanti de 3 000 000 FCFA.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">📱</div>
+        <div class="feature-card-title">Mobile Money Intégré</div>
+        <div class="feature-card-desc">Airtel Money et Moov Money sont les modes de paiement dominants en Afrique Centrale. L'intégration native élimine la barrière du paiement par carte bancaire.</div>
+      </div>
+    </div>
+
+    <div class="highlight">
+      <div class="highlight-title">📐 Modèle de Croissance</div>
+      <p>Avec un coût d'acquisition client estimé à <strong>150 000 FCFA</strong> et une valeur vie client (LTV) de <strong>3 000 000 FCFA/an</strong>, le ratio LTV/CAC est de <strong>20:1</strong> — un indicateur exceptionnel pour un modèle SaaS. Le taux de churn attendu est inférieur à 5%/mois compte tenu de la nature critique et règlementaire du service.</p>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 11 — PLAN FINANCIER (1/2)
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 08</span>
+        <h1 class="page-title">Plan Financier Détaillé — Justification du Crédit</h1>
+      </div>
+      <span class="page-num">Page 11</span>
+    </div>
+
+    <h2>Budget de Développement &amp; Déploiement Production</h2>
+    <table>
+      <thead>
+        <tr><th>Poste de Dépense</th><th>Détail</th><th class="td-right">Montant (FCFA)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Finalisation &amp; polish application web</td><td>Tests, optimisations, corrections avancées (3 mois)</td><td class="td-right">3 750 000</td></tr>
+        <tr><td>Finalisation application mobile iOS/Android</td><td>Tests sur appareils réels, corrections, soumission stores</td><td class="td-right">2 500 000</td></tr>
+        <tr><td>Intégrations API paiement (Airtel + Moov)</td><td>Développement, tests, certification paiement</td><td class="td-right">1 700 000</td></tr>
+        <tr><td>Mise en production &amp; DevOps</td><td>Configuration serveurs, CI/CD, monitoring, sécurité</td><td class="td-right">1 800 000</td></tr>
+        <tr><td>Tests de charge &amp; sécurité (pentest)</td><td>Audit de sécurité par prestataire externe</td><td class="td-right">1 250 000</td></tr>
+        <tr><td>Développement module API partenaires</td><td>API REST pour intégration ERP/comptabilité</td><td class="td-right">1 500 000</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="2"><strong>Sous-total Développement</strong></td><td class="td-right"><strong>12 500 000 FCFA</strong></td></tr>
+      </tfoot>
+    </table>
+
+    <h2>Budget Infrastructure &amp; Licences (24 mois)</h2>
+    <table>
+      <thead>
+        <tr><th>Poste</th><th>Détail</th><th class="td-right">Montant 24 mois (FCFA)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Cloud AWS (hébergement + RDS)</td><td>3 300 000 FCFA/an × 2</td><td class="td-right">6 600 000</td></tr>
+        <tr><td>CDN + S3 + Route 53</td><td>665 000 FCFA/an × 2</td><td class="td-right">1 330 000</td></tr>
+        <tr><td>Monitoring (Datadog + Sentry)</td><td>2 095 000 FCFA/an × 2</td><td class="td-right">4 190 000</td></tr>
+        <tr><td>Sécurité (Snyk + WAF + Secrets)</td><td>1 245 000 FCFA/an × 2</td><td class="td-right">2 490 000</td></tr>
+        <tr><td>Stores mobiles (Apple + Google)</td><td>72 000 FCFA/an × 2</td><td class="td-right">144 000</td></tr>
+        <tr><td>Communication (Firebase + SMS + Email)</td><td>905 000 FCFA/an × 2</td><td class="td-right">1 810 000</td></tr>
+        <tr><td>Nom de domaine &amp; certificats SSL</td><td>65 000 FCFA/an × 2</td><td class="td-right">130 000</td></tr>
+        <tr><td>Outils Dev (GitHub Pro, Figma, Postman)</td><td>280 000 FCFA/an × 2</td><td class="td-right">560 000</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="2"><strong>Sous-total Infrastructure &amp; Licences</strong></td><td class="td-right"><strong>17 254 000 FCFA</strong></td></tr>
+      </tfoot>
+    </table>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 12 — PLAN FINANCIER (2/2)
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 08</span>
+        <h1 class="page-title">Plan Financier — Marketing, Équipe &amp; Récapitulatif</h1>
+      </div>
+      <span class="page-num">Page 12</span>
+    </div>
+
+    <h2>Budget Marketing &amp; Acquisition Clients</h2>
+    <table>
+      <thead>
+        <tr><th>Poste</th><th>Détail</th><th class="td-right">Montant (FCFA)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Campagnes publicité digitale</td><td>Google Ads, LinkedIn, Meta — 12 mois</td><td class="td-right">2 400 000</td></tr>
+        <tr><td>Commercial terrain (freelance)</td><td>Démarchage direct PME &amp; administration — 12 mois</td><td class="td-right">2 400 000</td></tr>
+        <tr><td>Présence salon &amp; événements</td><td>Forum CEMAC, Salon de l'Environnement, COP africaine</td><td class="td-right">1 200 000</td></tr>
+        <tr><td>Site vitrine &amp; SEO</td><td>Landing page, optimisation, blog contenu</td><td class="td-right">600 000</td></tr>
+        <tr><td>Relations presse &amp; partenariats</td><td>Agence de communication + conférences</td><td class="td-right">800 000</td></tr>
+        <tr><td>Supports marketing imprimés</td><td>Brochures, plaquettes commerciales</td><td class="td-right">350 000</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="2"><strong>Sous-total Marketing</strong></td><td class="td-right"><strong>7 750 000 FCFA</strong></td></tr>
+      </tfoot>
+    </table>
+
+    <h2>Budget Juridique, Conformité &amp; Divers</h2>
+    <table>
+      <thead>
+        <tr><th>Poste</th><th>Détail</th><th class="td-right">Montant (FCFA)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Frais juridiques &amp; création société</td><td>Notaire, enregistrement, statuts</td><td class="td-right">850 000</td></tr>
+        <tr><td>Conseil conformité ISO 14064</td><td>Consultant certification pour la plateforme</td><td class="td-right">950 000</td></tr>
+        <tr><td>Comptabilité &amp; expert-comptable (2 ans)</td><td>Tenue comptable, déclarations fiscales</td><td class="td-right">960 000</td></tr>
+        <tr><td>Assurance responsabilité civile pro</td><td>RC Pro pour plateforme SaaS</td><td class="td-right">480 000</td></tr>
+        <tr><td>Fonds de roulement</td><td>Trésorerie de sécurité (3 mois d'exploitation)</td><td class="td-right">2 500 000</td></tr>
+        <tr><td>Imprévus &amp; contingences (5%)</td><td>Marge de sécurité budgétaire</td><td class="td-right">1 756 000</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="2"><strong>Sous-total Juridique &amp; Divers</strong></td><td class="td-right"><strong>7 496 000 FCFA</strong></td></tr>
+      </tfoot>
+    </table>
+
+    <h2>Récapitulatif Global du Budget</h2>
+    <table>
+      <thead>
+        <tr><th>Catégorie</th><th class="td-right">Montant (FCFA)</th><th class="td-right">% du Total</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>🔧 Développement &amp; Déploiement Production</td><td class="td-right">12 500 000</td><td class="td-right">35,7%</td></tr>
+        <tr><td>☁️ Infrastructure Cloud &amp; Licences (24 mois)</td><td class="td-right">7 754 000</td><td class="td-right">22,2%</td></tr>
+        <tr><td>🔒 Sécurité, Monitoring &amp; DevOps (24 mois)</td><td class="td-right">7 280 000</td><td class="td-right">20,8%</td></tr>
+        <tr><td>📣 Marketing &amp; Acquisition Clients</td><td class="td-right">7 750 000</td><td class="td-right">22,1%</td></tr>
+        <tr><td>⚖️ Juridique, Conformité &amp; Fonds de Roulement</td><td class="td-right">3 996 000</td><td class="td-right">11,4%</td></tr>
+        <tr><td>🛡️ Contingences (5%)</td><td class="td-right">1 756 000</td><td class="td-right">5,0%</td></tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td><strong>🏦 TOTAL CRÉDIT DEMANDÉ</strong></td>
+          <td class="td-right"><strong>35 000 000 FCFA</strong></td>
+          <td class="td-right"><strong>100%</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="amount-box">
+      <div class="amount-box-label">Montant Total du Crédit Sollicité</div>
+      <div class="amount-box-value">35 000 000 FCFA</div>
+      <div class="amount-box-sub">Environ 53 400 EUR — Remboursement sur 36 mois</div>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 13 — PROJECTIONS FINANCIÈRES
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 09</span>
+        <h1 class="page-title">Projections Financières sur 3 Ans</h1>
+      </div>
+      <span class="page-num">Page 13</span>
+    </div>
+
+    <h2>Hypothèses de Croissance</h2>
+    <ul>
+      <li>Acquisition clients <strong>Année 1 :</strong> 50 abonnés (objectif conservateur — 1% du marché cible)</li>
+      <li>Acquisition clients <strong>Année 2 :</strong> 150 abonnés (croissance ×3 avec équipe commerciale)</li>
+      <li>Acquisition clients <strong>Année 3 :</strong> 400 abonnés (notoriété, références, bouche-à-oreille)</li>
+      <li>Taux de certification : 30% des clients abonnés demandent une certification</li>
+      <li>Churn mensuel : 3% (taux très faible, justifié par la nature réglementaire du service)</li>
+    </ul>
+
+    <h2>Projections de Chiffre d'Affaires</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th class="td-center">An 1</th>
+          <th class="td-center">An 2</th>
+          <th class="td-center">An 3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Abonnements SaaS (250 000 FCFA/mois/client)</td>
+          <td class="td-center">12 500 000</td>
+          <td class="td-center">37 500 000</td>
+          <td class="td-center">100 000 000</td>
+        </tr>
+        <tr>
+          <td>Certifications carbone (150 000 FCFA/dossier)</td>
+          <td class="td-center">2 250 000</td>
+          <td class="td-center">6 750 000</td>
+          <td class="td-center">18 000 000</td>
+        </tr>
+        <tr>
+          <td>Plans Enterprise &amp; API partenaires</td>
+          <td class="td-center">500 000</td>
+          <td class="td-center">3 000 000</td>
+          <td class="td-center">8 000 000</td>
+        </tr>
+        <tr>
+          <td>Formation &amp; conseil</td>
+          <td class="td-center">750 000</td>
+          <td class="td-center">1 500 000</td>
+          <td class="td-center">4 000 000</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td><strong>TOTAL CA</strong></td>
+          <td class="td-center"><strong>16 000 000</strong></td>
+          <td class="td-center"><strong>48 750 000</strong></td>
+          <td class="td-center"><strong>130 000 000</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="roi-grid">
+      <div class="roi-card y1">
+        <div class="roi-year">Année 1</div>
+        <div class="roi-revenue">16 M FCFA</div>
+        <div class="roi-label">Chiffre d'Affaires</div>
+        <br/>
+        <div style="font-size:11px;color:#166534;font-weight:600;">Phase de lancement</div>
+        <div style="font-size:10px;color:#166534;">50 clients · Break-even partiel</div>
+      </div>
+      <div class="roi-card y2">
+        <div class="roi-year">Année 2</div>
+        <div class="roi-revenue">48,75 M FCFA</div>
+        <div class="roi-label">Chiffre d'Affaires</div>
+        <br/>
+        <div style="font-size:11px;color:#1d4ed8;font-weight:600;">Croissance accélérée</div>
+        <div style="font-size:10px;color:#1d4ed8;">150 clients · Seuil de rentabilité atteint</div>
+      </div>
+      <div class="roi-card y3">
+        <div class="roi-year">Année 3</div>
+        <div class="roi-revenue">130 M FCFA</div>
+        <div class="roi-label">Chiffre d'Affaires</div>
+        <br/>
+        <div style="font-size:11px;color:#92400e;font-weight:600;">Maturité &amp; expansion</div>
+        <div style="font-size:10px;color:#92400e;">400 clients · Rentabilité solide</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Indicateur</th><th class="td-center">An 1</th><th class="td-center">An 2</th><th class="td-center">An 3</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Chiffre d'affaires</td><td class="td-center">16 000 000</td><td class="td-center">48 750 000</td><td class="td-center">130 000 000</td></tr>
+        <tr><td>Charges d'exploitation</td><td class="td-center">22 500 000</td><td class="td-center">32 000 000</td><td class="td-center">55 000 000</td></tr>
+        <tr><td>Résultat d'exploitation</td><td class="td-center" style="color:#dc2626;">- 6 500 000</td><td class="td-center" style="color:#d97706;">+ 16 750 000</td><td class="td-center" style="color:#16a34a;">+ 75 000 000</td></tr>
+        <tr><td>Remboursement crédit</td><td class="td-center">11 667 000</td><td class="td-center">11 667 000</td><td class="td-center">11 666 000</td></tr>
+        <tr><td><strong>Résultat net</strong></td><td class="td-center" style="color:#dc2626;"><strong>- 18 167 000</strong></td><td class="td-center" style="color:#d97706;"><strong>+ 5 083 000</strong></td><td class="td-center" style="color:#16a34a;"><strong>+ 63 334 000</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <p>📌 <strong>Note :</strong> Le déficit de l'An 1 est inhérent à toute phase de lancement SaaS. Il est couvert par le crédit sollicité (fonds de roulement). La rentabilité est atteinte dès le début de l'An 2, permettant un remboursement serein du crédit.</p>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 14 — PLAN DE REMBOURSEMENT
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 10</span>
+        <h1 class="page-title">Plan de Remboursement du Crédit</h1>
+      </div>
+      <span class="page-num">Page 14</span>
+    </div>
+
+    <div class="stat-grid stat-grid-3">
+      <div class="stat-card">
+        <div class="stat-card-value green">35 M</div>
+        <div class="stat-card-label">FCFA — Capital emprunté</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-value">36</div>
+        <div class="stat-card-label">Mois de remboursement</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-value blue">972 222</div>
+        <div class="stat-card-label">FCFA / mois (capital)</div>
+      </div>
+    </div>
+
+    <h2>Calendrier de Remboursement (Mensualités Indicatives)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Période</th>
+          <th class="td-right">Mensualité (FCFA)</th>
+          <th class="td-right">Capital Remboursé (FCFA)</th>
+          <th class="td-right">Capital Restant (FCFA)</th>
+          <th>Source de financement</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Mois 1–6 (démarrage)</td><td class="td-right">[ Selon taux banque ]</td><td class="td-right">5 833 332</td><td class="td-right">29 166 668</td><td>Fonds de roulement crédit</td></tr>
+        <tr><td>Mois 7–12 (lancement)</td><td class="td-right">[ Selon taux banque ]</td><td class="td-right">5 833 332</td><td class="td-right">23 333 336</td><td>Revenus abonnements (An 1)</td></tr>
+        <tr><td>Mois 13–18 (croissance)</td><td class="td-right">[ Selon taux banque ]</td><td class="td-right">5 833 332</td><td class="td-right">17 500 004</td><td>Revenus abonnements (An 2)</td></tr>
+        <tr><td>Mois 19–24 (accélération)</td><td class="td-right">[ Selon taux banque ]</td><td class="td-right">5 833 332</td><td class="td-right">11 666 672</td><td>Revenus abonnements (An 2)</td></tr>
+        <tr><td>Mois 25–30 (maturité)</td><td class="td-right">[ Selon taux banque ]</td><td class="td-right">5 833 332</td><td class="td-right">5 833 340</td><td>Revenus abonnements (An 3)</td></tr>
+        <tr><td>Mois 31–36 (solde)</td><td class="td-right">[ Selon taux banque ]</td><td class="td-right">5 833 340</td><td class="td-right">0</td><td>Revenus abonnements (An 3)</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td><strong>TOTAL</strong></td><td class="td-right"><strong>[ + Intérêts ]</strong></td><td class="td-right"><strong>35 000 000</strong></td><td class="td-right"><strong>0</strong></td><td></td></tr>
+      </tfoot>
+    </table>
+
+    <h2>Capacité de Remboursement</h2>
+    <p>La capacité de remboursement mensuelle est directement corrélée à la croissance du nombre de clients abonnés :</p>
+    <ul>
+      <li><strong>Dès 4 clients abonnés</strong> (1 000 000 FCFA/mois de CA) : couverture de la mensualité du crédit</li>
+      <li><strong>À 20 clients</strong> (5 000 000 FCFA/mois) : taux d'effort de remboursement &lt; 20% du CA</li>
+      <li><strong>Objectif An 1 (50 clients)</strong> : mensualités crédit = 23% du CA mensuel — très soutenable</li>
+    </ul>
+
+    <div class="highlight">
+      <div class="highlight-title">🔒 Garanties Proposées</div>
+      <p>Le porteur de projet propose en garantie : <strong>(1)</strong> Nantissement du fonds de commerce CarbonTrack, <strong>(2)</strong> Nantissement des droits de propriété intellectuelle sur les applications développées, <strong>(3)</strong> Caution personnelle du porteur, <strong>(4)</strong> Assurance décès-invalidité sur le crédit. La propriété intellectuelle des applications CarbonTrack représente une valeur estimée à <strong>25 000 000 FCFA</strong> (sur base des 2 000+ heures de développement valorisées au tarif expert).</p>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 15 — ANALYSE DES RISQUES
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 11</span>
+        <h1 class="page-title">Analyse des Risques &amp; Mitigation</h1>
+      </div>
+      <span class="page-num">Page 15</span>
+    </div>
+
+    <h2>Risques Identifiés &amp; Mesures de Mitigation</h2>
+
+    <div class="risk-card risk-low">
+      <div class="risk-badge">Faible</div>
+      <div>
+        <div class="risk-content-title">Risque Technique — Pannes ou indisponibilité de la plateforme</div>
+        <div class="risk-content-desc">L'infrastructure cloud AWS garantit un SLA de 99,9% de disponibilité. Le monitoring Datadog détecte les anomalies en temps réel. Les sauvegardes automatiques quotidiennes permettent une restauration en moins de 2 heures.</div>
+      </div>
+    </div>
+
+    <div class="risk-card risk-low">
+      <div class="risk-badge">Faible</div>
+      <div>
+        <div class="risk-content-title">Risque de Sécurité — Fuite de données / cyberattaque</div>
+        <div class="risk-content-desc">Architecture sécurisée dès la conception : JWT + bcrypt, HTTPS obligatoire, WAF AWS, audit de sécurité externe (pentest). Conformité RGPD. Assurance cyber-risques souscrite.</div>
+      </div>
+    </div>
+
+    <div class="risk-card risk-medium">
+      <div class="risk-badge">Modéré</div>
+      <div>
+        <div class="risk-content-title">Risque Commercial — Lenteur d'adoption du marché</div>
+        <div class="risk-content-desc">Mitigation : démarrage avec un commercial terrain expérimenté, partenariats avec ordres professionnels (CCIG, BGFI Business Club), tarification accessible et essai gratuit 1 mois. L'objectif de 50 clients An 1 est très conservateur.</div>
+      </div>
+    </div>
+
+    <div class="risk-card risk-medium">
+      <div class="risk-badge">Modéré</div>
+      <div>
+        <div class="risk-content-title">Risque Réglementaire — Évolution des normes carbone</div>
+        <div class="risk-content-desc">La plateforme est conçue de manière modulaire. L'ajout de nouveaux facteurs d'émission ou de nouvelles méthodologies ne nécessite que des mises à jour de configuration, sans refonte. Veille réglementaire permanente assurée.</div>
+      </div>
+    </div>
+
+    <div class="risk-card risk-medium">
+      <div class="risk-badge">Modéré</div>
+      <div>
+        <div class="risk-content-title">Risque de Concurrence — Arrivée d'un concurrent international</div>
+        <div class="risk-content-desc">Avantage du pionnier local : Mobile Money intégré, connaissance du tissu économique local, prix adapté au marché africain, support en français. Les solutions internationales (Watershed, Persefoni) ont des prix prohibitifs pour les PME africaines.</div>
+      </div>
+    </div>
+
+    <div class="risk-card risk-low">
+      <div class="risk-badge">Faible</div>
+      <div>
+        <div class="risk-content-title">Risque de Dépendance Technologique — Changements de fournisseurs</div>
+        <div class="risk-content-desc">Architecture multi-cloud possible. La base de données PostgreSQL est un standard open-source portable vers tout hébergeur. Le code source est 100% propriétaire et indépendant de tout fournisseur unique.</div>
+      </div>
+    </div>
+
+    <div class="risk-card risk-low">
+      <div class="risk-badge">Faible</div>
+      <div>
+        <div class="risk-content-title">Risque Personnel — Indisponibilité du porteur de projet</div>
+        <div class="risk-content-desc">Documentation technique complète rédigée. Code source versionné sur GitHub avec historique complet. Assurance décès-invalidité sur le crédit. Possibilité de recruter un développeur de continuité dès l'An 2.</div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 16 — ROADMAP
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 12</span>
+        <h1 class="page-title">Roadmap &amp; Plan de Déploiement</h1>
+      </div>
+      <span class="page-num">Page 16</span>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 0 — Mois 1 à 2</div>
+        <div class="timeline-title">Structuration &amp; Préparation</div>
+        <div class="timeline-desc">Création de la société, ouverture du compte bancaire professionnel, souscription aux services cloud AWS, acquisition du nom de domaine carbontrack.africa, soumission des applications sur l'App Store et Google Play.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 1 — Mois 2 à 4</div>
+        <div class="timeline-title">Finalisation Technique &amp; Mise en Production</div>
+        <div class="timeline-desc">Déploiement en production de l'application web et mobile, intégration API Airtel Money et Moov Money, audit de sécurité, mise en place du monitoring (Datadog + Sentry), configuration CI/CD (déploiement automatisé).</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 2 — Mois 4 à 6</div>
+        <div class="timeline-title">Lancement Commercial — Phase Pilote</div>
+        <div class="timeline-desc">Acquisition des 10 premiers clients pilotes (tarif préférentiel en échange de feedback), itérations rapides sur la plateforme, recrutement commercial terrain, participation au premier salon professionnel.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 3 — Mois 7 à 12</div>
+        <div class="timeline-title">Croissance &amp; Acquisition Active</div>
+        <div class="timeline-desc">Campagne marketing digitale, démarchage PME et administrations, signature des premiers contrats Enterprise, activation du module de certification carbone avec les premiers experts certifieur partenaires.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 4 — An 2</div>
+        <div class="timeline-title">Expansion Régionale</div>
+        <div class="timeline-desc">Extension au Cameroun, République du Congo, RDC. Développement de l'API partenaires pour intégration avec les logiciels ERP (Sage, Odoo). Recrutement d'une équipe de 2–3 personnes. Objectif : 150 clients actifs.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 5 — An 3</div>
+        <div class="timeline-title">Leader Régional &amp; Nouvelles Fonctionnalités</div>
+        <div class="timeline-desc">Module de compensation carbone (mise en relation avec porteurs de projets REDD+), module de déclaration réglementaire automatisée, 400+ clients, levée de fonds Series A envisagée pour l'expansion panafricaine.</div>
+      </div>
+    </div>
+
+    <div class="screenshot-placeholder" style="min-height:100px;">
+      <div class="screenshot-placeholder-icon" style="font-size:24px;">🗺️</div>
+      <div class="screenshot-placeholder-text">[ CARTE DE DÉPLOIEMENT RÉGIONAL ]</div>
+      <div class="screenshot-placeholder-sub">Gabon → Congo → Cameroun → RDC → Afrique de l'Ouest</div>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 17 — CAPTURES D'ÉCRAN
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 13</span>
+        <h1 class="page-title">Captures d'Écran de l'Application</h1>
+      </div>
+      <span class="page-num">Page 17</span>
+    </div>
+
+    <p style="color:#64748b;font-size:10px;font-style:italic;margin-bottom:20px;">
+      Les emplacements ci-dessous sont réservés pour les captures d'écran réelles de l'application CarbonTrack. Insérez les captures depuis votre navigateur (F12 → capture) ou depuis votre appareil mobile.
+    </p>
+
+    <h2>Application Web</h2>
+    <div class="screenshot-placeholder" style="min-height:200px;">
+      <div class="screenshot-placeholder-icon">🖥️</div>
+      <div class="screenshot-placeholder-text">[ Tableau de Bord Principal — Vue Analytique ]</div>
+      <div class="screenshot-placeholder-sub">Dashboard avec KPI, graphiques Scope 1/2/3, liste des bilans récents</div>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot-placeholder" style="min-height:160px;">
+        <div class="screenshot-placeholder-icon" style="font-size:28px;">📊</div>
+        <div class="screenshot-placeholder-text">[ Rapport Graphique — Répartition Scopes ]</div>
+        <div class="screenshot-placeholder-sub">Page Rapports &amp; Graphiques</div>
+      </div>
+      <div class="screenshot-placeholder" style="min-height:160px;">
+        <div class="screenshot-placeholder-icon" style="font-size:28px;">👑</div>
+        <div class="screenshot-placeholder-text">[ Panel Admin — Gestion Certifications ]</div>
+        <div class="screenshot-placeholder-sub">Interface administrateur</div>
+      </div>
+    </div>
+
+    <h2>Application Mobile</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0;">
+      <div class="screenshot-placeholder" style="min-height:200px;">
+        <div class="screenshot-placeholder-icon" style="font-size:22px;">📱</div>
+        <div class="screenshot-placeholder-text" style="font-size:9px;">[ Accueil Mobile ]</div>
+      </div>
+      <div class="screenshot-placeholder" style="min-height:200px;">
+        <div class="screenshot-placeholder-icon" style="font-size:22px;">📱</div>
+        <div class="screenshot-placeholder-text" style="font-size:9px;">[ Bilan Carbone ]</div>
+      </div>
+      <div class="screenshot-placeholder" style="min-height:200px;">
+        <div class="screenshot-placeholder-icon" style="font-size:22px;">📱</div>
+        <div class="screenshot-placeholder-text" style="font-size:9px;">[ Saisie Émissions ]</div>
+      </div>
+      <div class="screenshot-placeholder" style="min-height:200px;">
+        <div class="screenshot-placeholder-icon" style="font-size:22px;">📱</div>
+        <div class="screenshot-placeholder-text" style="font-size:9px;">[ Certification ]</div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 18 — CONCLUSION & ENGAGEMENT
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="content-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <span class="page-section-tag">Section 14</span>
+        <h1 class="page-title">Conclusion &amp; Engagement du Porteur</h1>
+      </div>
+      <span class="page-num">Page 18</span>
+    </div>
+
+    <div class="highlight">
+      <div class="highlight-title">🌿 Pourquoi CarbonTrack est un investissement sûr</div>
+      <p>CarbonTrack n'est pas un projet sur papier. C'est une application <strong>fonctionnelle, testée et prête pour la production</strong>. Le porteur a démontré sa capacité technique en développant seul deux plateformes complexes. L'investissement demandé sert uniquement à transformer un produit déjà construit en une entreprise commerciale.</p>
+    </div>
+
+    <h2>Résumé des Points Forts du Dossier</h2>
+    <ul>
+      <li>✅ <strong>Produit existant :</strong> 85% du développement déjà réalisé — le risque de développement est quasi nul</li>
+      <li>✅ <strong>Marché porteur :</strong> Croissance de 35%/an du marché carbone mondial, réglementation africaine en forte progression</li>
+      <li>✅ <strong>Positionnement unique :</strong> Première solution SaaS de ce type en Afrique Centrale, sans concurrent direct local</li>
+      <li>✅ <strong>Modèle de revenus récurrents :</strong> Abonnements SaaS mensuels = flux de trésorerie prévisibles et cumulatifs</li>
+      <li>✅ <strong>Break-even rapide :</strong> Seuil de rentabilité atteint dès l'An 2, avec seulement 100 clients abonnés</li>
+      <li>✅ <strong>Garanties solides :</strong> PI valorisée à 25 M FCFA + caution personnelle + assurance crédit</li>
+      <li>✅ <strong>Porteur compétent :</strong> Maîtrise technique complète du produit, réduction des coûts d'exploitation</li>
+    </ul>
+
+    <h2>Demande Formelle</h2>
+    <p>
+      Au terme de cette présentation, le porteur de projet sollicite auprès de votre établissement l'octroi d'un crédit d'un montant de <strong>35 000 000 FCFA</strong> (trente-cinq millions de francs CFA), remboursable sur une période de <strong>36 mois</strong>, aux conditions tarifaires en vigueur dans votre établissement.
+    </p>
+    <p>
+      Ce financement permettra de concrétiser un projet solide, innovant et à fort potentiel de croissance, au service du développement durable en Afrique Centrale.
+    </p>
+
+    <div style="margin-top:50px;display:grid;grid-template-columns:1fr 1fr;gap:40px;">
+      <div>
+        <p style="font-size:10px;color:#64748b;margin-bottom:40px;">Fait à ____________, le ___/___/2026</p>
+        <div style="border-top:1px solid #cbd5e1;padding-top:10px;">
+          <p style="font-size:10px;color:#64748b;">Signature du porteur de projet</p>
+          <p style="font-size:12px;font-weight:700;margin-top:4px;">[ NOM DU PORTEUR ]</p>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:10px;color:#64748b;margin-bottom:40px;">&nbsp;</p>
+        <div style="border-top:1px solid #cbd5e1;padding-top:10px;">
+          <p style="font-size:10px;color:#64748b;">Cachet &amp; signature de l'établissement</p>
+          <p style="font-size:12px;font-weight:700;margin-top:4px;">[ BANQUE ]</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:40px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px 24px;">
+      <p style="font-size:9px;color:#94a3b8;line-height:1.7;">
+        <strong>Mentions légales :</strong> Ce document est strictement confidentiel et destiné exclusivement à l'établissement bancaire destinataire. Il ne peut être reproduit, distribué ou communiqué à des tiers sans l'accord écrit préalable du porteur de projet. Les projections financières présentées sont des estimations basées sur des hypothèses raisonnables et ne constituent pas une garantie de résultats. CarbonTrack © 2026 — Tous droits réservés.
+      </p>
+    </div>
+
+    <div class="page-footer">
+      <span>CarbonTrack — Dossier de Financement Bancaire — Confidentiel</span>
+      <span>© 2026 CarbonTrack. Tous droits réservés.</span>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT BUTTON (hidden when printing) -->
+<div class="no-print" style="text-align:center;padding:30px;background:#f1f5f9;border-top:1px solid #e2e8f0;">
+  <p style="color:#64748b;font-size:13px;margin-bottom:12px;">Pour imprimer ou exporter en PDF : <strong>Ctrl+P</strong> → Enregistrer en PDF</p>
+  <button onclick="window.print()" style="background:#16a34a;color:white;border:none;padding:12px 32px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">🖨️ Imprimer / Exporter en PDF</button>
+</div>
+
+</body>
+</html>

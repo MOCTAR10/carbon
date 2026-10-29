@@ -1,0 +1,528 @@
+﻿EF Energy factors: 1929
+EF Non energy factors: 0
+EF Inputs factors: 1489
+EF Freight factors: 474
+EF Transportation factors: 392
+EF Wastes factors: 135
+EF Capital goods factors: 153
+
+--- Mainland France Energy fuels (kgCO2eq/kWh LHV) ---
+  Butane (maritime included): Upstream=0.04, Combustion=0.233
+  Propane (maritime included): Upstream=0.039, Combustion=0.233
+  Steel furnace gas: Upstream=0, Combustion=0.659314587
+  Coke-oven gas: Upstream=0, Combustion=0.1711335677
+  Blast furnace gas: Upstream=0, Combustion=0.9655536028
+  Bitumens: Upstream=0.029, Combustion=0.295
+  Jet fuel B: Upstream=0.0544, Combustion=0.259
+  High viscosity fuel: Upstream=0.0453, Combustion=0.29
+  Gasoline: Upstream=0.15, Combustion=0.0969
+  Gasoline (lead free): Upstream=0.0591, Combustion=0.253
+  Aviation gasoline (AvGas): Upstream=0.0544, Combustion=0.259
+  Domestic fuel oil: Upstream=0.0527, Combustion=0.272
+  Heavy fuel oil (commercial): Upstream=0.0413, Combustion=0.283
+  Recycled carbon fuel - VALORTEC - low sulfur content: Upstream=0.00733, Combustion=0.275
+  Diesel oil (B30): Upstream=0.102, Combustion=0.195
+  Off road diesel: Upstream=0.0671, Combustion=0.256
+  Road diesel: Upstream=0.0677, Combustion=0.254
+  LNG, Liquefied Natural Gas (incl. Road, maritime and river transport): Upstream=0.0511, Combustion=0.204
+  CNG, Compressed Natural Gas for road vehicle: Upstream=0.0428, Combustion=0.187
+  LPG Liquefied Petroleum Gas for Vehicles: Upstream=0.039, Combustion=0.233
+  HFO (Heavy Fuel Oil) (ISO 8217 classes RME ├á RMK): Upstream=0.044, Combustion=0.283
+  Shale oil: Upstream=0.458, Combustion=0.264
+  Jet fuel A1 or A: Upstream=0.0544, Combustion=0.259
+  LFO (Light Fuel Oil) (ISO 8217 classes RMA ├á RMD (maritime)): Upstream=0.059, Combustion=0.272
+  MDO (Marine Diesel Oil) (ISO 8217 classes DMX ├á DMC): Upstream=0.059, Combustion=0.272
+  Naphtha: Upstream=0.0372, Combustion=0.266
+  Other petroleum products: Upstream=0.026, Combustion=0.266
+  Concentrated coal: Upstream=0.0319, Combustion=0.345
+  Anthracite: Upstream=0.0319, Combustion=0.356
+  Lignite briquette: Upstream=0.0319, Combustion=0.357
+  Coke coal (HHV more than 23865 kJ/kg): Upstream=0.0319, Combustion=0.345
+  Steam coal (HHV more than 23865 kJ/kg): Upstream=0.0319, Combustion=0.345
+  Bituminous coal (HHV between 17 435 & 23 865 kJ/kg): Upstream=0.0319, Combustion=0.349
+  Coal HHV more than 23865 kJ/kg): Upstream=0.0319, Combustion=0.346
+  Lignite (HHV less than 17435 kJ/kg): Upstream=0.0319, Combustion=0.364
+  Peat: Upstream=0.0319, Combustion=0.398
+  Coke from hard coal: Upstream=0.0319, Combustion=0.389
+  Coke from lignite: Upstream=0.0319, Combustion=0.393
+  Coke from oil: Upstream=0.0413, Combustion=0.349
+  Biodiesel (with land-use/land-cover change, maximum scenario): Upstream=0.0471, Combustion=0
+  Biodiesel (without land-use/land-cover change): Upstream=0.11, Combustion=0
+  Bioethanol (with land-use/land-cover change, maximum scenario): Upstream=0.121, Combustion=0
+  Bioethanol (without land-use/land-cover change): Upstream=0.144, Combustion=0
+  Biogas - injected in the network - average mix: Upstream=0.0428, Combustion=0.00156
+  Biomethane (Coming from the STEU, injected in the network): Upstream=0.0134, Combustion=0.00293
+  Biopropane (based on rapeseed oil without land-use change): Upstream=0.184, Combustion=0
+  Biopropane (palm oil-based (with methane capture) without land-use change): Upstream=0.103, Combustion=0
+  Biopropane (palm oil-based (no methane capture) without land-use change): Upstream=0.154, Combustion=0
+  Biopropane (based on cooking oils without land-use change): Upstream=0.0487, Combustion=0
+  Biopropane (based on palm oil fatty acid distillate (with capture of methane) without land-use change): Upstream=0.0464, Combustion=0
+  Biopropane (based on palm oil fatty acid distillate (without methane capture) without land-use change): Upstream=0.0464, Combustion=0
+  Biopropane (from animal fat without land-use change): Upstream=0.0489, Combustion=0
+  Biopropane (representative mix of biomass without land-use change): Upstream=0.0603, Combustion=0
+  Wood log (20% humidity): Upstream=0.0107, Combustion=0.0188
+  Wooden boxes and pallets mashes (20% hymidity): Upstream=0.00688, Combustion=0.000297
+  Wood pellets (8% humidity): Upstream=0.0164, Combustion=0.014
+  Straw (10% humidity): Upstream=0.0513, Combustion=0
+  Woodchips (25% humidity): Upstream=0.0112, Combustion=0.0132
+  Sawdust (50% d'humidity): Upstream=0.00272, Combustion=0.000199
+
+--- Mainland France Electricity ---
+  Non-reusable used tires - fuel mix | kgCO2eq/GJ LHV | Combustion | total=59
+  Non-reusable used tires - fuel mix | kgCO2eq/GJ LHV | Upstream | total=1.55
+  Non-reusable used tires - lorry | kgCO2eq/GJ LHV | Combustion | total=43
+  Non-reusable used tires - lorry | kgCO2eq/GJ LHV | Upstream | total=1.63
+  Non-reusable used tires - light vehicles | kgCO2eq/GJ LHV | Combustion | total=62
+  Non-reusable used tires - light vehicles | kgCO2eq/GJ LHV | Upstream | total=1.54
+  Biodiesel (with land-use/land-cover change, maximum scenario) | kgCO2eq/kWh LHV | Upstream | total=0.78
+  Biodiesel (with land-use/land-cover change, maximum scenario) | kgCO2eq/liter | Upstream | total=7.17
+  Biodiesel (with land-use/land-cover change, maximum scenario) | kgCO2eq/MJ LHV | Upstream | total=0.217
+  Biodiesel (with land-use/land-cover change, maximum scenario) | kgCO2eq/toe LHV | Upstream | total=9070
+  Biodiesel (with land-use/land-cover change, maximum scenario) | kgCO2eq/ton | Upstream | total=8060
+  Biodiesel (with land-use/land-cover change, maximum scenario) | kgCO2eq/kWh LHV | Upstream | total=0.0471
+  Biodiesel (with land-use/land-cover change, maximum scenario) | kgCO2eq/liter | Upstream | total=0.434
+  Biodiesel (with land-use/land-cover change, maximum scenario) | kgCO2eq/MJ LHV | Upstream | total=0.0131
+  Biodiesel (with land-use/land-cover change, maximum scenario) | kgCO2eq/toe LHV | Upstream | total=548
+  Biodiesel (with land-use/land-cover change, maximum scenario) | kgCO2eq/ton | Upstream | total=486
+  Biodiesel (without land-use/land-cover change) | kgCO2eq/kWh LHV | Upstream | total=0.11
+  Biodiesel (without land-use/land-cover change) | kgCO2eq/liter | Upstream | total=1.01
+  Biodiesel (without land-use/land-cover change) | kgCO2eq/MJ LHV | Upstream | total=0.0305
+  Biodiesel (without land-use/land-cover change) | kgCO2eq/toe LHV | Upstream | total=1280
+  Biodiesel (without land-use/land-cover change) | kgCO2eq/ton | Upstream | total=1130
+  Bioethanol (with land-use/land-cover change, maximum scenario) | kgCO2eq/kWh LHV | Upstream | total=0.815
+  Bioethanol (with land-use/land-cover change, maximum scenario) | kgCO2eq/liter | Upstream | total=4.79
+  Bioethanol (with land-use/land-cover change, maximum scenario) | kgCO2eq/MJ LHV | Upstream | total=0.226
+  Bioethanol (with land-use/land-cover change, maximum scenario) | kgCO2eq/toe LHV | Upstream | total=9480
+  Bioethanol (with land-use/land-cover change, maximum scenario) | kgCO2eq/ton | Upstream | total=6070
+  Bioethanol (with land-use/land-cover change, maximum scenario) | kgCO2eq/kWh LHV | Upstream | total=0.121
+  Bioethanol (with land-use/land-cover change, maximum scenario) | kgCO2eq/liter | Upstream | total=0.713
+  Bioethanol (with land-use/land-cover change, maximum scenario) | kgCO2eq/MJ LHV | Upstream | total=0.0337
+  Bioethanol (with land-use/land-cover change, maximum scenario) | kgCO2eq/toe LHV | Upstream | total=1410
+  Bioethanol (with land-use/land-cover change, maximum scenario) | kgCO2eq/ton | Upstream | total=902
+  Bioethanol (without land-use/land-cover change) | kgCO2eq/kWh LHV | Upstream | total=0.144
+  Bioethanol (without land-use/land-cover change) | kgCO2eq/liter | Upstream | total=0.848
+  Bioethanol (without land-use/land-cover change) | kgCO2eq/MJ LHV | Upstream | total=0.04
+  Bioethanol (without land-use/land-cover change) | kgCO2eq/toe LHV | Upstream | total=1670
+  Bioethanol (without land-use/land-cover change) | kgCO2eq/ton | Upstream | total=1070
+  Biopropane (based on rapeseed oil without land-use change) | kgCO2eq/toe LHV | Upstream | total=2150
+  Biopropane (based on rapeseed oil without land-use change) | kgCO2eq/ton | Upstream | total=2340
+  Biopropane (based on rapeseed oil without land-use change) | kgCO2eq/kWh LHV | Upstream | total=0.184
+  Biopropane (based on rapeseed oil without land-use change) | kgCO2eq/liter | Upstream | total=1.22
+  Biopropane (based on rapeseed oil without land-use change) | kgCO2eq/GJ LHV | Upstream | total=51
+  Biopropane (palm oil-based (with methane capture) without land-use change) | kgCO2eq/kWh LHV | Upstream | total=0.103
+  Biopropane (palm oil-based (with methane capture) without land-use change) | kgCO2eq/toe LHV | Upstream | total=1200
+  Biopropane (palm oil-based (with methane capture) without land-use change) | kgCO2eq/ton | Upstream | total=1320
+  Biopropane (palm oil-based (with methane capture) without land-use change) | kgCO2eq/GJ LHV | Upstream | total=28.6
+  Biopropane (palm oil-based (with methane capture) without land-use change) | kgCO2eq/liter | Upstream | total=0.684
+  Biopropane (palm oil-based (no methane capture) without land-use change) | kgCO2eq/ton | Upstream | total=1970
+  Biopropane (palm oil-based (no methane capture) without land-use change) | kgCO2eq/kWh LHV | Upstream | total=0.154
+  Biopropane (palm oil-based (no methane capture) without land-use change) | kgCO2eq/toe LHV | Upstream | total=1800
+  Biopropane (palm oil-based (no methane capture) without land-use change) | kgCO2eq/GJ LHV | Upstream | total=42.7
+  Biopropane (palm oil-based (no methane capture) without land-use change) | kgCO2eq/liter | Upstream | total=1.02
+  Biopropane (based on cooking oils without land-use change) | kgCO2eq/liter | Upstream | total=0.323
+  Biopropane (based on cooking oils without land-use change) | kgCO2eq/GJ LHV | Upstream | total=13.5
+  Biopropane (based on cooking oils without land-use change) | kgCO2eq/kWh LHV | Upstream | total=0.0487
+  Biopropane (based on cooking oils without land-use change) | kgCO2eq/toe LHV | Upstream | total=568
+  Biopropane (based on cooking oils without land-use change) | kgCO2eq/ton | Upstream | total=621
+  Biopropane (based on palm oil fatty acid distillate (with capture of methane) without land-use change) | kgCO2eq/toe LHV | Upstream | total=541
+  Biopropane (based on palm oil fatty acid distillate (with capture of methane) without land-use change) | kgCO2eq/ton | Upstream | total=592
+  Biopropane (based on palm oil fatty acid distillate (with capture of methane) without land-use change) | kgCO2eq/kWh LHV | Upstream | total=0.0464
+  Biopropane (based on palm oil fatty acid distillate (with capture of methane) without land-use change) | kgCO2eq/GJ LHV | Upstream | total=12.9
+  Biopropane (based on palm oil fatty acid distillate (with capture of methane) without land-use change) | kgCO2eq/liter | Upstream | total=0.307
+  Biopropane (based on palm oil fatty acid distillate (without methane capture) without land-use change) | kgCO2eq/toe LHV | Upstream | total=541
+  Biopropane (based on palm oil fatty acid distillate (without methane capture) without land-use change) | kgCO2eq/ton | Upstream | total=592
+  Biopropane (based on palm oil fatty acid distillate (without methane capture) without land-use change) | kgCO2eq/kWh LHV | Upstream | total=0.0464
+  Biopropane (based on palm oil fatty acid distillate (without methane capture) without land-use change) | kgCO2eq/liter | Upstream | total=0.307
+  Biopropane (based on palm oil fatty acid distillate (without methane capture) without land-use change) | kgCO2eq/GJ LHV | Upstream | total=12.9
+  Biopropane (from animal fat without land-use change) | kgCO2eq/GJ LHV | Upstream | total=13.6
+  Biopropane (from animal fat without land-use change) | kgCO2eq/liter | Upstream | total=0.325
+  Biopropane (from animal fat without land-use change) | kgCO2eq/kWh LHV | Upstream | total=0.0489
+  Biopropane (from animal fat without land-use change) | kgCO2eq/toe LHV | Upstream | total=572
+  Biopropane (from animal fat without land-use change) | kgCO2eq/ton | Upstream | total=624
+  Biopropane (representative mix of biomass without land-use change) | kgCO2eq/liter | Upstream | total=0.4
+  Biopropane (representative mix of biomass without land-use change) | kgCO2eq/GJ LHV | Upstream | total=16.7
+  Biopropane (representative mix of biomass without land-use change) | kgCO2eq/ton | Upstream | total=769
+  Biopropane (representative mix of biomass without land-use change) | kgCO2eq/toe LHV | Upstream | total=703
+  Biopropane (representative mix of biomass without land-use change) | kgCO2eq/kWh LHV | Upstream | total=0.0603
+  31, Toulouse, Cancerop├┤le | kgCO2eq/kWh |  | total=0.124
+  31, Toulouse, CSU Rangueil | kgCO2eq/kWh |  | total=0.374
+  31, Toulouse, Ensemble Universitaire de Toulouse Rangueil | kgCO2eq/kWh |  | total=0.205
+  31, Toulouse, R├®seau de Toulouse (UIOM) | kgCO2eq/kWh |  | total=0
+  31, Toulouse, R├®seau Saint-Exup├®ry | kgCO2eq/kWh |  | total=0.361
+  59, Maubeuge, ZUP de la caserne joyeuse | kgCO2eq/kWh |  | total=0.237
+  68, Mulhouse, Porte de B├óle | kgCO2eq/kWh |  | total=0.217
+  74, Cluses, R├®seau de la Zup des Ewues | kgCO2eq/kWh |  | total=0.212
+  31, Toulouse, Cancerop├┤le | kgCO2eq/kWh | Cold | total=0.011
+  2008 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0333
+  2008 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0101
+  2008 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.006
+  2008 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.178
+  2008 - use : heating | kgCO2eq/kWh | Upstream | total=0.0272
+  2008 - use : heating | kgCO2eq/kWh | losses | total=0.006
+  2008 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0406
+  2008 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.011
+  2008 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.006
+  2008 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.0551
+  2008 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.0127
+  2008 - use : residential cooking | kgCO2eq/kWh | losses | total=0.006
+  2008 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.0401
+  2008 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.0109
+  2008 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.006
+  2008 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.0705
+  2008 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0145
+  2008 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.006
+  2008 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0909
+  2008 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.0169
+  2008 - use : residential lighting | kgCO2eq/kWh | losses | total=0.006
+  2008 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0342
+  2009 - use : industry | kgCO2eq/kWh | Upstream | total=0.01
+  2010 - use : industry | kgCO2eq/kWh | losses | total=0.006
+  2008 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0322
+  2008 - use : Transports | kgCO2eq/kWh | Upstream | total=0.01
+  2008 - use : Transports | kgCO2eq/kWh | losses | total=0.006
+  2009 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0333
+  2009 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0101
+  2009 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.006
+  2009 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.178
+  2009 - use : heating | kgCO2eq/kWh | Upstream | total=0.0272
+  2009 - use : heating | kgCO2eq/kWh | losses | total=0.006
+  2009 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0406
+  2009 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.011
+  2009 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.006
+  2009 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.0551
+  2009 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.0127
+  2009 - use : residential cooking | kgCO2eq/kWh | losses | total=0.006
+  2009 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.0401
+  2009 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.0109
+  2009 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.006
+  2009 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.0705
+  2009 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0145
+  2009 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.006
+  2009 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0909
+  2009 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.0169
+  2009 - use : residential lighting | kgCO2eq/kWh | losses | total=0.006
+  2009 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0342
+  2009 - use : industry | kgCO2eq/kWh | Upstream | total=0.01
+  2009 - use : industry | kgCO2eq/kWh | losses | total=0.006
+  2009 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0322
+  2009 - use : Transports | kgCO2eq/kWh | Upstream | total=0.01
+  2009 - use : Transports | kgCO2eq/kWh | losses | total=0.006
+  2010 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0333
+  2010 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0101
+  2010 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.006
+  2010 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.178
+  2010 - use : heating | kgCO2eq/kWh | Upstream | total=0.0272
+  2010 - use : heating | kgCO2eq/kWh | losses | total=0.006
+  2010 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0406
+  2010 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.011
+  2010 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.006
+  2010 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.0551
+  2010 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.0127
+  2010 - use : residential cooking | kgCO2eq/kWh | losses | total=0.006
+  2010 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.0401
+  2010 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.0109
+  2010 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.006
+  2010 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.0705
+  2010 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0145
+  2010 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.006
+  2010 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0909
+  2010 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.0169
+  2010 - use : residential lighting | kgCO2eq/kWh | losses | total=0.006
+  2010 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0342
+  2010 - use : industry | kgCO2eq/kWh | Upstream | total=0.01
+  2010 - use : industry | kgCO2eq/kWh | losses | total=0.006
+  2010 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0322
+  2010 - use : Transports | kgCO2eq/kWh | Upstream | total=0.01
+  2010 - use : Transports | kgCO2eq/kWh | losses | total=0.006
+  2011 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0333
+  2011 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0101
+  2011 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.006
+  2011 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.178
+  2011 - use : heating | kgCO2eq/kWh | Upstream | total=0.0272
+  2011 - use : heating | kgCO2eq/kWh | losses | total=0.006
+  2011 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0406
+  2011 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.011
+  2011 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.006
+  2011 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.0551
+  2011 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.0127
+  2011 - use : residential cooking | kgCO2eq/kWh | losses | total=0.006
+  2011 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.0401
+  2011 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.0109
+  2011 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.006
+  2011 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.0705
+  2011 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0145
+  2011 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.006
+  2011 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0909
+  2011 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.0169
+  2011 - use : residential lighting | kgCO2eq/kWh | losses | total=0.006
+  2011 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0342
+  2011 - use : industry | kgCO2eq/kWh | Upstream | total=0.01
+  2011 - use : industry | kgCO2eq/kWh | losses | total=0.006
+  2011 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0322
+  2011 - use : Transports | kgCO2eq/kWh | Upstream | total=0.01
+  2011 - use : Transports | kgCO2eq/kWh | losses | total=0.006
+  2012 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0333
+  2012 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0101
+  2012 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.006
+  2012 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.178
+  2012 - use : heating | kgCO2eq/kWh | Upstream | total=0.0272
+  2012 - use : heating | kgCO2eq/kWh | losses | total=0.006
+  2012 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0406
+  2012 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.011
+  2012 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.006
+  2012 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.0551
+  2012 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.0127
+  2012 - use : residential cooking | kgCO2eq/kWh | losses | total=0.006
+  2012 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.0401
+  2012 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.0109
+  2012 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.006
+  2012 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.0705
+  2012 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0145
+  2012 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.006
+  2012 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0909
+  2012 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.0169
+  2012 - use : residential lighting | kgCO2eq/kWh | losses | total=0.006
+  2012 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0342
+  2012 - use : industry | kgCO2eq/kWh | Upstream | total=0.01
+  2012 - use : industry | kgCO2eq/kWh | losses | total=0.006
+  2012 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0322
+  2012 - use : Transports | kgCO2eq/kWh | Upstream | total=0.01
+  2012 - use : Transports | kgCO2eq/kWh | losses | total=0.006
+  2013 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0321
+  2013 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0101
+  2013 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.0063
+  2013 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.165
+  2013 - use : heating | kgCO2eq/kWh | Upstream | total=0.0263
+  2013 - use : heating | kgCO2eq/kWh | losses | total=0.0063
+  2013 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0395
+  2013 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.011
+  2013 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.0063
+  2013 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.0528
+  2013 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.0126
+  2013 - use : residential cooking | kgCO2eq/kWh | losses | total=0.0063
+  2013 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.0415
+  2013 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.0113
+  2013 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.0063
+  2013 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.0665
+  2013 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0143
+  2013 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.0063
+  2013 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0856
+  2013 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.0166
+  2013 - use : residential lighting | kgCO2eq/kWh | losses | total=0.0063
+  2013 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0312
+  2013 - use : industry | kgCO2eq/kWh | Upstream | total=0.01
+  2013 - use : industry | kgCO2eq/kWh | losses | total=0.0063
+  2013 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0312
+  2013 - use : Transports | kgCO2eq/kWh | Upstream | total=0.01
+  2013 - use : Transports | kgCO2eq/kWh | losses | total=0.0063
+  2014 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0288
+  2014 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0098
+  2014 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.0062
+  2014 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.162
+  2014 - use : heating | kgCO2eq/kWh | Upstream | total=0.0258
+  2014 - use : heating | kgCO2eq/kWh | losses | total=0.0062
+  2014 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0338
+  2014 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.0104
+  2014 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.0062
+  2014 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.0487
+  2014 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.0122
+  2014 - use : residential cooking | kgCO2eq/kWh | losses | total=0.0062
+  2014 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.041
+  2014 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.0113
+  2014 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.0062
+  2014 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.0621
+  2014 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0138
+  2014 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.0062
+  2014 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0816
+  2014 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.0162
+  2014 - use : residential lighting | kgCO2eq/kWh | losses | total=0.0062
+  2014 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0277
+  2014 - use : industry | kgCO2eq/kWh | Upstream | total=0.0096
+  2014 - use : industry | kgCO2eq/kWh | losses | total=0.0062
+  2014 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0262
+  2014 - use : Transports | kgCO2eq/kWh | Upstream | total=0.0094
+  2014 - use : Transports | kgCO2eq/kWh | losses | total=0.0062
+  2015 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0251
+  2015 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0094
+  2015 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.0052
+  2015 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.139
+  2015 - use : heating | kgCO2eq/kWh | Upstream | total=0.0235
+  2015 - use : heating | kgCO2eq/kWh | losses | total=0.0052
+  2015 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0276
+  2015 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.0097
+  2015 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.0052
+  2015 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.041
+  2015 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.0114
+  2015 - use : residential cooking | kgCO2eq/kWh | losses | total=0.0052
+  2015 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.0389
+  2015 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.0111
+  2015 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.0052
+  2015 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.0529
+  2015 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0129
+  2015 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.0052
+  2015 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0699
+  2015 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.015
+  2015 - use : residential lighting | kgCO2eq/kWh | losses | total=0.0052
+  2015 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0242
+  2015 - use : industry | kgCO2eq/kWh | Upstream | total=0.0093
+  2015 - use : industry | kgCO2eq/kWh | losses | total=0.0052
+  2015 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0221
+  2015 - use : Transports | kgCO2eq/kWh | Upstream | total=0.009
+  2015 - use : Transports | kgCO2eq/kWh | losses | total=0.0052
+  2016 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0259
+  2016 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0097
+  2016 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.0049
+  2016 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.128
+  2016 - use : heating | kgCO2eq/kWh | Upstream | total=0.0225
+  2016 - use : heating | kgCO2eq/kWh | losses | total=0.0049
+  2016 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0238
+  2016 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.0095
+  2016 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.0049
+  2016 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.0361
+  2016 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.011
+  2016 - use : residential cooking | kgCO2eq/kWh | losses | total=0.0049
+  2016 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.0362
+  2016 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.011
+  2016 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.0049
+  2016 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.0484
+  2016 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0125
+  2016 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.0049
+  2016 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0639
+  2016 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.0145
+  2016 - use : residential lighting | kgCO2eq/kWh | losses | total=0.0049
+  2016 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0227
+  2016 - use : industry | kgCO2eq/kWh | Upstream | total=0.0093
+  2016 - use : industry | kgCO2eq/kWh | losses | total=0.0049
+  2016 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0208
+  2016 - use : Transports | kgCO2eq/kWh | Upstream | total=0.0091
+  2016 - use : Transports | kgCO2eq/kWh | losses | total=0.0049
+  2017 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0254
+  2017 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0102
+  2017 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.0044
+  2017 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.127
+  2017 - use : heating | kgCO2eq/kWh | Upstream | total=0.0231
+  2017 - use : heating | kgCO2eq/kWh | losses | total=0.0044
+  2017 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0216
+  2017 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.0097
+  2017 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.0044
+  2017 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.034
+  2017 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.0112
+  2017 - use : residential cooking | kgCO2eq/kWh | losses | total=0.0044
+  2017 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.0354
+  2017 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.0115
+  2017 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.0044
+  2017 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.047
+  2017 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0128
+  2017 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.0044
+  2017 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0631
+  2017 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.015
+  2017 - use : residential lighting | kgCO2eq/kWh | losses | total=0.0044
+  2017 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0223
+  2017 - use : industry | kgCO2eq/kWh | Upstream | total=0.0098
+  2017 - use : industry | kgCO2eq/kWh | losses | total=0.0044
+  2017 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0206
+  2017 - use : Transports | kgCO2eq/kWh | Upstream | total=0.0096
+  2017 - use : Transports | kgCO2eq/kWh | losses | total=0.0044
+  2018 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Combustion at plant | total=0.0299
+  2018 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | Upstream | total=0.0113
+  2018 - use : others (construction. research. armyÔÇª) | kgCO2eq/kWh | losses | total=0.0044
+  2018 - use : heating | kgCO2eq/kWh | Combustion at plant | total=0.119
+  2018 - use : heating | kgCO2eq/kWh | Upstream | total=0.0237
+  2018 - use : heating | kgCO2eq/kWh | losses | total=0.0044
+  2018 - use : tertiairy air conditioning | kgCO2eq/kWh | Combustion at plant | total=0.0238
+  2018 - use : tertiairy air conditioning | kgCO2eq/kWh | Upstream | total=0.0105
+  2018 - use : tertiairy air conditioning | kgCO2eq/kWh | losses | total=0.0044
+  2018 - use : residential cooking | kgCO2eq/kWh | Combustion at plant | total=0.0336
+  2018 - use : residential cooking | kgCO2eq/kWh | Upstream | total=0.0118
+  2018 - use : residential cooking | kgCO2eq/kWh | losses | total=0.0044
+  2018 - use : Sanitary Hot Water | kgCO2eq/kWh | Combustion at plant | total=0.0371
+  2018 - use : Sanitary Hot Water | kgCO2eq/kWh | Upstream | total=0.0123
+  2018 - use : Sanitary Hot Water | kgCO2eq/kWh | losses | total=0.0044
+  2018 - use : industrial and public lighting | kgCO2eq/kWh | Combustion at plant | total=0.0465
+  2018 - use : industrial and public lighting | kgCO2eq/kWh | Upstream | total=0.0135
+  2018 - use : industrial and public lighting | kgCO2eq/kWh | losses | total=0.0044
+  2018 - use : residential lighting | kgCO2eq/kWh | Combustion at plant | total=0.0622
+  2018 - use : residential lighting | kgCO2eq/kWh | Upstream | total=0.0157
+  2018 - use : residential lighting | kgCO2eq/kWh | losses | total=0.0044
+  2018 - use : industry | kgCO2eq/kWh | Combustion at plant | total=0.0243
+  2018 - use : industry | kgCO2eq/kWh | Upstream | total=0.0105
+  2018 - use : industry | kgCO2eq/kWh | losses | total=0.0044
+  2018 - use : Transports | kgCO2eq/kWh | Combustion at plant | total=0.0237
+  2018 - use : Transports | kgCO2eq/kWh | Upstream | total=0.0105
+  2018 - use : Transports | kgCO2eq/kWh | losses | total=0.0044
+
+--- Non energy factor names ---
+
+--- Waste factor names (unique) ---
+  kgCO2eq/ton | Base Carbone | 896
+  kgCO2eq/ton | Base Carbone | 18.3
+  kgCO2eq/ton | Base Carbone | 20
+  kgCO2eq/ton | Base Carbone | 52
+  kgCO2eq/ton | Base Carbone | 636
+  Unit | Source | Total consolidated
+  kgCO2eq/ton | Base Carbone | 18
+  kgCO2eq/ton | Base Carbone | 10.6
+  kgCO2eq/ton | Base Carbone | 15
+  kgCO2eq/ton | Base Carbone | 46.6
+  kgCO2eq/ton | Base Carbone | 33
+  kgCO2eq/ton | Base Carbone | 50.8
+  kgCO2eq/ton | Base Carbone | 950
+  kgCO2eq/ton | Base Carbone | 0
+  kgCO2eq/ton | Base Carbone | 616
+  kgCO2eq/ton | Base Carbone | 5.25
+  kgCO2eq/ton | Base Carbone | 5.19
+  kgCO2eq/ton | Base Carbone | 24.1
+  kgCO2eq/ton | Base Carbone | 23.7
+  kgCO2eq/ton | Base Carbone | 15.1
+  kgCO2eq/ton | Base Carbone | 985
+  kgCO2eq/ton | Base Carbone | 43.1
+  kgCO2eq/ton | Base Carbone | 1018
+  kgCO2eq/ton | Base Carbone | 86.8
+  kgCO2eq/ton |  | 1018
+  kgCO2eq/ton | Base Carbone | 649
+  kgCO2eq/ton | Base Carbone | 983
+  kgCO2eq/ton |  | 983
+  kgCO2eq/ton | Base Carbone | 2644
+  kgCO2eq/ton | Base Carbone | 877
+  kgCO2eq/ton | Base Carbone | 2880
+  kgCO2eq/ton | Base Carbone | 1960
+  kgCO2eq/ton | Base Carbone | 2989
+  kgCO2eq/ton | Base Carbone | 3110
+  kgCO2eq/ton | Base Carbone | 1410
+  kgCO2eq/ton | Base Carbone | 2713
+  kgCO2eq/ton | Base Carbone | 2916
+  kgCO2eq/ton | Base Carbone | 1996
+  kgCO2eq/ton | Base Carbone | 3025
+  kgCO2eq/ton | Base Carbone | 3146
+  kgCO2eq/ton | Base Carbone | 1446
+  kgCO2eq/ton | Base Carbone | 0.49
+  kgCO2eq/ton | Base Carbone | 0.69
+  kgCO2eq/ton | Base Carbone | 0.04
+  kgCO2eq/ton | Base Carbone | 2
+  kgCO2eq/ton | Base Carbone | 2.72
+  kgCO2eq/ton | Base Carbone | 0.39
+  kgCO2eq/ton | Base Carbone | 1
+  kgCO2eq/ton | Base Carbone | 3.73
+  kgCO2eq/ton | Base Carbone | 0.85
+
+--- Transport factor names (unique, first 30) ---
+  kgCO2eq/km
+  kgCO2eq/passenger.km
+  kgCO2eq/hour
+  Unit
+  kgCO2eq/kWh LHV
+  kgCO2eq/liter
+  kgCO2eq/toe LHV
+  kgCO2eq/GJ LHV
+  kgCO2eq/ton
+  kgCO2eq/m3 (n)
+  kgCO2eq/MJ LHV
+  EF Author
+  ADEME
+  EDF
+  PWC
+
+--- Capital goods categories ---
+  
+
+Full data written to ef-full.json

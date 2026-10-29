@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>CarbonTrack — Presentation Investisseurs | GreenLeaves</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+:root{--b50:#f0fdf4;--b100:#dcfce7;--b200:#bbf7d0;--b500:#22c55e;--b600:#16a34a;--b700:#15803d;--b800:#166534;--g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;--g800:#1f2937;--g900:#111827}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;color:var(--g800);line-height:1.7;font-size:10.5pt;background:#e5e7eb}
+@media print{body{font-size:10pt;background:white;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}.page-break{page-break-before:always}.no-break{page-break-inside:avoid}@page{margin:18mm 20mm;size:A4}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}}
+@media screen{.page{max-width:210mm;margin:0 auto 10px;background:white;padding:28mm 24mm;box-shadow:0 2px 8px rgba(0,0,0,.1)}}
+h1{font-size:20pt;font-weight:800;color:var(--b800);margin-bottom:6px}
+h2{font-size:14pt;font-weight:700;color:var(--g900);margin-top:22px;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid var(--b200)}
+h3{font-size:11pt;font-weight:700;color:var(--b700);margin-top:16px;margin-bottom:6px}
+p{margin-bottom:8px;color:var(--g700);font-size:10pt}
+.sh{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:10px;border-bottom:3px solid var(--b500)}
+.sh h1{border:none;margin:0;padding:0}
+.si{width:44px;height:44px;background:var(--b50);border:2px solid var(--b200);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.si svg{width:22px;height:22px;color:var(--b600)}
+.sn{font-size:8.5pt;color:var(--b600);font-weight:600;margin:0}
+table{width:100%;border-collapse:collapse;font-size:9pt;margin:10px 0}
+thead th{background:var(--b600);color:white;padding:7px 10px;text-align:left;font-size:8pt;text-transform:uppercase;letter-spacing:.5px}
+thead th:first-child{border-radius:6px 0 0 0}thead th:last-child{border-radius:0 6px 0 0}
+tbody td{padding:7px 10px;border-bottom:1px solid var(--g100)}
+tbody tr:nth-child(even){background:var(--g50)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.fc{background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:14px}
+.fc h4{font-size:9.5pt;font-weight:700;color:var(--g900);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.fc p{font-size:8.5pt;color:var(--g600);margin:0;line-height:1.5}
+.hb{background:linear-gradient(135deg,var(--b50),var(--b100));border:1px solid var(--b200);border-radius:12px;padding:16px;margin:14px 0}
+.hb h4{font-weight:700;color:var(--b800);margin-bottom:4px;font-size:10pt}
+.hb p{color:var(--b700);font-size:9pt;margin:0}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.sc{background:white;border:1px solid var(--g200);border-radius:10px;padding:14px;text-align:center}
+.sv{font-size:20pt;font-weight:800;color:var(--b600);line-height:1.2}
+.sl{font-size:8pt;color:var(--g500);margin-top:3px;font-weight:500}
+.cl{list-style:none;padding:0;margin:8px 0}
+.cl li{display:flex;align-items:flex-start;gap:7px;padding:4px 0;font-size:9pt;color:var(--g700)}
+.cl li::before{content:'✓';display:flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--b100);color:var(--b700);border-radius:50%;font-size:8pt;font-weight:700;flex-shrink:0;margin-top:2px}
+.tc{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:10px 0}
+.ti{display:flex;gap:12px;margin-bottom:14px}.td{width:32px;height:32px;background:var(--b100);border:2px solid var(--b200);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--b700);font-size:9pt;flex-shrink:0}
+.ti h4{font-weight:700;font-size:9.5pt;color:var(--g900);margin-bottom:1px}.ti p{font-size:8.5pt;color:var(--g500);margin:0}
+.fd{display:flex;align-items:center;justify-content:center;gap:6px;margin:16px 0;flex-wrap:wrap}
+.fs{background:var(--b50);border:1px solid var(--b200);border-radius:8px;padding:8px 14px;text-align:center;font-size:8pt;font-weight:600;color:var(--b800)}
+.fa{color:var(--b500);font-size:14pt}
+.pc{background:linear-gradient(135deg,var(--b700),var(--b600));border-radius:14px;padding:24px;color:white;text-align:center;margin:14px 0}
+.pc .pv{font-size:28pt;font-weight:900;margin:6px 0}.pc .ps{font-size:9pt;opacity:.8}
+.al{background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:12px;margin-bottom:8px}
+.al h4{font-size:8.5pt;font-weight:700;color:var(--b700);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.at{display:flex;flex-wrap:wrap;gap:5px}.atg{background:white;border:1px solid var(--g200);border-radius:5px;padding:2px 8px;font-size:7.5pt;font-weight:500;color:var(--g700)}
+.toc-i{display:flex;align-items:center;padding:8px 0;border-bottom:1px dashed var(--g200)}
+.toc-n{width:28px;height:28px;background:var(--b100);color:var(--b700);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:9pt;margin-right:10px;flex-shrink:0}
+.toc-l{font-weight:500;font-size:10pt;flex:1}.toc-d{flex:1;border-bottom:1px dotted var(--g200);margin:0 8px;height:1px}.toc-p{font-weight:600;color:var(--b600);font-size:9pt}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="page" style="background:linear-gradient(135deg,var(--b800) 0%,var(--b600) 40%,#4ade80 100%);color:white;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:100vh;text-align:center">
+<div style="padding:40px">
+<div style="width:90px;height:90px;background:#16a34a;border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:50px;height:50px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 17 3.5s1.5 2.5 1.5 6c0 4-2.5 7-7.5 10.5"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+</div>
+<div style="display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:100px;padding:6px 20px;font-size:9pt;font-weight:500;letter-spacing:.5px;margin-bottom:16px">🌍 PLATEFORME DIGITALE — GABON, AFRIQUE & MONDE</div>
+<h1 style="font-size:38pt;font-weight:900;color:white;letter-spacing:-1.5px;margin-bottom:6px;text-shadow:0 2px 20px rgba(0,0,0,.2)">CarbonTrack</h1>
+<p style="font-size:14pt;font-weight:300;color:rgba(255,255,255,.9);max-width:480px;margin:0 auto 30px">La premiere plateforme de bilan carbone certifie pour les entreprises au Gabon, en Afrique et dans le monde</p>
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+<span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:4px 12px;border-radius:100px;font-size:8pt;font-weight:600">📋 ISO 14064-1:2018</span>
+<span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:4px 12px;border-radius:100px;font-size:8pt;font-weight:600">📋 ISO 14069:2013</span>
+<span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:4px 12px;border-radius:100px;font-size:8pt;font-weight:600">📋 GHG Protocol</span>
+</div>
+<div style="display:flex;gap:24px;justify-content:center;margin-top:36px;font-size:8.5pt;opacity:.6">
+<div>📄 Documentation Investisseurs</div><div>|</div><div>📅 Fevrier 2026</div><div>|</div><div>🔒 Confidentiel</div>
+</div>
+</div>
+</div>
+
+<!-- TABLE DES MATIERES -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div><h1>Table des Matieres</h1></div>
+<div class="toc-i"><div class="toc-n">1</div><span class="toc-l">Resume Executif</span><span class="toc-d"></span><span class="toc-p">3</span></div>
+<div class="toc-i"><div class="toc-n">2</div><span class="toc-l">Le Probleme : Urgence Climatique en Afrique</span><span class="toc-d"></span><span class="toc-p">4</span></div>
+<div class="toc-i"><div class="toc-n">3</div><span class="toc-l">Notre Solution : CarbonTrack</span><span class="toc-d"></span><span class="toc-p">5</span></div>
+<div class="toc-i"><div class="toc-n">4</div><span class="toc-l">Fonctionnalites Detaillees de la Plateforme</span><span class="toc-d"></span><span class="toc-p">6</span></div>
+<div class="toc-i"><div class="toc-n">5</div><span class="toc-l">Systeme de Certification par Experts</span><span class="toc-d"></span><span class="toc-p">8</span></div>
+<div class="toc-i"><div class="toc-n">6</div><span class="toc-l">Conformite Normative & Standards Internationaux</span><span class="toc-d"></span><span class="toc-p">9</span></div>
+<div class="toc-i"><div class="toc-n">7</div><span class="toc-l">Architecture Technique</span><span class="toc-d"></span><span class="toc-p">10</span></div>
+<div class="toc-i"><div class="toc-n">8</div><span class="toc-l">Modele Economique & Tarification</span><span class="toc-d"></span><span class="toc-p">11</span></div>
+<div class="toc-i"><div class="toc-n">9</div><span class="toc-l">Opportunite de Marche</span><span class="toc-d"></span><span class="toc-p">12</span></div>
+<div class="toc-i"><div class="toc-n">10</div><span class="toc-l">Feuille de Route & Vision 2026-2028</span><span class="toc-d"></span><span class="toc-p">13</span></div>
+<div class="toc-i"><div class="toc-n">11</div><span class="toc-l">Securite & Confidentialite</span><span class="toc-d"></span><span class="toc-p">14</span></div>
+<div class="toc-i"><div class="toc-n">12</div><span class="toc-l">Contact & Informations</span><span class="toc-d"></span><span class="toc-p">15</span></div>
+<div class="hb" style="margin-top:28px"><h4>📌 A propos de ce document</h4><p>Ce document presente CarbonTrack, la premiere plateforme digitale de bilan carbone et de certification environnementale concue pour le marche gabonais, africain et international. Destine aux investisseurs, partenaires strategiques et decideurs institutionnels.</p></div>
+</div>
+
+<!-- SECTION 1: RESUME EXECUTIF -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><div><p class="sn">SECTION 1</p><h1>Resume Executif</h1></div></div>
+<p style="font-size:10.5pt;line-height:1.8"><strong>CarbonTrack</strong> est une plateforme SaaS innovante qui permet aux entreprises gabonaises, africaines et internationales de <strong>mesurer, analyser et certifier</strong> leurs emissions de gaz a effet de serre conformement aux normes ISO 14064 et GHG Protocol.</p>
+<div class="sg">
+<div class="sc"><div class="sv">0</div><div class="sl">Concurrence directe<br>au Gabon</div></div>
+<div class="sc"><div class="sv">+5 000</div><div class="sl">Entreprises ciblees<br>au Gabon</div></div>
+<div class="sc"><div class="sv">3</div><div class="sl">Standards internationaux<br>supportes</div></div>
+</div>
+<h2>Proposition de Valeur</h2>
+<div class="fg">
+<div class="fc"><h4>⚡ Rapidite</h4><p>Bilan carbone complet en quelques heures au lieu de plusieurs semaines avec les methodes traditionnelles.</p></div>
+<div class="fc"><h4>🏅 Certification</h4><p>Certification par experts accredites avec visite sur site, audit des donnees et certificat officiel.</p></div>
+<div class="fc"><h4>🌍 Normes Internationales</h4><p>Conformite totale ISO 14064-1, ISO 14069 et GHG Protocol, reconnus mondialement.</p></div>
+<div class="fc"><h4>💰 Accessibilite</h4><p>Tarification adaptee au marche africain, paiement Airtel Money et Visa. Sans engagement.</p></div>
+</div>
+<div class="hb"><h4>🎯 Notre Mission</h4><p>Democratiser l'acces au bilan carbone au Gabon, en Afrique et dans le monde, et accompagner les entreprises dans leur transition ecologique, tout en respectant les plus hauts standards internationaux.</p></div>
+</div>
+
+<!-- SECTION 2: LE PROBLEME -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div><p class="sn">SECTION 2</p><h1>Le Probleme : Urgence Climatique</h1></div></div>
+<h2>Contexte Global</h2>
+<p>Le changement climatique est l'un des defis les plus pressants de notre epoque. L'Accord de Paris (2015) engage les nations a limiter le rechauffement a 1,5°C. Pour y parvenir, chaque entreprise doit connaitre et reduire son empreinte carbone.</p>
+<h2>La Situation au Gabon et en Afrique</h2>
+<div class="tc">
+<div><h3>⚠️ Les Defis</h3>
+<ul class="cl"><li>Aucune plateforme locale de bilan carbone</li><li>Dependance aux consultants internationaux couteux</li><li>Manque de donnees d'emission regionales</li><li>Faible sensibilisation des entreprises locales</li><li>Absence de cadre reglementaire incitatif</li></ul></div>
+<div><h3>🌱 Les Opportunites</h3>
+<ul class="cl"><li>Pression croissante des investisseurs internationaux</li><li>Exigences ESG des multinationales au Gabon</li><li>Potentiel de credits carbone (forets du bassin du Congo)</li><li>Marche vierge sans concurrence directe</li><li>Croissance du secteur digital en Afrique</li></ul></div>
+</div>
+<div class="sg">
+<div class="sc"><div class="sv" style="font-size:16pt">+10 000 $</div><div class="sl">Cout moyen d'un bilan<br>par cabinet international</div></div>
+<div class="sc"><div class="sv" style="font-size:16pt">6-12 mois</div><div class="sl">Delai moyen pour obtenir<br>une certification</div></div>
+<div class="sc"><div class="sv" style="font-size:16pt">&lt; 1%</div><div class="sl">Entreprises au Gabon ayant<br>realise un bilan carbone</div></div>
+</div>
+</div>
+
+<!-- SECTION 3: NOTRE SOLUTION -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div><div><p class="sn">SECTION 3</p><h1>Notre Solution : CarbonTrack</h1></div></div>
+<p>CarbonTrack est une application web moderne qui guide les entreprises dans la realisation complete de leur bilan carbone, de la collecte des donnees a la certification officielle.</p>
+<h2>Parcours Utilisateur</h2>
+<div class="fd">
+<div class="fs">📝 Inscription</div><div class="fa">→</div>
+<div class="fs">💳 Abonnement</div><div class="fa">→</div>
+<div class="fs">🏢 Sites</div><div class="fa">→</div>
+<div class="fs">📊 Bilan</div><div class="fa">→</div>
+<div class="fs">📈 Rapports</div><div class="fa">→</div>
+<div class="fs">📄 PDF</div><div class="fa">→</div>
+<div class="fs">🏅 Certification</div>
+</div>
+<h2>Les 6 Modules</h2>
+<table><thead><tr><th>Module</th><th>Description</th><th>Fonctionnalites Cles</th></tr></thead><tbody>
+<tr><td><strong>🏢 Sites & Entites</strong></td><td>Gestion multi-sites</td><td>Type, adresse, surface m², description</td></tr>
+<tr><td><strong>📊 Bilans Carbone</strong></td><td>Saisie et calcul des emissions</td><td>Scope 1/2/3, 200+ facteurs, mensuel/annuel</td></tr>
+<tr><td><strong>📈 Rapports & Graphiques</strong></td><td>Visualisation et analyse</td><td>Graphiques interactifs, export PDF, QR code</td></tr>
+<tr><td><strong>🏅 Certification</strong></td><td>Certification par experts</td><td>Demande, suivi, audit, certificat officiel</td></tr>
+<tr><td><strong>📎 Documents d'Audit</strong></td><td>Pieces justificatives</td><td>Upload, stockage securise, tracabilite</td></tr>
+<tr><td><strong>💳 Abonnement</strong></td><td>Paiement et gestion</td><td>Airtel Money, Visa, facturation mensuelle</td></tr>
+</tbody></table>
+
+<h2>Les 3 Scopes d'Emissions</h2>
+<table><thead><tr><th>Scope</th><th>Description</th><th>Exemples</th></tr></thead><tbody>
+<tr><td><strong style="color:#ef4444">Scope 1</strong></td><td>Emissions directes</td><td>Combustion de carburants, gaz refrigerants, vehicules</td></tr>
+<tr><td><strong style="color:#f97316">Scope 2</strong></td><td>Emissions indirectes energie</td><td>Electricite achetee, vapeur, chauffage</td></tr>
+<tr><td><strong style="color:#3b82f6">Scope 3</strong></td><td>Autres emissions indirectes</td><td>Achats, fret, transport, dechets, immobilisations</td></tr>
+</tbody></table>
+</div>
+
+<!-- SECTION 4a: FONCTIONNALITES - Categories & Saisie -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div><div><p class="sn">SECTION 4</p><h1>Fonctionnalites Detaillees</h1></div></div>
+
+<h2>4.1 — Categories d'Emissions</h2>
+<div class="fg">
+<div class="fc"><h4>🔥 Energie</h4><p>Combustibles stationnaires, organiques, mobiles — Diesel, essence, GPL, bois, charbon, gaz naturel</p></div>
+<div class="fc"><h4>⚡ Electricite & Reseaux</h4><p>Electricite par pays/region, vapeur, refroidissement, gaz refrigerants (R-134a, R-410A)</p></div>
+<div class="fc"><h4>📦 Intrants & Materiaux</h4><p>Metaux (acier, aluminium, cuivre), plastiques (PET, HDPE), papier, verre, ciment</p></div>
+<div class="fc"><h4>🚛 Transport & Fret</h4><p>Fret routier, ferroviaire, maritime, aerien — Transport personnes : voiture, bus, avion</p></div>
+<div class="fc"><h4>🗑️ Dechets</h4><p>Decharge, incineration, recyclage, compostage, eaux usees</p></div>
+<div class="fc"><h4>🏗️ Immobilisations</h4><p>Batiments, vehicules, equipements informatiques, mobilier, machines industrielles</p></div>
+</div>
+
+<div class="hb"><h4>📊 Plus de 200 facteurs d'emission</h4><p>Base de donnees validee provenant de sources reconnues (ADEME, DEFRA, GHG Protocol) avec composantes amont et combustion.</p></div>
+
+<h2>4.2 — Saisie des Donnees</h2>
+<ul class="cl">
+<li>Selection du facteur d'emission dans une liste filtrable</li>
+<li>Saisie quantite et unite (kWh, litres, tonnes, km)</li>
+<li>Calcul automatique des emissions en kgCO2eq</li>
+<li>Saisie mensuelle (Janvier a Decembre) ou annuelle</li>
+<li>Upload de documents justificatifs</li>
+<li>Synthese en temps reel avec totaux par scope</li>
+</ul>
+</div>
+
+<!-- SECTION 4b: FONCTIONNALITES - Rapports -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div><div><p class="sn">SECTION 4 (suite)</p><h1>Rapports & Visualisations</h1></div></div>
+
+<h2>4.3 — Rapports & Graphiques Interactifs</h2>
+<p>Le module de rapports offre une visualisation complete et interactive des resultats du bilan carbone avec 4 onglets dedies.</p>
+<div class="fg">
+<div class="fc"><h4>🍩 Repartition par Scope</h4><p>Graphique donut avec legende detaillee, barres de progression et pourcentages pour chaque scope</p></div>
+<div class="fc"><h4>📊 Emissions par Categorie</h4><p>Barres horizontales montrant la contribution de chaque categorie (Energie, Fret, Intrants, etc.)</p></div>
+<div class="fc"><h4>📅 Suivi Mensuel</h4><p>Barres empilees par mois (Scope 1+2+3), courbe cumulative, tableau detail mensuel</p></div>
+<div class="fc"><h4>🏆 Top Sources d'Emissions</h4><p>Classement des 15 principales sources avec code couleur par scope et valeurs detaillees</p></div>
+</div>
+
+<h3>Onglets de Rapports</h3>
+<table><thead><tr><th>Onglet</th><th>Contenu</th></tr></thead><tbody>
+<tr><td><strong>Vue d'ensemble</strong></td><td>Repartition par scope, emissions par categorie, top emetteurs, sous-categories</td></tr>
+<tr><td><strong>Suivi mensuel</strong></td><td>Barres empilees mensuelles, courbe cumulative, comparaison annuelle</td></tr>
+<tr><td><strong>GHG Protocol</strong></td><td>Detail par categorie GHG (1- Directes, 2- Electricite, 3-1 a 3-6)</td></tr>
+<tr><td><strong>ISO 14064/14069</strong></td><td>Classification par postes ISO avec scope, nombre de postes et part relative</td></tr>
+</tbody></table>
+
+<h2>4.4 — Generation de Rapports PDF</h2>
+<div class="fg">
+<div class="fc"><h4>📄 Contenu du PDF</h4><p>Page de couverture, synthese, tableaux par scope, graphiques, donnees de calcul, methodologie, QR code de verification</p></div>
+<div class="fc"><h4>🎨 Design Professionnel</h4><p>En-tetes/pieds de page, couleurs par scope, alternance de lignes, sections titrees avec separateurs</p></div>
+</div>
+</div>
+
+<!-- SECTION 5: CERTIFICATION -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg></div><div><p class="sn">SECTION 5</p><h1>Systeme de Certification</h1></div></div>
+<p style="font-size:10.5pt;line-height:1.8">La certification est l'element differenciateur majeur de CarbonTrack. Elle apporte credibilite et confiance aux rapports d'emissions.</p>
+
+<h2>Processus de Certification</h2>
+<div class="ti"><div class="td">1</div><div><h4>Demande de Certification</h4><p>L'entreprise soumet une demande depuis la page du bilan avec message optionnel. Statut : <strong style="color:#eab308">En attente</strong></p></div></div>
+<div class="ti"><div class="td">2</div><div><h4>Assignation d'un Expert</h4><p>L'equipe CarbonTrack assigne un expert accredite. L'entreprise est notifiee. Statut : <strong style="color:#3b82f6">Assigne</strong></p></div></div>
+<div class="ti"><div class="td">3</div><div><h4>Audit & Inspection sur Site</h4><p>L'expert verifie les donnees, visite le site, controle les documents. Statut : <strong style="color:#f97316">En cours</strong></p></div></div>
+<div class="ti"><div class="td">4</div><div><h4>Decision de Certification</h4><p>Certification approuvee avec certificat officiel, ou rejet motive. Statut : <strong style="color:#22c55e">Certifie</strong> ou <strong style="color:#ef4444">Refuse</strong></p></div></div>
+
+<h2>Elements de la Certification</h2>
+<table><thead><tr><th>Element</th><th>Description</th></tr></thead><tbody>
+<tr><td><strong>Numero de certificat</strong></td><td>Reference unique du certificat</td></tr>
+<tr><td><strong>Nom de l'expert</strong></td><td>Identite de l'auditeur accredite</td></tr>
+<tr><td><strong>Date d'inspection</strong></td><td>Date de la visite sur site</td></tr>
+<tr><td><strong>Notes d'inspection</strong></td><td>Observations detaillees de l'expert</td></tr>
+<tr><td><strong>Documents certifies</strong></td><td>Rapport d'audit, certificat officiel</td></tr>
+<tr><td><strong>Badge de certification</strong></td><td>Affiche sur le bilan dans la plateforme</td></tr>
+</tbody></table>
+
+<div class="hb"><h4>🏅 Valeur de la Certification</h4><p>Un bilan certifie donne a l'entreprise une credibilite renforcee aupres des investisseurs, partenaires commerciaux et organismes de regulation. C'est un atout competitif majeur dans le contexte des exigences ESG croissantes.</p></div>
+</div>
+
+<!-- SECTION 6: NORMES -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div><div><p class="sn">SECTION 6</p><h1>Conformite Normative & Standards</h1></div></div>
+
+<div class="fc" style="border-left:4px solid var(--b600);margin-bottom:10px"><h4>📋 ISO 14064-1:2018</h4><p>Quantification et declaration des emissions au niveau des organismes. CarbonTrack structure les donnees et genere les rapports dans le format ISO requis.</p></div>
+<div class="fc" style="border-left:4px solid #3b82f6;margin-bottom:10px"><h4>📋 ISO 14069:2013</h4><p>Guide pratique pour l'application de l'ISO 14064-1. CarbonTrack categorise les emissions selon les postes ISO 14069.</p></div>
+<div class="fc" style="border-left:4px solid #f97316;margin-bottom:10px"><h4>📋 GHG Protocol — Corporate Standard</h4><p>Standard le plus utilise au monde (WRI/WBCSD). CarbonTrack structure toutes les emissions en Scope 1, 2 et 3 avec les 15 categories du Scope 3.</p></div>
+
+<h2>Sources des Facteurs d'Emission</h2>
+<table><thead><tr><th>Source</th><th>Organisme</th><th>Couverture</th></tr></thead><tbody>
+<tr><td><strong>ADEME</strong></td><td>Agence de la transition ecologique (France)</td><td>Base Carbone — facteurs internationaux</td></tr>
+<tr><td><strong>DEFRA</strong></td><td>Dept. for Environment (UK)</td><td>GHG Conversion Factors</td></tr>
+<tr><td><strong>GHG Protocol</strong></td><td>WRI / WBCSD</td><td>Emission Factor Database</td></tr>
+<tr><td><strong>IEA</strong></td><td>Agence Internationale de l'Energie</td><td>Facteurs electricite par pays</td></tr>
+</tbody></table>
+</div>
+
+<!-- SECTION 7: ARCHITECTURE -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div><p class="sn">SECTION 7</p><h1>Architecture Technique</h1></div></div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+<div class="al" style="border-left:4px solid #3b82f6;padding:10px;margin:0"><h4 style="margin-bottom:3px">🖥️ Frontend</h4><div class="at"><span class="atg">Next.js 14</span><span class="atg">React 18</span><span class="atg">TypeScript</span><span class="atg">Tailwind CSS</span><span class="atg">Recharts</span></div></div>
+<div class="al" style="border-left:4px solid #22c55e;padding:10px;margin:0"><h4 style="margin-bottom:3px">⚙️ Backend</h4><div class="at"><span class="atg">Next.js API Routes</span><span class="atg">Node.js</span><span class="atg">JWT Auth</span><span class="atg">bcryptjs</span></div></div>
+<div class="al" style="border-left:4px solid #f97316;padding:10px;margin:0"><h4 style="margin-bottom:3px">🗄️ Base de Donnees</h4><div class="at"><span class="atg">PostgreSQL</span><span class="atg">9 Tables</span><span class="atg">Contraintes FK</span><span class="atg">Indexes</span></div></div>
+<div class="al" style="border-left:4px solid #8b5cf6;padding:10px;margin:0"><h4 style="margin-bottom:3px">📄 Documents</h4><div class="at"><span class="atg">jsPDF</span><span class="atg">jsPDF-AutoTable</span><span class="atg">QRCode</span></div></div>
+</div>
+
+<h2 style="margin-top:12px">Schema de la Base de Donnees</h2>
+<table style="margin:6px 0;font-size:8.5pt"><thead><tr><th>Table</th><th>Description</th><th>Relations</th></tr></thead><tbody>
+<tr><td><strong>companies</strong></td><td>Entreprises clientes</td><td>—</td></tr>
+<tr><td><strong>users</strong></td><td>Utilisateurs</td><td>→ companies</td></tr>
+<tr><td><strong>sites</strong></td><td>Sites physiques</td><td>→ companies</td></tr>
+<tr><td><strong>assessments</strong></td><td>Bilans carbone</td><td>→ sites</td></tr>
+<tr><td><strong>emission_entries</strong></td><td>Lignes d'emission</td><td>→ assessments</td></tr>
+<tr><td><strong>audit_documents</strong></td><td>Pieces justificatives</td><td>→ assessments</td></tr>
+<tr><td><strong>certification_requests</strong></td><td>Demandes certification</td><td>→ assessments, companies</td></tr>
+<tr><td><strong>certification_documents</strong></td><td>Documents certification</td><td>→ certification_requests</td></tr>
+<tr><td><strong>subscriptions</strong></td><td>Abonnements</td><td>→ companies</td></tr>
+</tbody></table>
+
+<h2 style="margin-top:12px">Securite</h2>
+<ul class="cl" style="margin:4px 0">
+<li>Authentification JWT avec cookies HTTP-Only securises</li>
+<li>Mots de passe hashes avec bcrypt (salt rounds = 12)</li>
+<li>Verification de propriete sur chaque requete API (company_id)</li>
+<li>Protection CSRF integree — Validation serveur sur toutes les routes</li>
+</ul>
+</div>
+
+<!-- SECTION 8: MODELE ECONOMIQUE -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div><p class="sn">SECTION 8</p><h1>Modele Economique & Tarification</h1></div></div>
+
+<div class="pc"><p style="opacity:.8;margin:0;font-size:9pt">Abonnement Entreprise</p><div class="pv">2.500.000 FCFA</div><div class="ps">par mois — sans engagement</div></div>
+
+<h3>Ce qui est inclus</h3>
+<div class="tc">
+<ul class="cl"><li>Nombre illimite de sites</li><li>Nombre illimite de bilans</li><li>200+ facteurs d'emission</li><li>Rapports interactifs</li><li>Export PDF avec QR code</li></ul>
+<ul class="cl"><li>Suivi mensuel et annuel</li><li>Rapports GHG Protocol et ISO</li><li>Stockage documents d'audit</li><li>Support par email</li><li>Mises a jour continues</li></ul>
+</div>
+
+<h3>Moyens de Paiement</h3>
+<div class="fg">
+<div class="fc" style="text-align:center"><h4 style="justify-content:center"><img src="airtel-money-logo.png" alt="Airtel Money" style="height:28px;vertical-align:middle;margin-right:6px"> Airtel Money</h4><p>Paiement mobile instantane. Disponible et operationnel.</p></div>
+<div class="fc" style="text-align:center"><h4 style="justify-content:center"><img src="card-payment-logo.png" alt="Visa/Mastercard" style="height:24px;vertical-align:middle;margin-right:6px"> Visa / Mastercard</h4><p>Paiement par carte bancaire. Bientot disponible.</p></div>
+</div>
+
+<h2>Sources de Revenus Futures</h2>
+<table><thead><tr><th>Source</th><th>Description</th><th>Horizon</th></tr></thead><tbody>
+<tr><td><strong>Plan Premium</strong></td><td>Consulting personnalise, API access, multi-utilisateurs</td><td>2026 T3</td></tr>
+<tr><td><strong>Certification</strong></td><td>Frais de certification par les experts (par bilan)</td><td>2026 T3</td></tr>
+<tr><td><strong>Formation</strong></td><td>Modules de formation en ligne sur le bilan carbone</td><td>2027 T1</td></tr>
+<tr><td><strong>API</strong></td><td>Integration avec les ERP et systemes comptables</td><td>2027 T2</td></tr>
+<tr><td><strong>Credits Carbone</strong></td><td>Marketplace de credits carbone pour projets Gabon & Afrique</td><td>2027 T4</td></tr>
+</tbody></table>
+</div>
+
+<!-- SECTION 9: MARCHE -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div><p class="sn">SECTION 9</p><h1>Opportunite de Marche</h1></div></div>
+
+<div class="sg">
+<div class="sc"><div class="sv" style="font-size:16pt">5 000+</div><div class="sl">Moyennes et grandes<br>entreprises au Gabon</div></div>
+<div class="sc"><div class="sv" style="font-size:16pt">50 000+</div><div class="sl">Entreprises en<br>Afrique Centrale</div></div>
+<div class="sc"><div class="sv" style="font-size:16pt">$2.3 Mrd</div><div class="sl">Marche mondial du logiciel<br>de gestion carbone</div></div>
+</div>
+
+<h2>Segments Cibles</h2>
+<table><thead><tr><th>Segment</th><th>Exemples</th><th>Motivation</th></tr></thead><tbody>
+<tr><td><strong>Petrole & Mines</strong></td><td>Total Energies, Assala Energy, Eramet</td><td>Exigences ESG</td></tr>
+<tr><td><strong>Telecoms</strong></td><td>Airtel Gabon, Moov Africa</td><td>Rapports RSE obligatoires</td></tr>
+<tr><td><strong>Banques</strong></td><td>BGFI Bank, UBA, Ecobank</td><td>Pression bailleurs de fonds</td></tr>
+<tr><td><strong>Industrie</strong></td><td>Brasseries, cimenteries</td><td>Reduction couts energetiques</td></tr>
+<tr><td><strong>ONG</strong></td><td>PNUD, Banque Mondiale</td><td>Obligation reporting carbone</td></tr>
+<tr><td><strong>Transport</strong></td><td>Compagnies aeriennes</td><td>Regulations OACI/OMI</td></tr>
+</tbody></table>
+
+<h2>Avantages Concurrentiels</h2>
+<div class="fg">
+<div class="fc"><h4>🥇 Premier Arrivant</h4><p>Aucune plateforme concurrente au Gabon. Position dominante a construire.</p></div>
+<div class="fc"><h4>🌍 Connaissance Locale</h4><p>Equipe basee au Gabon (Libreville), comprehension du marche et des reglementations locales.</p></div>
+<div class="fc"><h4>💰 Prix Accessible</h4><p>10x moins cher qu'un cabinet de conseil international. Paiement mobile adapte.</p></div>
+<div class="fc"><h4>🏅 Solution Tout-en-Un</h4><p>Bilan + certification + rapport. Pas besoin de prestataires externes.</p></div>
+</div>
+</div>
+
+<!-- SECTION 10: ROADMAP -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><p class="sn">SECTION 10</p><h1>Feuille de Route 2026 — 2028</h1></div></div>
+
+<div class="ti"><div class="td" style="background:var(--b500);color:white;border-color:var(--b600)">✓</div><div><h4>T1 2026 — Lancement (Phase actuelle)</h4><p>Plateforme operationnelle : inscription, bilans, rapports, PDF, certification. Paiement Airtel Money.</p></div></div>
+<div class="ti"><div class="td">2</div><div><h4>T2 2026 — Panel Administration & Experts</h4><p>Interface d'administration pour gestion des certifications, assignation des experts, suivi des audits.</p></div></div>
+<div class="ti"><div class="td">3</div><div><h4>T3 2026 — Paiement Visa & Plan Premium</h4><p>Integration paiement Visa. Plan Premium avec consulting, multi-utilisateurs et API access.</p></div></div>
+<div class="ti"><div class="td">4</div><div><h4>T4 2026 — Expansion Afrique</h4><p>Ouverture Cameroun, Congo-Brazzaville, Guinee Equatoriale, Senegal, Cote d'Ivoire. Partenariats chambres de commerce.</p></div></div>
+<div class="ti"><div class="td">5</div><div><h4>T1-T2 2027 — Formation & API</h4><p>Modules de formation en ligne. Ouverture API pour integrations ERP et systemes comptables.</p></div></div>
+<div class="ti"><div class="td">6</div><div><h4>T3-T4 2027 — Marketplace Credits Carbone</h4><p>Echange de credits carbone pour projets de compensation au Gabon et en Afrique (REDD+, reforestation).</p></div></div>
+<div class="ti"><div class="td">7</div><div><h4>2028 — Leader Continental</h4><p>Expansion Afrique Sub-Saharienne. Application mobile. IA pour recommandations de reduction.</p></div></div>
+
+<div class="hb" style="margin-top:20px"><h4>🚀 Vision a Long Terme</h4><p>Devenir la reference continentale en matiere de gestion carbone et de certification environnementale pour les entreprises africaines, tout en contribuant activement a la lutte contre le changement climatique.</p></div>
+</div>
+
+<!-- SECTION 11: SECURITE -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div><p class="sn">SECTION 11</p><h1>Securite & Confidentialite</h1></div></div>
+
+<div class="fg">
+<div class="fc"><h4>🔒 Authentification</h4><p>JWT tokens, cookies HTTP-Only, hachage bcrypt avec salt. Sessions expirent apres 7 jours.</p></div>
+<div class="fc"><h4>🛡️ Isolation des Donnees</h4><p>Chaque entreprise n'accede qu'a ses propres donnees. Verification company_id sur chaque requete.</p></div>
+<div class="fc"><h4>📁 Stockage Securise</h4><p>Documents stockes avec nommage securise. Acces controle par authentification.</p></div>
+<div class="fc"><h4>🔐 Chiffrement</h4><p>Communications HTTPS. Base PostgreSQL avec acces restreint par credentials.</p></div>
+</div>
+
+<h2>Politique de Confidentialite</h2>
+<ul class="cl">
+<li>Les donnees d'emission sont la propriete exclusive de l'entreprise cliente</li>
+<li>Aucune donnee partagee avec des tiers sans consentement</li>
+<li>Donnees de certification accessibles uniquement par l'entreprise et l'expert</li>
+<li>Droit a la suppression des donnees sur demande</li>
+<li>Sauvegardes regulieres de la base de donnees</li>
+<li>Conformite aux bonnes pratiques RGPD</li>
+</ul>
+
+<div class="sg">
+<div class="sc"><div class="sv" style="font-size:18pt">99.9%</div><div class="sl">Disponibilite cible</div></div>
+<div class="sc"><div class="sv" style="font-size:18pt">&lt; 2s</div><div class="sl">Temps de chargement moyen</div></div>
+<div class="sc"><div class="sv" style="font-size:18pt">24/7</div><div class="sl">Acces en continu</div></div>
+</div>
+</div>
+
+<!-- SECTION 12: CONTACT -->
+<div class="page page-break">
+<div class="sh"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><p class="sn">SECTION 12</p><h1>Contact & Informations</h1></div></div>
+
+<div style="text-align:center;padding:30px 0">
+<div style="width:80px;height:80px;background:var(--b50);border:2px solid var(--b200);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+<svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:44px;height:44px"><path d="M2 22c1.25-1.25 2.5-2.5 3.5-4 .83-1.25 1.5-2.5 2-4 .5-1.5.75-3 .5-4.5-.25-1.5-1-3-2-4.5 3 1 5.5 2.5 7.5 4.5s3.5 4.5 4.5 7.5c-1.5-1-3-1.75-4.5-2s-3 0-4.5.5c-1.5.5-2.75 1.17-4 2-1.5 1-2.75 2.25-4 3.5z"/><path d="M9 9c-1.5 1.5-2.5 3.5-2.5 6"/></svg>
+</div>
+<h2 style="font-size:24pt;font-weight:900;color:var(--b800);border:none;margin:0 0 4px">CarbonTrack</h2>
+<p style="font-size:11pt;color:var(--g500);margin-bottom:24px">La plateforme de bilan carbone pour l'Afrique</p>
+</div>
+
+<div class="fg" style="max-width:480px;margin:0 auto">
+<div class="fc" style="text-align:center"><h4 style="justify-content:center">🌐 Site Web</h4><p>www.greenleaves.ga/carbontrack</p></div>
+<div class="fc" style="text-align:center"><h4 style="justify-content:center">� Adresse</h4><p>Libreville, Gabon</p></div>
+</div>
+<div style="margin-top:16px">
+<h3 style="text-align:center;margin-bottom:12px">Equipe de Direction</h3>
+<div class="fg" style="max-width:480px;margin:0 auto">
+<div class="fc"><h4>👤 Sabine ANOTHO</h4><p>📧 sabine-anotho@greenleaves.ga<br>📱 077 52 37 17 / 065 46 16 25</p></div>
+<div class="fc"><h4>👤 Moctar SIDIBE</h4><p>📧 moctar-sidibe@greenleaves.ga<br>📱 077 72 44 99 / 062 95 13 17</p></div>
+</div>
+</div>
+
+<div style="text-align:center;margin-top:30px;padding:24px;background:var(--g50);border-radius:14px">
+<p style="font-size:13pt;font-weight:700;color:var(--g900);margin-bottom:6px">Pret a investir dans l'avenir vert de l'Afrique ?</p>
+<p style="font-size:9.5pt;color:var(--g500);margin:0">Contactez-nous pour une demonstration personnalisee de la plateforme CarbonTrack.</p>
+</div>
+
+<div style="margin-top:40px;padding-top:12px;border-top:1px solid var(--g200);display:flex;justify-content:space-between;font-size:7.5pt;color:var(--g400)">
+<span>© 2026 GreenLeaves / CarbonTrack — Tous droits reserves</span>
+<span>Document confidentiel — Fevrier 2026</span>
+</div>
+</div>
+
+</body>
+</html>

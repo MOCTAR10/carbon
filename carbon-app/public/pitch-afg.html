@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitch Deck - CarbonTrack & AFG Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; margin: 0; padding: 0; }
+        .slide { 
+            width: 100%; max-width: 1100px; height: 750px; 
+            background: white; margin: 40px auto; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            border-radius: 16px; overflow: hidden;
+            position: relative; display: flex; flex-direction: column;
+            page-break-after: always; /* Crucial for PDF generation */
+        }
+        .slide-bg-green { background: linear-gradient(135deg, #047857 0%, #064e3b 100%); color: white; }
+        .slide-bg-brand { background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); color: white; }
+        .slide-content { flex: 1; padding: 60px; display: flex; flex-direction: column; justify-content: center; }
+        .slide-header { font-size: 2.5rem; font-weight: 800; margin-bottom: 30px; color: #0f172a; }
+        .slide-header.white { color: white; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; }
+        .box-highlight { background: #ecfdf5; border: 2px solid #10b981; border-radius: 12px; padding: 24px; }
+        
+        @media print {
+            body { background: white; margin: 0; }
+            .slide { margin: 0; border-radius: 0; box-shadow: none; height: 100vh; max-width: 100%; border: none; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text-center py-6 no-print bg-gray-800 text-white sticky top-0 z-50 shadow-md">
+        <h1 class="text-xl font-bold">Mode Présentation</h1>
+        <p class="text-sm mt-1 mb-3 text-gray-300">Appuyez sur <kbd class="bg-gray-700 px-2 py-1 rounded">Ctrl + P</kbd> (Windows) ou <kbd class="bg-gray-700 px-2 py-1 rounded">Cmd + P</kbd> (Mac) pour Enregistrer en PDF.</p>
+        <button onclick="window.print()" class="bg-emerald-500 hover:bg-emerald-600 px-6 py-2 rounded-lg font-bold">Générer le PDF 🖨️</button>
+    </div>
+
+    <!-- SLIDE 1: COVER -->
+    <div class="slide slide-bg-green justify-center items-center text-center">
+        <div class="slide-content items-center">
+            <div class="mb-8 flex items-center justify-center gap-6">
+                <div class="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                </div>
+                <h1 class="text-6xl font-extrabold tracking-tight">CarbonTrack</h1>
+            </div>
+            <h2 class="text-4xl font-bold mb-6 text-emerald-100">La 1ère Green FinTech d'Afrique Centrale</h2>
+            <p class="text-2xl text-emerald-50/80 max-w-3xl mx-auto leading-relaxed">
+                Connecter la finance, l'industrie et la protection de l'environnement grâce à la technologie.
+            </p>
+            
+            <div class="mt-20 pt-8 border-t border-white/20 flex flex-col items-center">
+                <p class="text-emerald-200 uppercase tracking-widest text-sm font-bold mb-4">Proposition de Partenariat Stratégique</p>
+                <!-- Pseudo AFG Logo Base -->
+                <div class="bg-white px-8 py-4 rounded-xl shadow-xl flex items-center gap-3">
+                    <img src="/afg-logo.png" style="height: 40px; object-fit: contain;" alt="AFG Bank" onerror="this.style.display='none'">
+                    <span class="text-2xl font-black text-gray-900 tracking-tight">AFG Bank</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: LE CONSTAT -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-header">Le Constat & L'Opportunité Mondiale</h2>
+            
+            <div class="grid-2 mt-8">
+                <div class="box">
+                    <div class="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">La Pression Mondiale</h3>
+                    <p class="text-gray-600 leading-relaxed">Les grandes entreprises (Mines, Banques, Logistique) subissent une pression massive pour réduire leur empreinte carbone. Les lois internationales l'exigent pour accéder aux marchés et financements.</p>
+                </div>
+                
+                <div class="box">
+                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Un Marché de 2 Milliards $</h3>
+                    <p class="text-gray-600 leading-relaxed">Les entreprises qui ne peuvent pas réduire leur pollution *doivent* acheter des <strong>Crédits Carbone Volontaires</strong>. Ce marché pèsera 50 Milliards $ d'ici 2030 (McKinsey).</p>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-gray-900 rounded-xl p-8 text-white flex gap-6 items-center">
+                <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-2xl">!</div>
+                <div>
+                    <h3 class="text-xl font-bold mb-2">Le Paradoxe Africain</h3>
+                    <p class="text-gray-300">L'Afrique possède les plus grandes forêts du monde. Pourtant, les financements carbone échappent aux ONG locales à cause d'un manque de plateforme digitale centralisée et transparente.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: LA SOLUTION -->
+    <div class="slide">
+        <div class="slide-content">
+            <h2 class="slide-header">La Solution : L'Écosystème CarbonTrack</h2>
+            <p class="text-xl text-gray-600 mb-10">Une plateforme SaaS unifiée qui diagnostique la pollution et orchestre le paiement de la compensation directement aux acteurs locaux.</p>
+            
+            <div class="flex flex-col gap-6">
+                <!-- Etape 1 -->
+                <div class="flex items-center gap-8 bg-white border-2 border-gray-100 p-6 rounded-2xl shadow-sm">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center font-black text-2xl flex-shrink-0">1</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-gray-900">Le Diagnostic (Bilan Carbone)</h4>
+                        <p class="text-gray-600 mt-2">Les entreprises génèrent des rapports stricts de leurs émissions (Scope 1, 2, 3) via notre algorithme conforme à la norme ISO 14064.</p>
+                    </div>
+                </div>
+                
+                <!-- Etape 2 -->
+                <div class="flex items-center gap-8 bg-white border-2 border-emerald-100 p-6 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="absolute right-0 top-0 bottom-0 w-2 bg-emerald-500"></div>
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center font-black text-2xl flex-shrink-0">2</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-emerald-900">Le Marché Carbone Local (Fintech)</h4>
+                        <p class="text-emerald-700 mt-2">L'entreprise paie directement sur la plateforme pour compenser sa dette. Les fonds sont transférés vers notre <strong>Floating Account</strong>.</p>
+                    </div>
+                </div>
+
+                <!-- Etape 3 -->
+                <div class="flex items-center gap-8 bg-white border-2 border-gray-100 p-6 rounded-2xl shadow-sm">
+                    <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center font-black text-2xl flex-shrink-0">3</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-gray-900">Redistribution aux ONG Locales</h4>
+                        <p class="text-gray-600 mt-2">Les ONG écologiques partenaires reçoivent leurs fonds sur un compte virtuel CarbonTrack, retirable via leurs canaux bancaires.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: LE ROLE DE AFG BANK -->
+    <div class="slide bg-gray-50">
+        <div class="slide-content">
+            <h2 class="slide-header">Le Rôle Stratégique d'AFG Bank</h2>
+            <p class="text-xl text-gray-600 mb-10">Comment nous comptons bâtir la croissance de CarbonTrack <strong>autour</strong> de l'architecture financière d'AFG Bank.</p>
+            
+            <div class="grid grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Domiciliation Bancaire</h3>
+                    <p class="text-gray-600">Le <strong>Floating Account</strong> central de l'application (qui recevra les millions de FCFA des entreprises polluantes) sera domicilié chez AFG Bank, augmentant massivement votre encours de dépôts.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Cartes de Retrait ONG</h3>
+                    <p class="text-gray-600">CarbonTrack imprimera des <strong>Cartes Partenaire VIP</strong> physiques pour les ONG. Ces ONG viendront via AFG Bank pour faciliter le retrait de leurs revenus Carbones via vos agences locales.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">L'Intégration API de Paiement</h3>
+                    <p class="text-gray-600">Aujourd'hui l'App gère Airtel/Moov. Nous souhaitons intégrer l'API AFG Bank comme <strong>moyen de paiement Premium n°1</strong> sur l'application Web et Mobile pour les grandes entreprises.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">L'Image de Banque Verte</h3>
+                    <p class="text-gray-600">AFG Bank s'associera à la première initiative technologique climat-tech, un levier décisif pour la <strong>norme RSE</strong> et la communication institutionnelle panafricaine.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: LE BUSINESS MODEL -->
+    <div class="slide slide-bg-green text-center">
+        <div class="slide-content">
+            <h2 class="slide-header white">Le Business Model (Génération de Revenus)</h2>
+            <p class="text-xl text-emerald-100 mb-12">Un modèle ultra-rentable et scalable (SaaS + Marketplace)</p>
+            
+            <div class="grid grid-cols-2 gap-8 text-left mb-12">
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+                    <h3 class="text-2xl font-bold mb-4">1. Abonnements SaaS B2B</h3>
+                    <p class="text-emerald-50 mb-4">L'accès à la plateforme Web/Mobile pour réaliser les Diagnostics (Bilans Carbones).</p>
+                    <ul class="text-emerald-100 space-y-3 font-medium">
+                        <li>• Plan Starter : <strong>150.000 FCFA / mois</strong></li>
+                        <li>• Plan Entreprise : <strong>350.000 FCFA / mois</strong></li>
+                        <li>• Plan Groupe (Multi-Sites) : <strong>Sur Mesure</strong></li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8 shadow-2xl transform scale-105 border-b-4 border-emerald-500">
+                    <div class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full w-max mb-4 uppercase tracking-widest">Le Cœur du Système</div>
+                    <h3 class="text-2xl font-bold mb-4 text-emerald-900">2. Marge sur les Crédits Carbone</h3>
+                    <p class="text-gray-600 mb-4">Commission fixe sur chaque transaction financière d'achat de compensation.</p>
+                    <div class="bg-gray-50 rounded-xl p-4 mt-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-500 font-medium">Prix payé par l'entreprise :</span>
+                            <span class="font-bold text-gray-900">100%</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-emerald-600 font-bold border-b border-emerald-200 pb-1">Notre Marge Brute (Tech) :</span>
+                            <span class="font-bold text-emerald-600 text-xl border-b border-emerald-200 pb-1">15% - 20%</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="text-gray-500 font-medium">Reversé à l'ONG via Wallet :</span>
+                            <span class="font-bold text-gray-900">80% - 85%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: DEMANDE DE CREDIT -->
+    <div class="slide">
+        <div class="slide-content text-center">
+            <h2 class="slide-header">L'Accélération : Demande Financière</h2>
+            <p class="text-xl text-gray-600 mb-12 max-w-4xl mx-auto">L'application est aujourd'hui fonctionnelle sur le cloud avec une interface Web & Mobile hybride. Pour accélérer commercialement, nous sollicitons un financement bancaire / prêt structuré.</p>
+            
+            <div class="grid grid-cols-3 gap-6 mb-16">
+                <div class="box-highlight text-center">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Technologie FinTech</h3>
+                    <p class="text-gray-600 text-sm">Développement final du système "Wallet" Sécurisé, intégration de l'API mondiale Carbone, et sécurisation des bases de données aux normes ISO.</p>
+                </div>
+                <div class="box text-center">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Déploiement Matériel</h3>
+                    <p class="text-gray-600 text-sm">Acquisition d'imprimantes industrielles plastiques (Luka 40 / Evolis Zenius) pour l'édition de cartes sécurisées et accréditations partenaires.</p>
+                </div>
+                <div class="box text-center">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Acquisition B2B</h3>
+                    <p class="text-gray-600 text-sm">Pilotage commercial intense pour auditer et signer les premières grandes entreprises polluantes du pays (RSE/Banques/Pétrole).</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 text-white rounded-2xl p-8 mx-auto max-w-2xl shadow-xl flex items-center justify-center gap-4">
+                <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="text-2xl font-bold">Le dossier financier détaillé vous sera soumis.</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: END -->
+    <div class="slide slide-bg-green justify-center items-center text-center">
+        <div class="slide-content items-center">
+            <h1 class="text-5xl font-extrabold mb-6">CarbonTrack <span class="text-emerald-300">x</span> AFG Bank</h1>
+            <p class="text-2xl text-emerald-100 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Le climat n'attend pas. Construisons ensemble la finance verte de l'Afrique.
+            </p>
+            <div class="w-20 h-1 bg-emerald-400 rounded-full mb-10"></div>
+            <p class="text-lg font-medium">Merci de votre attention.</p>
+        </div>
+    </div>
+
+</body>
+</html>
