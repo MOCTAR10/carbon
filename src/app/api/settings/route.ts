@@ -1,9 +1,9 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
-// Public settings endpoint â€” no auth required
+// Public settings endpoint — no auth required
 // Only exposes price/currency (not admin-only config)
 const PUBLIC_KEYS = ['monthly_price', 'currency', 'subscription_duration_days']
 

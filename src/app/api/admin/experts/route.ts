@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession, hashPassword } from '@/lib/auth'
 import { query } from '@/lib/db'
 
@@ -20,7 +20,7 @@ async function ensureExpertColumn() {
 export async function GET(request: NextRequest) {
   try {
     const session = await getSession('admin')
-    if (!await requireAdmin(session)) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+    if (!await requireAdmin(session)) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
     await ensureExpertColumn()
 
@@ -75,27 +75,27 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession('admin')
-    if (!await requireAdmin(session)) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+    if (!await requireAdmin(session)) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
     const { firstName, lastName, email, password, phone } = await request.json()
 
     if (!firstName || !lastName || !email || !password) {
-      return NextResponse.json({ error: 'PrÃ©nom, nom, email et mot de passe sont obligatoires' }, { status: 400 })
+      return NextResponse.json({ error: 'Prénom, nom, email et mot de passe sont obligatoires' }, { status: 400 })
     }
     if (password.length < 6) {
-      return NextResponse.json({ error: 'Le mot de passe doit contenir au moins 6 caractÃ¨res' }, { status: 400 })
+      return NextResponse.json({ error: 'Le mot de passe doit contenir au moins 6 caractères' }, { status: 400 })
     }
 
     // Check email uniqueness
     const existing = await query('SELECT id FROM users WHERE email = $1', [email.toLowerCase().trim()])
     if (existing.rows.length > 0) {
-      return NextResponse.json({ error: 'Un compte avec cet email existe dÃ©jÃ ' }, { status: 409 })
+      return NextResponse.json({ error: 'Un compte avec cet email existe déjà' }, { status: 409 })
     }
 
     // Experts always belong to CarbonTrack Administration company
     const company = await query(`SELECT id FROM companies WHERE name = 'CarbonTrack Administration' LIMIT 1`)
     if (company.rows.length === 0) {
-      return NextResponse.json({ error: 'Entreprise CarbonTrack Administration introuvable. ExÃ©cutez seed-admin.js.' }, { status: 500 })
+      return NextResponse.json({ error: 'Entreprise CarbonTrack Administration introuvable. Exécutez seed-admin.js.' }, { status: 500 })
     }
     const companyId = company.rows[0].id
 

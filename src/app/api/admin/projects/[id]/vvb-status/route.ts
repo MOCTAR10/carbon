@@ -1,15 +1,15 @@
-﻿/**
+/**
  * PATCH /api/admin/projects/[id]/vvb-status
  * Update VVB verification status, add CARs/CLs, record final opinion.
  * Auth: admin only.
  *
  * Actions via body.action:
- *   'update_status'  â€” { verificationId, status }
- *   'add_car'        â€” { verificationId, text }
- *   'resolve_car'    â€” { verificationId, carId }
- *   'add_cl'         â€” { verificationId, text }
- *   'answer_cl'      â€” { verificationId, clId, answer }
- *   'record_opinion' â€” { verificationId, opinion, opinionText, opinionDate, reportUrl? }
+ *   'update_status'  — { verificationId, status }
+ *   'add_car'        — { verificationId, text }
+ *   'resolve_car'    — { verificationId, carId }
+ *   'add_cl'         — { verificationId, text }
+ *   'answer_cl'      — { verificationId, clId, answer }
+ *   'record_opinion' — { verificationId, opinion, opinionText, opinionDate, reportUrl? }
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -31,7 +31,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   const session = await requireAdmin()
-  if (!session) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+  if (!session) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
   const projectId = parseInt(params.id)
   const body = await req.json()
@@ -47,7 +47,7 @@ export async function PATCH(
     [verificationId, projectId]
   )
   if (vRes.rows.length === 0) {
-    return NextResponse.json({ error: 'VÃ©rification introuvable' }, { status: 404 })
+    return NextResponse.json({ error: 'Vérification introuvable' }, { status: 404 })
   }
   const v = vRes.rows[0]
 
@@ -167,13 +167,13 @@ export async function PATCH(
   return NextResponse.json({ verification: updated.rows[0] })
 }
 
-// GET â€” list verifications for a project
+// GET — list verifications for a project
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const session = await requireAdmin()
-  if (!session) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+  if (!session) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
   const projectId = parseInt(params.id)
   const result = await query(

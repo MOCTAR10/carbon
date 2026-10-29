@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 
@@ -9,19 +9,19 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const userResult = await query('SELECT company_id FROM users WHERE id = $1', [session.userId])
-    if (userResult.rows.length === 0) return NextResponse.json({ error: 'Utilisateur non trouvÃ©' }, { status: 404 })
+    if (userResult.rows.length === 0) return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
 
     const companyId = userResult.rows[0].company_id
 
     const { plan, amount, currency, paymentMethod, phonePayment } = await request.json()
     if (!phonePayment) {
-      return NextResponse.json({ error: 'NumÃ©ro de tÃ©lÃ©phone requis' }, { status: 400 })
+      return NextResponse.json({ error: 'Numéro de téléphone requis' }, { status: 400 })
     }
 
-    // Create pending subscription â€” admin will activate it after payment confirmation
+    // Create pending subscription — admin will activate it after payment confirmation
     const now = new Date()
     const result = await query(
       `INSERT INTO subscriptions

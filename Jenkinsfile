@@ -101,8 +101,10 @@ pipeline {
             ./ ${RELEASE_DIR}/
 
           # Link shared env + persistent uploads + logos
-          sudo -u ${DEPLOY_USER} mkdir -p ${APP_ROOT}/shared/logos
+          sudo -u ${DEPLOY_USER} mkdir -p ${APP_ROOT}/shared/logos ${APP_ROOT}/shared/private-uploads
           sudo -u ${DEPLOY_USER} ln -sfn ${SHARED_ENV} ${RELEASE_DIR}/.env.local
+          # Private files (audit evidence, CNC certificates) live in <app>/uploads, served only via auth'd API routes — never via nginx
+          sudo -u ${DEPLOY_USER} ln -sfn ${APP_ROOT}/shared/private-uploads ${RELEASE_DIR}/uploads
           sudo -u ${DEPLOY_USER} ln -sfn ${APP_ROOT}/shared/uploads ${RELEASE_DIR}/public/uploads 2>/dev/null || true
           sudo -u ${DEPLOY_USER} ln -sfn ${APP_ROOT}/shared/logos ${RELEASE_DIR}/public/logos 2>/dev/null || true
         '''

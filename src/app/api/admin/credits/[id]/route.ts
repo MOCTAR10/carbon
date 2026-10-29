@@ -1,9 +1,9 @@
-﻿/**
- * GET   /api/admin/credits/[id]           â€” credit detail + transaction history
- * PATCH /api/admin/credits/[id]           â€” transfer | retire | cancel | dispute
+/**
+ * GET   /api/admin/credits/[id]           — credit detail + transaction history
+ * PATCH /api/admin/credits/[id]           — transfer | retire | cancel | dispute
  *
  * Auth: admin only.
- * All operations are immutable â€” transactions are appended, credits only
+ * All operations are immutable — transactions are appended, credits only
  * change status and quantity_* columns (never deleted).
  */
 
@@ -28,7 +28,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   const session = await requireAdmin()
-  if (!session) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+  if (!session) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
   const creditId = parseInt(params.id)
 
@@ -41,7 +41,7 @@ export async function GET(
     [creditId]
   )
   if (creditRes.rows.length === 0) {
-    return NextResponse.json({ error: 'CrÃ©dit introuvable' }, { status: 404 })
+    return NextResponse.json({ error: 'Crédit introuvable' }, { status: 404 })
   }
 
   const txRes = await query(
@@ -66,7 +66,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   const session = await requireAdmin()
-  if (!session) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+  if (!session) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
   const creditId = parseInt(params.id)
   const body = await req.json()
@@ -75,7 +75,7 @@ export async function PATCH(
   // Load credit
   const creditRes = await query('SELECT * FROM carbon_credits WHERE id = $1', [creditId])
   if (creditRes.rows.length === 0) {
-    return NextResponse.json({ error: 'CrÃ©dit introuvable' }, { status: 404 })
+    return NextResponse.json({ error: 'Crédit introuvable' }, { status: 404 })
   }
   const credit = creditRes.rows[0]
 
@@ -99,7 +99,7 @@ export async function PATCH(
 
       if (qty > active + 0.001) {
         return NextResponse.json({
-          error: `QuantitÃ© demandÃ©e (${qty}) supÃ©rieure aux crÃ©dits actifs (${active.toFixed(2)})`,
+          error: `Quantité demandée (${qty}) supérieure aux crédits actifs (${active.toFixed(2)})`,
         }, { status: 400 })
       }
 
@@ -153,7 +153,7 @@ export async function PATCH(
       const active = parseFloat(credit.quantity_active)
 
       if (qty > active + 0.001) {
-        return NextResponse.json({ error: 'QuantitÃ© supÃ©rieure aux crÃ©dits actifs' }, { status: 400 })
+        return NextResponse.json({ error: 'Quantité supérieure aux crédits actifs' }, { status: 400 })
       }
 
       await query(

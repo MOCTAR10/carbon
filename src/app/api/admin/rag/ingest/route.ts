@@ -1,4 +1,4 @@
-﻿/**
+/**
  * GET /api/admin/rag/ingest
  *
  * One-time admin trigger to parse Verra methodology PDFs and store
@@ -35,19 +35,19 @@ const PDF_SOURCES = [
     filename: 'VM0048-Reducing-Emissions-from-Deforestation-and-Forest-Degradation-v1.0-1-1.pdf',
     path: 'Active VCS Methodologies+module+tools/Agriculture, forestry and other land use, AFOLU',
     methodologyCode: 'VM0048',
-    title: 'VM0048 â€” Reducing Emissions from Deforestation and Forest Degradation v1.0',
+    title: 'VM0048 — Reducing Emissions from Deforestation and Forest Degradation v1.0',
   },
   {
     filename: 'VM0048-v1.0-Clarification-issued-July-31-2024.pdf',
     path: 'Active VCS Methodologies+module+tools/Agriculture, forestry and other land use, AFOLU',
     methodologyCode: 'VM0048',
-    title: 'VM0048 â€” Clarification July 2024',
+    title: 'VM0048 — Clarification July 2024',
   },
   {
     filename: 'verra-registry-tou-oct-2024.pdf',
     path: '',
     methodologyCode: null,
-    title: 'Verra Registry Terms of Use â€” October 2024',
+    title: 'Verra Registry Terms of Use — October 2024',
   },
   {
     filename: 'Verra-Registry-User-Guide.pdf',
@@ -78,7 +78,7 @@ function chunkText(text: string, chunkWords = 400, overlapWords = 50): string[] 
 
 export async function GET(req: NextRequest) {
   const session = await requireAdmin()
-  if (!session) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+  if (!session) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
   // Check force flag to re-ingest already-processed documents
   const force = req.nextUrl.searchParams.get('force') === 'true'
@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
     pdfParse = mod.default ?? mod
   } catch {
     return NextResponse.json({
-      error: 'pdf-parse non installÃ© â€” lancez: npm install pdf-parse',
+      error: 'pdf-parse non installé — lancez: npm install pdf-parse',
     }, { status: 500 })
   }
 
@@ -166,6 +166,6 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     results,
     totalChunks,
-    message: `Ingestion terminÃ©e. ${totalChunks} chunks crÃ©Ã©s.`,
+    message: `Ingestion terminée. ${totalChunks} chunks créés.`,
   })
 }

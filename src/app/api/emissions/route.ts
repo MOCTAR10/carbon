@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { query, withTransaction } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const assessmentId = request.nextUrl.searchParams.get('assessmentId')
     if (!assessmentId) return NextResponse.json({ error: 'assessmentId requis' }, { status: 400 })
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       [assessmentId, session.companyId]
     )
     if (accessCheck.rows.length === 0) {
-      return NextResponse.json({ error: 'Bilan non trouvÃ©' }, { status: 404 })
+      return NextResponse.json({ error: 'Bilan non trouvé' }, { status: 404 })
     }
 
     const result = await query(
@@ -34,11 +34,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const { assessmentId, entries } = await request.json()
     if (!assessmentId || !entries || !Array.isArray(entries)) {
-      return NextResponse.json({ error: 'DonnÃ©es invalides' }, { status: 400 })
+      return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
     }
 
     const accessCheck = await query(
@@ -46,11 +46,11 @@ export async function POST(request: NextRequest) {
       [assessmentId, session.companyId]
     )
     if (accessCheck.rows.length === 0) {
-      return NextResponse.json({ error: 'Bilan non trouvÃ©' }, { status: 404 })
+      return NextResponse.json({ error: 'Bilan non trouvé' }, { status: 404 })
     }
 
     const { insertedEntries, totals } = await withTransaction(async (client) => {
-      // Delete all existing entries â€” rolled back automatically if any insert fails
+      // Delete all existing entries — rolled back automatically if any insert fails
       await client.query('DELETE FROM emission_entries WHERE assessment_id = $1', [assessmentId])
 
       const insertedEntries = []

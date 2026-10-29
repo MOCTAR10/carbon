@@ -37,6 +37,7 @@ const STATUS: Record<string, { label: string; dot: string; badge: string }> = {
   assigned:    { label: 'Assigné',       dot: 'bg-blue-400',   badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
   in_progress: { label: 'En cours',      dot: 'bg-violet-400', badge: 'bg-violet-500/15 text-violet-300 border-violet-500/30' },
   audit_done:  { label: 'Audit terminé', dot: 'bg-purple-400', badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30' },
+  submitted_to_cnc: { label: 'Déposé au CNC', dot: 'bg-amber-400', badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
   certified:   { label: 'Certifié ✓',   dot: 'bg-green-400',  badge: 'bg-green-500/15 text-green-300 border-green-500/30' },
   rejected:    { label: 'Rejeté',        dot: 'bg-red-400',    badge: 'bg-red-500/15 text-red-300 border-red-500/30' },
 }
@@ -96,7 +97,7 @@ export default function ExpertDashboard() {
   useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Derived data
-  const active     = certs.filter(c => ['assigned', 'in_progress', 'audit_done'].includes(c.status))
+  const active     = certs.filter(c => ['assigned', 'in_progress', 'audit_done', 'submitted_to_cnc'].includes(c.status))
   const certified  = certs.filter(c => c.status === 'certified')
   const rejected   = certs.filter(c => c.status === 'rejected')
 
@@ -104,7 +105,7 @@ export default function ExpertDashboard() {
 
   // Sort active: assigned first, then in_progress, then audit_done, newest first within each
   const sortedActive = [...active].sort((a, b) => {
-    const order: Record<string, number> = { assigned: 0, in_progress: 1, audit_done: 2 }
+    const order: Record<string, number> = { assigned: 0, in_progress: 1, audit_done: 2, submitted_to_cnc: 3 }
     const diff = (order[a.status] ?? 9) - (order[b.status] ?? 9)
     if (diff !== 0) return diff
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
@@ -191,11 +192,11 @@ export default function ExpertDashboard() {
             <FileCheck className="w-5 h-5 text-purple-400" />
           </div>
           <div>
-            <p className="text-xs text-gray-400">Audits terminés</p>
+            <p className="text-xs text-gray-400">Dossiers à déposer au CNC</p>
             <p className="text-lg font-bold text-white">
               {certs.filter(c => c.status === 'audit_done').length}
             </p>
-            <p className="text-xs text-gray-500">En attente de décision</p>
+            <p className="text-xs text-gray-500">{certs.filter(c => c.status === 'submitted_to_cnc').length} en attente du certificat</p>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 
@@ -13,7 +13,7 @@ async function requireAdmin(session: Awaited<ReturnType<typeof getSession>>) {
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getSession('admin')
-    if (!await requireAdmin(session)) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+    if (!await requireAdmin(session)) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
     const subId = parseInt(params.id)
     const { action, months } = await request.json()

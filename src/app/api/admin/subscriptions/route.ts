@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 
@@ -13,7 +13,7 @@ async function requireAdmin(session: Awaited<ReturnType<typeof getSession>>) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession('admin')
-    if (!await requireAdmin(session)) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+    if (!await requireAdmin(session)) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
     const { companyId, plan, amount, currency, paymentMethod, paymentRef, phonePayment, months } = await request.json()
     if (!companyId || !plan || !amount) {
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const session = await getSession('admin')
-    if (!await requireAdmin(session)) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+    if (!await requireAdmin(session)) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') || ''

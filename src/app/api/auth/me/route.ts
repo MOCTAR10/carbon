@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const portal = (request.nextUrl.searchParams.get('portal') ?? 'user') as 'admin' | 'expert' | 'cnc' | 'user'
+    const portal = (request.nextUrl.searchParams.get('portal') ?? 'user') as 'admin' | 'expert' | 'user'
     const session = await getSession(portal)
     if (!session) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { notifyAllAdmins, notifyCompanyUsers } from '@/lib/notifications'
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   try {
     const session = await getSession('expert')
     if (!session || session.role !== 'expert') {
-      return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
     }
 
     const certId = parseInt(params.id)
@@ -22,6 +22,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
          cr.audit_checklist, cr.audit_scheduled_date, cr.audit_location,
          cr.inspection_confirmed, cr.inspection_proposed_date, cr.inspection_proposed_by,
          cr.expert_report_pdf_url,
+         cr.submitted_to_cnc_at, cr.cnc_deposit_reference,
          a.id as assessment_id, a.name as assessment_name, a.year as assessment_year,
          a.total_co2eq, a.scope1_co2eq, a.scope2_co2eq, a.scope3_co2eq,
          a.approach,
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     )
 
     if (result.rows.length === 0) {
-      return NextResponse.json({ error: 'Certification introuvable ou non assignÃ©e' }, { status: 404 })
+      return NextResponse.json({ error: 'Certification introuvable ou non assignée' }, { status: 404 })
     }
 
     const r = result.rows[0]
@@ -93,6 +94,17 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       createdAt:   d.created_at,
     }))
 
+    // Documents attached to the certification itself (e.g. the CNC certificate)
+    const certDocsResult = await query(
+      `SELECT id, doc_type, original_name, file_size, mime_type, created_at
+       FROM certification_documents WHERE certification_id = $1 ORDER BY created_at DESC`,
+      [certId]
+    )
+    const documents = certDocsResult.rows.map(d => ({
+      id: d.id, docType: d.doc_type, originalName: d.original_name,
+      fileSize: d.file_size, mimeType: d.mime_type, createdAt: d.created_at,
+    }))
+
     // Monthly breakdown
     const MONTH_LABELS = ['', 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec']
     const byMonth = Array.from({ length: 12 }, (_, i) => {
@@ -141,6 +153,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       inspectionProposedDate: r.inspection_proposed_date,
       inspectionProposedBy: r.inspection_proposed_by,
       expertReportPdfUrl: r.expert_report_pdf_url,
+      submittedToCncAt: r.submitted_to_cnc_at,
+      cncDepositReference: r.cnc_deposit_reference,
       certifiedAt: r.certified_at,
       certificateNumber: r.certificate_number,
       rejectionReason: r.rejection_reason,
@@ -166,6 +180,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       byCategory,
       topEmitters,
       auditDocuments,
+      documents,
     })
   } catch (error) {
     console.error('Expert cert detail error:', error)
@@ -177,7 +192,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   try {
     const session = await getSession('expert')
     if (!session || session.role !== 'expert') {
-      return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
     }
 
     const certId = parseInt(params.id)
@@ -192,7 +207,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       [certId, session.userId]
     )
     if (owned.rows.length === 0) {
-      return NextResponse.json({ error: 'Certification introuvable ou non assignÃ©e' }, { status: 404 })
+      return NextResponse.json({ error: 'Certification introuvable ou non assignée' }, { status: 404 })
     }
     const cert = owned.rows[0]
 
@@ -201,6 +216,40 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       await query(
         `UPDATE certification_requests SET inspection_date = $1, updated_at = NOW() WHERE id = $2`,
         [inspectionDate || null, certId]
+      )
+
+    } else if (action === 'set_date') {
+      // Expert sets (or changes) the field audit date and place directly
+      if (!['assigned', 'in_progress'].includes(cert.status)) {
+        return NextResponse.json({ error: 'La date ne peut plus être modifiée à ce stade' }, { status: 400 })
+      }
+      const { auditDate, auditLocation } = body
+      if (!auditDate) return NextResponse.json({ error: 'Date requise' }, { status: 400 })
+      await query(
+        `UPDATE certification_requests
+         SET audit_scheduled_date = $1,
+             inspection_date = $1,
+             audit_location = COALESCE($2, audit_location),
+             inspection_confirmed = TRUE,
+             inspection_proposed_date = NULL,
+             inspection_proposed_by = NULL,
+             updated_at = NOW()
+         WHERE id = $3`,
+        [auditDate, auditLocation?.trim() || null, certId]
+      )
+      const dateStr = new Date(auditDate).toLocaleDateString('fr-FR')
+      await notifyCompanyUsers(
+        cert.company_id,
+        'cert_comment',
+        "Date d'audit terrain fixée",
+        `L'expert a fixé l'audit terrain de "${cert.assessment_name}" au ${dateStr}${auditLocation?.trim() ? ` (${auditLocation.trim()})` : ''}.`,
+        `/dashboard/certifications`
+      )
+      await notifyAllAdmins(
+        'cert_comment',
+        "Date d'audit terrain fixée",
+        `L'expert a fixé l'audit terrain de "${cert.assessment_name}" au ${dateStr}.`,
+        `/admin/certifications/${certId}`
       )
 
     } else if (action === 'confirm_date') {
@@ -244,7 +293,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     } else if (action === 'start_review') {
       if (cert.status !== 'assigned') {
-        return NextResponse.json({ error: 'Ce bilan n\'est pas dans l\'Ã©tat "assignÃ©"' }, { status: 400 })
+        return NextResponse.json({ error: 'Ce bilan n\'est pas dans l\'état "assigné"' }, { status: 400 })
       }
       await query(`UPDATE certification_requests SET status = 'in_progress', updated_at = NOW() WHERE id = $1`, [certId])
 
@@ -264,7 +313,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       )
 
     } else if (action === 'audit_done') {
-      // Expert finalizes the audit â€” transitions to audit_done for admin review
+      // Expert finalizes the audit — transitions to audit_done for admin review
       if (!['assigned', 'in_progress'].includes(cert.status)) {
         return NextResponse.json({ error: 'Statut invalide pour finaliser l\'audit' }, { status: 400 })
       }
@@ -291,24 +340,40 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         `/admin/certifications/${certId}`
       )
 
-    } else if (action === 'certify') {
-      // Legacy direct-certify (kept for backward compatibility)
-      if (!['in_progress', 'assigned'].includes(cert.status)) {
-        return NextResponse.json({ error: 'Statut invalide pour certifier' }, { status: 400 })
+    } else if (action === 'submit_to_cnc') {
+      // Expert has physically deposited the dossier at the CNC
+      if (cert.status !== 'audit_done') {
+        return NextResponse.json({ error: "Finalisez l'audit avant de déclarer le dépôt au CNC" }, { status: 400 })
       }
-      const year = new Date().getFullYear()
-      const random = Math.floor(100000 + Math.random() * 900000)
-      const certificateNumber = `CT-${year}-${random}`
+      const { depositDate, depositReference } = body
+      if (!depositDate) return NextResponse.json({ error: 'Date de dépôt requise' }, { status: 400 })
       await query(
-        `UPDATE certification_requests SET status = 'certified', certified_at = NOW(), certificate_number = $1, updated_at = NOW() WHERE id = $2`,
-        [certificateNumber, certId]
+        `UPDATE certification_requests
+         SET status = 'submitted_to_cnc',
+             submitted_to_cnc_at = $1,
+             cnc_deposit_reference = $2,
+             updated_at = NOW()
+         WHERE id = $3`,
+        [depositDate, depositReference?.trim() || null, certId]
       )
-      await query(
-        `UPDATE assessments SET status = 'completed', updated_at = NOW() WHERE id = (SELECT assessment_id FROM certification_requests WHERE id = $1)`,
-        [certId]
+      await notifyCompanyUsers(
+        cert.company_id,
+        'cert_comment',
+        'Dossier déposé au CNC',
+        `Votre dossier "${cert.assessment_name}" a été déposé au Conseil National du Climat par l'expert. En attente du certificat.`,
+        `/dashboard/certifications`
+      )
+      await notifyAllAdmins(
+        'cert_comment',
+        'Dossier déposé au CNC',
+        `L'expert a déposé le dossier "${cert.assessment_name}" au CNC.`,
+        `/admin/certifications/${certId}`
       )
 
     } else if (action === 'reject') {
+      if (['certified', 'rejected'].includes(cert.status)) {
+        return NextResponse.json({ error: 'Cette demande est déjà clôturée' }, { status: 400 })
+      }
       const { rejectionReason } = body
       if (!rejectionReason?.trim()) {
         return NextResponse.json({ error: 'Le motif de rejet est obligatoire' }, { status: 400 })
@@ -321,8 +386,16 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         cert.company_id,
         'cert_rejected',
         'Demande de certification refusée',
-        `L'expert a refusé la certification de "${cert.assessment_name}".`,
+        cert.status === 'submitted_to_cnc'
+          ? `Le CNC a refusé la certification de "${cert.assessment_name}".`
+          : `L'expert a refusé la certification de "${cert.assessment_name}".`,
         `/dashboard/certifications`
+      )
+      await notifyAllAdmins(
+        'cert_rejected',
+        'Certification refusée',
+        `"${cert.assessment_name}" : ${rejectionReason.trim()}`,
+        `/admin/certifications/${certId}`
       )
 
     } else {

@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 
@@ -7,13 +7,13 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const userResult = await query(
       'SELECT company_id FROM users WHERE id = $1',
       [session.userId]
     )
-    if (userResult.rows.length === 0) return NextResponse.json({ error: 'Utilisateur non trouvÃ©' }, { status: 404 })
+    if (userResult.rows.length === 0) return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 })
 
     const companyId = userResult.rows[0].company_id
 

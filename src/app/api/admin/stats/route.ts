@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 
@@ -7,11 +7,11 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   try {
     const session = await getSession('admin')
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const userResult = await query('SELECT role FROM users WHERE id = $1', [session.userId])
     if (userResult.rows.length === 0 || userResult.rows[0].role !== 'admin') {
-      return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
     }
 
     const [
@@ -78,8 +78,8 @@ export async function GET() {
       query(`
         SELECT
           COUNT(*) FILTER (WHERE cr.status = 'submitted_to_cnc')        AS cnc_pending,
-          COUNT(*) FILTER (WHERE cr.status = 'certificate_generated')   AS cnc_completed,
-          COUNT(*) FILTER (WHERE cr.status IN ('submitted_to_cnc','certificate_generated')) AS cnc_total
+          COUNT(*) FILTER (WHERE cr.status = 'certified' AND cr.submitted_to_cnc_at IS NOT NULL) AS cnc_completed,
+          COUNT(*) FILTER (WHERE cr.submitted_to_cnc_at IS NOT NULL)    AS cnc_total
         FROM certification_requests cr
       `),
     ])

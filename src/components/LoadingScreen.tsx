@@ -6,7 +6,7 @@ interface Props {
   /** 'light' = company dashboard (white bg), 'dark' = admin/expert (dark bg) */
   theme?: 'light' | 'dark'
   label?: string
-  /** Override the default Leaf icon with a custom image (e.g. /cnc-logo.png) */
+  /** Override the default Leaf icon with a custom image (e.g. a partner logo) */
   logoUrl?: string
   /** Override the default "CarbonTrack" brand text */
   brand?: string

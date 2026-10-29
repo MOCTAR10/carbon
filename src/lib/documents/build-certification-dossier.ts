@@ -1,33 +1,12 @@
-﻿/**
- * POST /api/admin/certifications/[id]/generate-ogec-dossier
- * Generate the OGEC submission dossier PDF for a certification request.
- * Auth: admin only.
+/**
+ * Builds the certification dossier summary PDF (company, emissions, audit checklist, expert opinion)
+ * that the expert deposits at the CNC. Used inside the full dossier ZIP.
  */
 
-import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
-import { getSession } from '@/lib/auth'
 import { generateOGECDossierPDF, OGECDossierData } from '@/lib/documents/OGECDossierPDF'
 
-export const dynamic = 'force-dynamic'
-
-async function requireAdmin() {
-  const session = await getSession('admin')
-  if (!session) return null
-  const r = await query('SELECT role FROM users WHERE id = $1', [session.userId])
-  if (r.rows.length === 0 || r.rows[0].role !== 'admin') return null
-  return session
-}
-
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const session = await requireAdmin()
-  if (!session) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
-
-  const certId = parseInt(params.id)
-
+export async function buildCertificationDossier(certId: number): Promise<Buffer> {
   // Load certification request + company + assessment
   const certResult = await query(
     `SELECT
@@ -46,9 +25,7 @@ export async function POST(
     [certId]
   )
 
-  if (certResult.rows.length === 0) {
-    return NextResponse.json({ error: 'Certification introuvable' }, { status: 404 })
-  }
+  if (certResult.rows.length === 0) throw new Error('Certification introuvable')
 
   const cr = certResult.rows[0]
 
@@ -78,7 +55,7 @@ export async function POST(
 
     assessmentName: cr.assessment_name,
     assessmentYear: parseInt(cr.assessment_year),
-    approach:       cr.approach ?? 'ContrÃ´le opÃ©rationnel',
+    approach:       cr.approach ?? 'Contrôle opérationnel',
     totalCo2eq:     parseFloat(cr.total_co2eq ?? 0),
     scope1:         parseFloat(cr.scope1_co2eq ?? 0),
     scope2:         parseFloat(cr.scope2_co2eq ?? 0),
@@ -106,22 +83,5 @@ export async function POST(
     generatedAt: now,
   }
 
-  let pdfBuffer: Buffer
-  try {
-    pdfBuffer = await generateOGECDossierPDF(data)
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Erreur gÃ©nÃ©ration PDF'
-    return NextResponse.json({ error: msg }, { status: 500 })
-  }
-
-  const safeCompany = cr.company_name?.replace(/[^a-z0-9]/gi, '_') ?? 'company'
-  const filename = `DossierOGEC_${safeCompany}_${cr.assessment_year}_${new Date().toISOString().slice(0, 10)}.pdf`
-
-  return new NextResponse(new Uint8Array(pdfBuffer), {
-    headers: {
-      'Content-Type':        'application/pdf',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Content-Length':      pdfBuffer.length.toString(),
-    },
-  })
+  return generateOGECDossierPDF(data)
 }

@@ -9,6 +9,7 @@ import {
   Info, FileCheck, Download
 } from 'lucide-react'
 import InspectionCard from '@/components/InspectionCard'
+import CncDepositCard, { CertDocument } from '@/components/CncDepositCard'
 import CertEmissionCharts from '@/components/CertEmissionCharts'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -90,6 +91,8 @@ interface CertDetail {
   entries: Entry[]; byMonth: MonthRow[]; byCategory: CatRow[]; topEmitters: TopRow[]
   auditDocuments: AuditDocRow[]
   expertReportPdfUrl: string | null
+  submittedToCncAt: string | null; cncDepositReference: string | null
+  documents: CertDocument[]
 }
 
 // ─── Default checklist ────────────────────────────────────────────────────────
@@ -173,6 +176,7 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   assigned:    { label: 'Assigné',              cls: 'bg-blue-500/20 text-blue-400' },
   in_progress: { label: "En cours d'inspection", cls: 'bg-violet-500/20 text-violet-400' },
   audit_done:  { label: 'Audit finalisé',        cls: 'bg-teal-500/20 text-teal-400' },
+  submitted_to_cnc: { label: 'Déposé au CNC',     cls: 'bg-amber-500/20 text-amber-400' },
   certified:   { label: 'Certifié',              cls: 'bg-green-500/20 text-green-400' },
   rejected:    { label: 'Rejeté',                cls: 'bg-red-500/20 text-red-400' },
 }
@@ -414,7 +418,7 @@ export default function ExpertCertDetailPage() {
   if (!cert)   return <div className="text-center py-20 text-gray-500">Certification introuvable.</div>
 
   const s        = STATUS_LABELS[cert.status] || { label: cert.status, cls: 'bg-gray-700 text-gray-400' }
-  const isReadOnly = ['certified', 'rejected', 'audit_done'].includes(cert.status)
+  const isReadOnly = ['certified', 'rejected', 'audit_done', 'submitted_to_cnc'].includes(cert.status)
   const canFinalizeAudit = ['assigned', 'in_progress'].includes(cert.status)
   const total    = Number(cert.totalCo2eq) || 0
   const cl       = checklist ?? defaultChecklist(cert)
@@ -490,7 +494,7 @@ export default function ExpertCertDetailPage() {
         <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex items-center gap-3">
           <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-green-400">Bilan certifié</p>
+            <p className="text-sm font-bold text-green-400">Bilan certifié par le CNC</p>
             <p className="text-xs text-green-500 mt-0.5">{fmtDate(cert.certifiedAt)}{cert.certificateNumber && ` · Certificat n° ${cert.certificateNumber}`}</p>
           </div>
         </div>
@@ -499,8 +503,17 @@ export default function ExpertCertDetailPage() {
         <div className="bg-teal-500/10 border border-teal-500/30 rounded-xl p-4 flex items-center gap-3">
           <FileCheck className="w-5 h-5 text-teal-400 flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-teal-400">Rapport d'audit finalisé — en attente de revue par l'admin</p>
-            <p className="text-xs text-teal-500 mt-0.5">L'administrateur procédera à la revue finale et à la certification GreenLeaves.</p>
+            <p className="text-sm font-bold text-teal-400">Audit finalisé — dossier prêt pour le CNC</p>
+            <p className="text-xs text-teal-500 mt-0.5">Téléchargez le dossier complet, déposez-le au CNC, puis enregistrez le dépôt ci-dessous.</p>
+          </div>
+        </div>
+      )}
+      {cert.status === 'submitted_to_cnc' && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-center gap-3">
+          <Award className="w-5 h-5 text-amber-400 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-bold text-amber-400">Dossier déposé au CNC — en attente du certificat</p>
+            <p className="text-xs text-amber-500 mt-0.5">Dès réception, téléversez la copie numérique du certificat CNC ci-dessous.</p>
           </div>
         </div>
       )}
@@ -841,6 +854,11 @@ export default function ExpertCertDetailPage() {
         )}
       </Card>
 
+      {/* ── CNC deposit & certificate (after the field audit) ── */}
+      {['audit_done', 'submitted_to_cnc', 'certified'].includes(cert.status) && (
+        <CncDepositCard cert={cert} role="expert" onRefresh={loadCert} />
+      )}
+
       {/* ── Inspection planning ── */}
       <InspectionCard
         data={{
@@ -1106,7 +1124,7 @@ export default function ExpertCertDetailPage() {
             {cert.status === 'assigned' && (
               <button onClick={() => action({ action: 'start_review' })} disabled={submitting}
                 className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
-                <PlayCircle className="w-4 h-4" />Démarrer l&apos;inspection
+                <PlayCircle className="w-4 h-4" />Démarrer l&apos;audit
               </button>
             )}
             {canFinalizeAudit && (

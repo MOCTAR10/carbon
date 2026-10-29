@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 
@@ -10,7 +10,7 @@ export async function PATCH(
 ) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const id = parseInt(params.id)
     if (isNaN(id)) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
@@ -26,7 +26,7 @@ export async function PATCH(
       [id, session.companyId]
     )
     if (check.rows.length === 0) {
-      return NextResponse.json({ error: 'Bilan non trouvÃ©' }, { status: 404 })
+      return NextResponse.json({ error: 'Bilan non trouvé' }, { status: 404 })
     }
 
     await query(
@@ -47,7 +47,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const id = parseInt(params.id)
     if (isNaN(id)) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
@@ -62,12 +62,12 @@ export async function DELETE(
     )
 
     if (check.rows.length === 0) {
-      return NextResponse.json({ error: 'Bilan non trouvÃ©' }, { status: 404 })
+      return NextResponse.json({ error: 'Bilan non trouvé' }, { status: 404 })
     }
 
     if (check.rows[0].status !== 'draft') {
       return NextResponse.json(
-        { error: 'Seuls les bilans en brouillon peuvent Ãªtre supprimÃ©s' },
+        { error: 'Seuls les bilans en brouillon peuvent être supprimés' },
         { status: 400 }
       )
     }

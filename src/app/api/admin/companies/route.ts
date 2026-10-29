@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getSession('admin')
     if (!await requireAdmin(session)) {
-      return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
     }
 
     const { searchParams } = new URL(request.url)

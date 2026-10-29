@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   Award, Shield, Clock, CheckCircle2, XCircle,
   FileText, Download, Calendar, Building2, ArrowRight, User,
-  BarChart3, Eye, ClipboardCheck, ChevronDown, ChevronUp,
+  BarChart3, Eye, ClipboardCheck, ChevronDown, ChevronUp, Landmark,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -53,6 +53,8 @@ interface Certification {
   avisTotalCo2eq: number | null
   expertReportPdfUrl: string | null
   dossierCompiledAt: string | null
+  submittedToCncAt: string | null
+  cncDepositReference: string | null
   documents: CertDoc[]
 }
 
@@ -65,6 +67,7 @@ const STATUS_CONFIG: Record<string, {
   assigned:   { label: 'Expert assigné', color: 'text-blue-700',   bg: 'bg-blue-50 border-blue-200',    icon: User },
   in_progress:{ label: 'Audit en cours', color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200',icon: Eye },
   audit_done: { label: 'Audit terminé',  color: 'text-indigo-700', bg: 'bg-indigo-50 border-indigo-200',icon: ClipboardCheck },
+  submitted_to_cnc: { label: 'Déposé au CNC', color: 'text-teal-700', bg: 'bg-teal-50 border-teal-200', icon: Landmark },
   certified:  { label: 'Certifié',       color: 'text-green-700',  bg: 'bg-green-50 border-green-200',  icon: Award },
   rejected:   { label: 'Refusé',         color: 'text-red-700',    bg: 'bg-red-50 border-red-200',      icon: XCircle },
 }
@@ -74,6 +77,7 @@ const WORKFLOW_STEPS: { key: string; label: string }[] = [
   { key: 'assigned',    label: 'Expert assigné' },
   { key: 'in_progress', label: 'Audit en cours' },
   { key: 'audit_done',  label: 'Audit terminé' },
+  { key: 'submitted_to_cnc', label: 'Déposé au CNC' },
   { key: 'certified',   label: 'Certifié' },
 ]
 
@@ -82,7 +86,8 @@ const STATUS_STEP_INDEX: Record<string, number> = {
   assigned:    1,
   in_progress: 2,
   audit_done:  3,
-  certified:   4,
+  submitted_to_cnc: 4,
+  certified:   5,
   rejected:    -1,
 }
 
@@ -189,7 +194,7 @@ export default function CertificationsPage() {
       .catch(() => setLoading(false))
   }, [])
 
-  const ACTIVE_STATUSES = ['pending', 'assigned', 'in_progress', 'audit_done']
+  const ACTIVE_STATUSES = ['pending', 'assigned', 'in_progress', 'audit_done', 'submitted_to_cnc']
   const certified   = certifications.filter(c => c.status === 'certified')
   const inProgress  = certifications.filter(c => ACTIVE_STATUSES.includes(c.status))
   const rejected    = certifications.filter(c => c.status === 'rejected')
@@ -364,31 +369,41 @@ function CertDetailModal({ cert, onClose }: { cert: Certification; onClose: () =
   const config        = STATUS_CONFIG[cert.status] || STATUS_CONFIG.pending
   const StatusIcon    = config.icon
   const [certLoading, setCertLoading] = useState(false)
+  const [trackingLoading, setTrackingLoading] = useState(false)
   const [reportLoading, setReportLoading] = useState(false)
   const [showDocs, setShowDocs] = useState(false)
 
-  const canDownloadCert   = cert.status === 'certified' && !!cert.certificateNumber
+  // Most recent certificate uploaded by the expert (documents are sorted newest first)
+  const certificateDoc    = cert.documents.find(d => d.docType === 'certificate')
+  const canDownloadCert   = cert.status === 'certified' && !!certificateDoc
   const canDownloadReport = !!cert.expertReportPdfUrl
 
-  async function downloadCertificate() {
-    setCertLoading(true)
-    try {
-      const res = await fetch(`/api/certifications/${cert.id}/generate-certificate`, { method: 'POST' })
-      if (!res.ok) {
-        const data = await res.json()
-        alert(data.error || 'Erreur lors de la génération du certificat')
-        return
-      }
-      const blob = await res.blob()
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href     = url
-      a.download = `recapitulatif-certification-${cert.certificateNumber}.pdf`
-      a.click()
-      URL.revokeObjectURL(url)
-    } finally {
-      setCertLoading(false)
+  async function downloadBlob(url: string, filename: string) {
+    const res = await fetch(url)
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      alert(data.error || 'Erreur lors du téléchargement')
+      return
     }
+    const blobUrl = URL.createObjectURL(await res.blob())
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(blobUrl)
+  }
+
+  async function downloadCertificate() {
+    if (!certificateDoc) return
+    setCertLoading(true)
+    try { await downloadBlob(`/api/certification-documents/${certificateDoc.id}`, certificateDoc.originalName) }
+    finally { setCertLoading(false) }
+  }
+
+  async function downloadTracking() {
+    setTrackingLoading(true)
+    try { await downloadBlob(`/api/certifications/${cert.id}/tracking`, `suivi-demande-certification-${cert.id}.pdf`) }
+    finally { setTrackingLoading(false) }
   }
 
   async function downloadExpertReport() {
@@ -414,11 +429,12 @@ function CertDetailModal({ cert, onClose }: { cert: Certification; onClose: () =
 
   // Status-specific message shown to company
   const statusMessage: Record<string, string> = {
-    pending:     'Votre demande est en attente d\'attribution à un expert GreenLeaves.',
+    pending:     'Votre demande est en attente d\'attribution à un expert accrédité GreenLeaves.',
     assigned:    `L'expert ${cert.expertName || ''} a été désigné pour votre audit.`,
     in_progress: 'L\'audit de votre bilan est en cours. L\'expert examine vos données et documents.',
-    audit_done:  'L\'audit est terminé. GreenLeaves procède à la revue finale avant certification.',
-    certified:   'Votre bilan carbone est certifié par GreenLeaves. Téléchargez le récapitulatif ci-dessous.',
+    audit_done:  'L\'audit terrain est terminé. L\'expert accrédité prépare le dépôt de votre dossier au Conseil National du Climat (CNC).',
+    submitted_to_cnc: 'Votre dossier a été déposé au CNC par l\'expert accrédité. Le certificat sera disponible ici dès sa délivrance.',
+    certified:   'Votre bilan carbone est certifié par le CNC. Téléchargez le certificat ci-dessous.',
     rejected:    cert.rejectionReason || 'Votre demande a été refusée.',
   }
 
@@ -513,6 +529,16 @@ function CertDetailModal({ cert, onClose }: { cert: Certification; onClose: () =
               </div>
             )}
 
+            {cert.submittedToCncAt && (
+              <div className="flex items-center gap-3 text-sm p-3 bg-gray-50 rounded-lg">
+                <Landmark className="w-4 h-4 text-gray-400" />
+                <span className="text-gray-500">Dossier déposé au CNC le</span>
+                <span className="font-medium text-gray-900 ml-auto">
+                  {formatDate(cert.submittedToCncAt)}{cert.cncDepositReference && ` · Réf. ${cert.cncDepositReference}`}
+                </span>
+              </div>
+            )}
+
             {cert.certifiedAt && (
               <div className="flex items-center gap-3 text-sm p-3 bg-green-50 rounded-lg">
                 <CheckCircle2 className="w-4 h-4 text-green-600" />
@@ -524,7 +550,7 @@ function CertDetailModal({ cert, onClose }: { cert: Certification; onClose: () =
             {cert.certificateNumber && (
               <div className="flex items-center gap-3 text-sm p-3 bg-green-50 rounded-lg">
                 <Award className="w-4 h-4 text-green-600" />
-                <span className="text-green-700">Numéro de certificat</span>
+                <span className="text-green-700">N° du certificat CNC</span>
                 <span className="font-mono font-medium text-green-800 ml-auto">{cert.certificateNumber}</span>
               </div>
             )}
@@ -546,8 +572,7 @@ function CertDetailModal({ cert, onClose }: { cert: Certification; onClose: () =
           )}
 
           {/* Downloads */}
-          {(canDownloadCert || canDownloadReport) && (
-            <div className="space-y-2">
+          <div className="space-y-2">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Téléchargements</p>
 
               {canDownloadCert && (
@@ -560,8 +585,8 @@ function CertDetailModal({ cert, onClose }: { cert: Certification; onClose: () =
                     <Award className="w-5 h-5 text-green-600" />
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="font-semibold text-green-900 text-sm">Récapitulatif de Certification</p>
-                    <p className="text-xs text-green-600">Document facilitateur CarbonTrack — Réf. N° {cert.certificateNumber}</p>
+                    <p className="font-semibold text-green-900 text-sm">Certificat CNC</p>
+                    <p className="text-xs text-green-600">Copie numérique du certificat — N° {cert.certificateNumber}</p>
                   </div>
                   {certLoading
                     ? <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
@@ -569,6 +594,24 @@ function CertDetailModal({ cert, onClose }: { cert: Certification; onClose: () =
                   }
                 </button>
               )}
+
+              <button
+                onClick={downloadTracking}
+                disabled={trackingLoading}
+                className="w-full flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors disabled:opacity-60"
+              >
+                <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-5 h-5 text-gray-600" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-gray-900 text-sm">Fiche de suivi de la demande</p>
+                  <p className="text-xs text-gray-500">État d&apos;avancement de votre dossier (PDF)</p>
+                </div>
+                {trackingLoading
+                  ? <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                  : <Download className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                }
+              </button>
 
               {canDownloadReport && (
                 <button
@@ -589,8 +632,7 @@ function CertDetailModal({ cert, onClose }: { cert: Certification; onClose: () =
                   }
                 </button>
               )}
-            </div>
-          )}
+          </div>
 
           {/* Uploaded documents */}
           {cert.documents.length > 0 && (
@@ -612,7 +654,7 @@ function CertDetailModal({ cert, onClose }: { cert: Certification; onClose: () =
                         <p className="text-xs text-gray-400">{formatFileSize(doc.fileSize)} &bull; {formatDate(doc.createdAt)}</p>
                       </div>
                       <a
-                        href={`/api/certifications/documents/${doc.id}`}
+                        href={`/api/certification-documents/${doc.id}`}
                         className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
                         title="Télécharger"
                       >

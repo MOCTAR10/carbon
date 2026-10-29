@@ -371,7 +371,7 @@ function PDDDocument({ d }: { d: PDDData }) {
               const passed = !!additionality[b.key]
               return (
                 <View key={b.key} style={s.checkRow}>
-                  <View style={[s.checkBox, passed && s.checkBoxPassed]}>
+                  <View style={[s.checkBox, passed ? s.checkBoxPassed : {}]}>
                     {passed && <Text style={s.checkMark}>✓</Text>}
                   </View>
                   <Text style={s.checkLabel}>{b.label}</Text>

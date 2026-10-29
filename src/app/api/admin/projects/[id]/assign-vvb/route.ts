@@ -1,4 +1,4 @@
-﻿/**
+/**
  * POST /api/admin/projects/[id]/assign-vvb
  * Assign a VVB to a carbon project and send the document package by email.
  * Auth: admin only.
@@ -28,7 +28,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   const session = await requireAdmin()
-  if (!session) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+  if (!session) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
   const projectId = parseInt(params.id)
   const body = await req.json()
@@ -52,7 +52,7 @@ export async function POST(
   const proj = projResult.rows[0]
 
   // Load methodology name
-  let methodologyName = proj.methodology ?? proj.methodology_code ?? 'â€”'
+  let methodologyName = proj.methodology ?? proj.methodology_code ?? '—'
   if (proj.methodology_code) {
     const mRes = await query('SELECT name FROM methodologies WHERE code = $1', [proj.methodology_code])
     if (mRes.rows.length > 0) methodologyName = mRes.rows[0].name
@@ -97,11 +97,11 @@ export async function POST(
   const pddData: PDDData = {
     projectId,
     projectTitle:    proj.title ?? `Projet #${projectId}`,
-    projectType:     proj.project_type ?? 'â€”',
+    projectType:     proj.project_type ?? '—',
     projectTypeMrv:  proj.project_type_mrv ?? null,
-    methodologyCode: proj.methodology_code ?? 'â€”',
+    methodologyCode: proj.methodology_code ?? '—',
     methodologyName,
-    standard:        proj.standard ?? 'â€”',
+    standard:        proj.standard ?? '—',
     country:         proj.country ?? 'Gabon',
     locationName:    proj.location_name ?? null,
     areaHa:          proj.area_ha != null ? parseFloat(proj.area_ha) : null,
@@ -130,8 +130,8 @@ export async function POST(
     projectId,
     projectTitle:    proj.title ?? `Projet #${projectId}`,
     projectTypeMrv:  proj.project_type_mrv ?? null,
-    methodologyCode: proj.methodology_code ?? 'â€”',
-    standard:        proj.standard ?? 'â€”',
+    methodologyCode: proj.methodology_code ?? '—',
+    standard:        proj.standard ?? '—',
     country:         proj.country ?? 'Gabon',
     areaHa:          proj.area_ha != null ? parseFloat(proj.area_ha) : null,
     partnerName:     proj.partner_name ?? 'Partenaire',
@@ -156,8 +156,8 @@ export async function POST(
     vvbName, vvbEmail, vvbContact,
     projectId,
     projectTitle:    proj.title ?? `Projet #${projectId}`,
-    methodologyCode: proj.methodology_code ?? 'â€”',
-    standard:        proj.standard ?? 'â€”',
+    methodologyCode: proj.methodology_code ?? '—',
+    standard:        proj.standard ?? '—',
     country:         proj.country ?? 'Gabon',
     partnerName:     proj.partner_name ?? 'Partenaire',
     pddData,

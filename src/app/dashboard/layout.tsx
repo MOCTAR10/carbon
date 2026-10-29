@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import LoadingScreen from '@/components/LoadingScreen'
 import NotificationBell from '@/components/NotificationBell'
+import { FEATURES } from '@/lib/features'
 
 interface UserData {
   id: number
@@ -57,7 +58,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: '/dashboard/assessments',      label: 'Bilans Carbone',      icon: ClipboardList },
     { href: '/dashboard/reports',          label: 'Rapports & Graphiques', icon: BarChart3 },
     { href: '/dashboard/certifications',   label: 'Bilans Certifiés',    icon: Award },
-    { href: '/dashboard/assistant',        label: 'Assistant IA',        icon: Bot },
+    ...(FEATURES.aiAssistant ? [{ href: '/dashboard/assistant', label: 'Assistant IA', icon: Bot }] : []),
   ]
 
   if (loading) return <LoadingScreen theme="light" label="Chargement du tableau de bord" />

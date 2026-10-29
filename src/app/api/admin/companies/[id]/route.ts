@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 
@@ -13,7 +13,7 @@ async function requireAdmin(session: Awaited<ReturnType<typeof getSession>>) {
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getSession('admin')
-    if (!await requireAdmin(session)) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+    if (!await requireAdmin(session)) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
     const companyId = parseInt(params.id)
 
@@ -30,7 +30,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     ])
 
     if (companyResult.rows.length === 0) {
-      return NextResponse.json({ error: 'Entreprise non trouvÃ©e' }, { status: 404 })
+      return NextResponse.json({ error: 'Entreprise non trouvée' }, { status: 404 })
     }
 
     const c = companyResult.rows[0]
@@ -80,7 +80,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getSession('admin')
-    if (!await requireAdmin(session)) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+    if (!await requireAdmin(session)) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
     const companyId = parseInt(params.id)
     await query('DELETE FROM companies WHERE id = $1', [companyId])

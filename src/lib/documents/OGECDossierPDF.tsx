@@ -505,7 +505,7 @@ function OGECDossierDocument({ d }: { d: OGECDossierData }) {
             <View style={s.scopeCardTotal}>
               <Text style={s.scopeValueTotal}>{fmtNum(d.totalCo2eq)}</Text>
               <Text style={s.scopeLabelTotal}>TOTAL (tCO2e)</Text>
-              <View style={[s.seuilBadge, !isAssujetti && { backgroundColor: C.orange }]}>
+              <View style={[s.seuilBadge, isAssujetti ? {} : { backgroundColor: C.orange }]}>
                 <Text style={s.seuilBadgeText}>
                   {isAssujetti ? 'Assujetti OGEC  >=10 000 tCO2e' : 'Non assujetti  <10 000 tCO2e'}
                 </Text>

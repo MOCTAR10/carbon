@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { verifyPassword, createToken, PORTAL_COOKIE } from '@/lib/auth'
+import { FEATURES } from '@/lib/features'
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +25,14 @@ export async function POST(request: NextRequest) {
 
     if (!valid) {
       return NextResponse.json({ error: 'Email ou mot de passe incorrect' }, { status: 401 })
+    }
+
+    // The CNC portal was removed — legacy CNC accounts can no longer sign in
+    if (user.role === 'cnc') {
+      return NextResponse.json({ error: "Ce compte n'est plus actif" }, { status: 403 })
+    }
+    if (user.role === 'partner' && !FEATURES.carbonMarket) {
+      return NextResponse.json({ error: "L'espace partenaire est temporairement indisponible" }, { status: 403 })
     }
 
     const token = await createToken({
@@ -53,7 +62,6 @@ export async function POST(request: NextRequest) {
     // stale tokens from previous sessions never contaminate cross-portal reads.
     const cookieName = user.role === 'admin'  ? PORTAL_COOKIE.admin  :
                        user.role === 'expert' ? PORTAL_COOKIE.expert :
-                       user.role === 'cnc'    ? PORTAL_COOKIE.cnc    :
                        PORTAL_COOKIE.user
 
     const cookieOpts = {
@@ -68,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set(cookieName, token, { ...cookieOpts, maxAge: 60 * 60 * 24 * 7 })
 
-    // Clear the other two portals so no cross-portal leakage
+    // Clear the other portals so no cross-portal leakage
     for (const [, name] of Object.entries(PORTAL_COOKIE)) {
       if (name !== cookieName) {
         response.cookies.set(name, '', { ...cookieOpts, maxAge: 0 })

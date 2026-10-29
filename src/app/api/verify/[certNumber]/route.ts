@@ -11,7 +11,9 @@ export async function GET(_req: NextRequest, { params }: { params: { certNumber:
       `SELECT
          cr.id, cr.status, cr.certificate_number, cr.certified_at,
          cr.expert_name, cr.expert_email, cr.inspection_date, cr.audit_location,
-         cr.cnc_certificate_number, cr.cnc_certificate_generated_at,
+         -- the expert enters the CNC-issued number/date when uploading the certificate
+         CASE WHEN cr.status = 'certified' THEN cr.certificate_number END AS cnc_certificate_number,
+         CASE WHEN cr.status = 'certified' THEN cr.certified_at END AS cnc_certificate_generated_at,
          cr.avis_number, cr.avis_date,
          cr.avis_period_start, cr.avis_period_end, cr.avis_total_co2eq,
          a.id as assessment_id, a.name as assessment_name, a.year as assessment_year,
@@ -22,7 +24,7 @@ export async function GET(_req: NextRequest, { params }: { params: { certNumber:
        JOIN assessments a ON a.id = cr.assessment_id
        JOIN sites s ON s.id = a.site_id
        JOIN companies c ON c.id = cr.company_id
-       WHERE cr.certificate_number = $1 OR cr.cnc_certificate_number = $1`,
+       WHERE cr.certificate_number = $1`,
       [certNumber]
     )
 

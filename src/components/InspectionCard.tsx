@@ -34,16 +34,15 @@ export default function InspectionCard({ data, role, onRefresh, theme = 'dark' }
   // (covers certs assigned before audit_scheduled_date column was backfilled)
   const effectiveDate = data.auditScheduledDate || data.inspectionDate
 
-  const [mode, setMode] = useState<'view' | 'reschedule' | 'propose'>('view')
+  const [mode, setMode] = useState<'view' | 'reschedule'>('view')
   const [dateInput, setDateInput] = useState(effectiveDate?.slice(0, 10) ?? '')
   const [locationInput, setLocationInput] = useState(data.auditLocation ?? '')
-  const [proposedDate, setProposedDate] = useState('')
-  const [reason, setReason] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   const isDark = theme === 'dark'
-  const isReadOnly = ['certified', 'rejected'].includes(data.status)
+  // The field audit date can only change before the audit is finalised
+  const isReadOnly = !['pending', 'assigned', 'in_progress'].includes(data.status)
 
   const apiBase = role === 'expert'
     ? `/api/expert/certifications/${data.certId}`
@@ -99,35 +98,25 @@ export default function InspectionCard({ data, role, onRefresh, theme = 'dark' }
       <div className={`flex items-center justify-between px-5 py-3.5 border-b ${border}`}>
         <div className="flex items-center gap-2.5">
           <Calendar className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
-          <span className={`text-sm font-semibold ${txt}`}>Planification de l&apos;inspection</span>
+          <span className={`text-sm font-semibold ${txt}`}>Audit terrain</span>
           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${pillCls}`}>{pillLabel}</span>
         </div>
         {!isReadOnly && mode === 'view' && (
           <div className="flex items-center gap-2">
-            {role === 'admin' && (
-              <button
-                onClick={() => { setDateInput(effectiveDate?.slice(0, 10) ?? ''); setLocationInput(data.auditLocation ?? ''); setMode('reschedule') }}
-                className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${isDark ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
-              >
-                <Edit2 className="w-3.5 h-3.5" />{hasScheduled ? 'Modifier' : 'Planifier'}
-              </button>
-            )}
+            <button
+              onClick={() => { setDateInput(effectiveDate?.slice(0, 10) ?? ''); setLocationInput(data.auditLocation ?? ''); setMode('reschedule') }}
+              className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${isDark ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+            >
+              <Edit2 className="w-3.5 h-3.5" />{hasScheduled ? 'Modifier' : 'Planifier'}
+            </button>
             {role === 'expert' && hasScheduled && !isConfirmed && !hasProposal && (
-              <>
-                <button
-                  onClick={() => patch({ action: 'confirm_date' })}
-                  disabled={saving}
-                  className="flex items-center gap-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  <ThumbsUp className="w-3.5 h-3.5" />Confirmer
-                </button>
-                <button
-                  onClick={() => { setProposedDate(''); setReason(''); setMode('propose') }}
-                  className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${isDark ? 'text-amber-400 hover:bg-amber-500/10' : 'text-amber-600 hover:bg-amber-50'}`}
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />Proposer autre date
-                </button>
-              </>
+              <button
+                onClick={() => patch({ action: 'confirm_date' })}
+                disabled={saving}
+                className="flex items-center gap-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <ThumbsUp className="w-3.5 h-3.5" />Confirmer
+              </button>
             )}
             {role === 'admin' && hasProposal && data.inspectionProposedBy === 'expert' && (
               <button
@@ -168,7 +157,7 @@ export default function InspectionCard({ data, role, onRefresh, theme = 'dark' }
         {mode === 'view' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className={`${bgIn} rounded-xl p-3.5`}>
-              <p className={`text-xs font-medium mb-1 ${muted}`}>Date planifiée par l&apos;admin</p>
+              <p className={`text-xs font-medium mb-1 ${muted}`}>Date de l&apos;audit terrain</p>
               <div className="flex items-center gap-2">
                 <Calendar className={`w-4 h-4 flex-shrink-0 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
                 <p className={`text-sm font-semibold ${hasScheduled ? txt : muted}`}>
@@ -209,12 +198,12 @@ export default function InspectionCard({ data, role, onRefresh, theme = 'dark' }
           </div>
         )}
 
-        {/* Admin: reschedule form */}
-        {mode === 'reschedule' && role === 'admin' && (
+        {/* Set / change the field audit date (admin plans it, the expert can fix it directly) */}
+        {mode === 'reschedule' && (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className={`block text-xs font-medium mb-1 ${muted}`}>Date d&apos;inspection *</label>
+                <label className={`block text-xs font-medium mb-1 ${muted}`}>Date de l&apos;audit terrain *</label>
                 <input
                   type="date"
                   value={dateInput}
@@ -235,50 +224,13 @@ export default function InspectionCard({ data, role, onRefresh, theme = 'dark' }
             </div>
             <div className="flex items-center gap-2 pt-1">
               <button
-                onClick={() => patch({ action: 'reschedule', scheduledDate: dateInput, location: locationInput })}
+                onClick={() => patch(role === 'expert'
+                  ? { action: 'set_date', auditDate: dateInput, auditLocation: locationInput }
+                  : { action: 'reschedule', scheduledDate: dateInput, location: locationInput })}
                 disabled={saving || !dateInput}
                 className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
               >
                 <Save className="w-3.5 h-3.5" />{saving ? 'Sauvegarde…' : 'Confirmer la date'}
-              </button>
-              <button onClick={() => setMode('view')} className={`text-xs px-3 py-2 rounded-lg transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}>
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Expert: propose alternate date */}
-        {mode === 'propose' && role === 'expert' && (
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={`block text-xs font-medium mb-1 ${muted}`}>Date proposée *</label>
-                <input
-                  type="date"
-                  value={proposedDate}
-                  onChange={e => setProposedDate(e.target.value)}
-                  className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/30 ${inputCls}`}
-                />
-              </div>
-              <div>
-                <label className={`block text-xs font-medium mb-1 ${muted}`}>Motif (optionnel)</label>
-                <input
-                  type="text"
-                  value={reason}
-                  onChange={e => setReason(e.target.value)}
-                  placeholder="Contrainte, déplacement…"
-                  className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500/30 ${inputCls}`}
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2 pt-1">
-              <button
-                onClick={() => patch({ action: 'propose_date', proposedDate, reason })}
-                disabled={saving || !proposedDate}
-                className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-              >
-                <Save className="w-3.5 h-3.5" />{saving ? 'Envoi…' : 'Envoyer la proposition'}
               </button>
               <button onClick={() => setMode('view')} className={`text-xs px-3 py-2 rounded-lg transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}>
                 <X className="w-3.5 h-3.5" />
@@ -292,7 +244,7 @@ export default function InspectionCard({ data, role, onRefresh, theme = 'dark' }
           <div className={`flex items-center gap-3 rounded-xl p-3 ${isDark ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-emerald-50 border border-emerald-200'}`}>
             <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
             <p className={`text-xs font-medium ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-              Inspection confirmée · {fmtDate(effectiveDate)}
+              Audit terrain confirmé · {fmtDate(effectiveDate)}
               {data.auditLocation && ` · ${data.auditLocation}`}
             </p>
           </div>

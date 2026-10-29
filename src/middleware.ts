@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
+import { isDisabledPath } from '@/lib/features'
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'carbontrack-secret-key-change-in-production'
@@ -9,14 +10,6 @@ const COOKIE = {
   admin:  'adm_token',
   expert: 'exp_token',
   user:   'token',
-  cnc:    'cnc_token',
-}
-
-function roleHome(role: unknown) {
-  if (role === 'admin') return '/admin'
-  if (role === 'expert') return '/expert'
-  if (role === 'cnc') return '/cnc'
-  return '/dashboard'
 }
 
 async function verifyRole(token: string): Promise<string | null> {
@@ -30,6 +23,15 @@ async function verifyRole(token: string): Promise<string | null> {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // ── Paused modules (carbon market, AI assistant) ─────────────────────────
+  if (isDisabledPath(pathname)) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Fonctionnalité non disponible' }, { status: 404 })
+    }
+    const home = pathname.startsWith('/admin') ? '/admin' : pathname.startsWith('/partner') ? '/' : '/dashboard'
+    return NextResponse.redirect(new URL(home, request.url))
+  }
 
   // ── Admin routes (except /admin/login) ──────────────────────────────────
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
@@ -63,30 +65,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // ── CNC routes (except /cnc/login) ─────────────────────────────────────
-  if (pathname.startsWith('/cnc') && !pathname.startsWith('/cnc/login')) {
-    const token = request.cookies.get(COOKIE.cnc)?.value
-    if (!token) return NextResponse.redirect(new URL('/cnc/login', request.url))
-    const role = await verifyRole(token)
-    if (role !== 'cnc') return NextResponse.redirect(new URL('/cnc/login', request.url))
-  }
-
-  // ── Already-logged-in CNC visits /cnc/login → skip to /cnc ──────────────
-  if (pathname.startsWith('/cnc/login')) {
-    const token = request.cookies.get(COOKIE.cnc)?.value
-    if (token && (await verifyRole(token)) === 'cnc') {
-      return NextResponse.redirect(new URL('/cnc', request.url))
-    }
-  }
-
-  // ── Dashboard: redirect admins/experts/cnc to their portal ────────────────
+  // ── Dashboard: redirect admins/experts to their portal ───────────────────
   if (pathname === '/dashboard' || pathname.startsWith('/dashboard/') || pathname === '/subscription') {
     const token = request.cookies.get(COOKIE.user)?.value
     if (token) {
       const role = await verifyRole(token)
       if (role === 'expert') return NextResponse.redirect(new URL('/expert', request.url))
       if (role === 'admin')  return NextResponse.redirect(new URL('/admin', request.url))
-      if (role === 'cnc')    return NextResponse.redirect(new URL('/cnc', request.url))
     }
   }
 
@@ -94,5 +79,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/expert/:path*', '/cnc/:path*', '/dashboard', '/dashboard/:path*', '/subscription'],
+  matcher: [
+    '/admin/:path*', '/expert/:path*', '/dashboard', '/dashboard/:path*', '/subscription',
+    '/partner', '/partner/:path*',
+    '/api/partner/:path*', '/api/partners', '/api/partners/:path*', '/api/market/:path*',
+    '/api/puro/:path*', '/api/vvb-registry', '/api/admin/projects/:path*', '/api/admin/credits/:path*',
+    '/api/auth/partner-me', '/api/rag/:path*', '/api/admin/rag/:path*',
+  ],
 }

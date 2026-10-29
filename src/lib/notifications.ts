@@ -47,23 +47,6 @@ export async function notifyAllAdmins(
   }
 }
 
-/** Notify every CNC user */
-export async function notifyAllCnc(
-  type: NotifType,
-  title: string,
-  message: string,
-  link?: string
-) {
-  try {
-    const result = await query(`SELECT id FROM users WHERE role = 'cnc'`)
-    await Promise.all(
-      result.rows.map(r => createNotification(r.id, type, title, message, link))
-    )
-  } catch (err) {
-    console.error('notifyAllCnc failed:', err)
-  }
-}
-
 /** Notify every user belonging to a company */
 export async function notifyCompanyUsers(
   companyId: number,

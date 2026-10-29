@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { FEATURES } from '@/lib/features'
 import {
   Leaf, BarChart3, Building2, Shield, ArrowRight, FileCheck,
   BadgeCheck, Bot, FileText, CheckCircle2, ChevronRight,
@@ -30,7 +31,7 @@ export default function HomePage() {
             <a href="#fonctionnalites" className="hover:text-brand-600 transition-colors">Fonctionnalités</a>
             <a href="#workflow" className="hover:text-brand-600 transition-colors">Comment ça marche</a>
             <a href="#mobile" className="hover:text-brand-600 transition-colors">Application</a>
-            <a href="#assistant" className="hover:text-brand-600 transition-colors">Assistant IA</a>
+            {FEATURES.aiAssistant && <a href="#assistant" className="hover:text-brand-600 transition-colors">Assistant IA</a>}
           </nav>
 
           <div className="flex items-center gap-3">
@@ -57,7 +58,7 @@ export default function HomePage() {
           </h1>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-8 leading-relaxed">
             La plateforme tout-en-un pour les entreprises gabonaises — bilan GES Scope 1, 2 & 3
-            et certification officielle GreenLeaves avec accompagnement expert de bout en bout.
+            et certification auprès du CNC, portée de bout en bout par un expert accrédité GreenLeaves.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
@@ -112,13 +113,13 @@ export default function HomePage() {
               {
                 icon: Shield,
                 title: 'Certification GreenLeaves',
-                desc: 'Workflow simplifié en 5 étapes : soumission → expert assigné → audit terrain → revue finale → certificat. GreenLeaves gère tout le processus.',
+                desc: 'Workflow simplifié en 5 étapes : soumission → expert assigné → audit terrain → dépôt au CNC → certificat. L’expert accrédité GreenLeaves porte votre dossier jusqu’au CNC.',
                 color: 'bg-brand-50 text-brand-600',
               },
               {
                 icon: FileText,
                 title: 'Documents PDF professionnels',
-                desc: 'Rapport d\'audit expert détaillé, Récapitulatif de Certification et rapport de bilan GES générés automatiquement, prêts à soumettre.',
+                desc: 'Rapport d\'audit expert détaillé, dossier de certification et rapport de bilan GES générés automatiquement, prêts à déposer au CNC.',
                 color: 'bg-purple-50 text-purple-600',
               },
               {
@@ -170,8 +171,8 @@ export default function HomePage() {
               { step: '01', icon: Building2,    title: 'Inscription',         desc: 'Créez votre compte entreprise et renseignez vos sites de production par pays.' },
               { step: '02', icon: BarChart3,    title: 'Bilan GES',           desc: 'Saisissez vos données Scope 1, 2 & 3 — ISO 14064-1, GHG Protocol, facteurs ADEME, IPCC et locaux Gabon. Sites par pays.' },
               { step: '03', icon: FileCheck,    title: 'Demande de certification', desc: 'Soumettez votre bilan finalisé en un clic pour déclencher le processus.' },
-              { step: '04', icon: UserCheck,    title: 'Audit expert',        desc: 'Un expert GreenLeaves est assigné, effectue la visite de site et complète la grille d\'audit.' },
-              { step: '05', icon: BadgeCheck,   title: 'Certifié ✓',         desc: 'Votre certificat officiel GreenLeaves est émis avec numéro unique CT-GL.' },
+              { step: '04', icon: UserCheck,    title: 'Audit expert',        desc: 'Un expert accrédité GreenLeaves est assigné, effectue l\'audit terrain puis dépose votre dossier au CNC.' },
+              { step: '05', icon: BadgeCheck,   title: 'Certifié ✓',         desc: 'Le Conseil National du Climat délivre le certificat, disponible au téléchargement sur la plateforme.' },
             ].map((s, i) => (
               <div key={i} className="relative">
                 <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm h-full">
@@ -214,14 +215,14 @@ export default function HomePage() {
               </h2>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 L&apos;application CarbonTrack est disponible sur iOS et Android. Saisissez vos données
-                d&apos;activité, consultez vos bilans, suivez vos certifications et posez vos questions
-                à l&apos;assistant IA — directement depuis votre téléphone.
+                d&apos;activité, consultez vos bilans et suivez vos certifications — directement
+                depuis votre téléphone.
               </p>
               <div className="space-y-3 mb-6">
                 {[
                   { icon: BarChart3,  label: 'Saisie Scope 1, 2 & 3 depuis le terrain' },
                   { icon: BadgeCheck, label: 'Suivi de certification en temps réel' },
-                  { icon: Bot,        label: 'Assistant IA intégré' },
+                  ...(FEATURES.aiAssistant ? [{ icon: Bot, label: 'Assistant IA intégré' }] : []),
                   { icon: FileText,   label: 'Consultation des rapports PDF' },
                 ].map(({ icon: Icon, label }) => (
                   <div key={label} className="flex items-center gap-3">
@@ -277,6 +278,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Assistant IA ─────────────────────────────────────────────────────── */}
+      {FEATURES.aiAssistant && (
       <section id="assistant" className="py-16 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -350,6 +352,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* ── Modules recap ────────────────────────────────────────────────────── */}
       <section className="py-16 px-6 bg-gray-50">
@@ -370,12 +373,12 @@ export default function HomePage() {
                 'Grille d\'audit expert (6 sections)',
                 'Rapport d\'Audit Expert PDF',
                 'Rapport de Bilan GES PDF',
-                'Récapitulatif de Certification PDF',
+                'Dossier complet de certification (CNC)',
                 'Dashboard entreprise — suivi temps réel',
                 'Application mobile iOS & Android',
                 'Rapports conformes ISO 14064 & GHG Protocol',
                 'Historique multi-années par site',
-                'Assistant IA — questions GES',
+                ...(FEATURES.aiAssistant ? ['Assistant IA — questions GES'] : []),
                 'Support technique inclus',
               ].map((label) => (
                 <div key={label} className="flex items-center gap-3">

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { createNotification, notifyCompanyUsers } from '@/lib/notifications'
@@ -14,7 +14,7 @@ async function requireAdmin(session: Awaited<ReturnType<typeof getSession>>) {
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getSession('admin')
-    if (!await requireAdmin(session)) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+    if (!await requireAdmin(session)) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
     const certId = parseInt(params.id)
     const result = await query(
@@ -29,8 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
           cr.avis_number, cr.avis_date, cr.avis_pdf_url,
           cr.avis_period_start, cr.avis_period_end, cr.avis_total_co2eq,
           cr.expert_report_pdf_url, cr.dossier_compiled_at,
-          cr.cnc_user_id, cr.submitted_to_cnc_at, cr.cnc_reviewed_at, cr.cnc_notes,
-          cr.cnc_certificate_pdf_url, cr.cnc_certificate_generated_at, cr.cnc_certificate_number,
+          cr.submitted_to_cnc_at, cr.cnc_deposit_reference,
          a.id as assessment_id, a.name as assessment_name, a.year as assessment_year,
          a.total_co2eq, a.scope1_co2eq, a.scope2_co2eq, a.scope3_co2eq,
          a.approach,
@@ -107,7 +106,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       .map(e => ({ name: e.factorName, total: e.totalCo2eq, scope: e.scope, category: e.category, quantity: e.quantity, unit: e.unit, factorValue: e.factorValue }))
 
     const docsResult = await query(
-      `SELECT id, doc_type, original_name, file_size, created_at
+      `SELECT id, doc_type, original_name, file_size, mime_type, created_at
        FROM certification_documents WHERE certification_id = $1 ORDER BY created_at DESC`,
       [certId]
     )
@@ -145,13 +144,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       avisTotalCo2eq: r.avis_total_co2eq ? parseFloat(r.avis_total_co2eq) : null,
       expertReportPdfUrl: r.expert_report_pdf_url,
       dossierCompiledAt: r.dossier_compiled_at,
-      cncUserId: r.cnc_user_id,
       submittedToCncAt: r.submitted_to_cnc_at,
-      cncReviewedAt: r.cnc_reviewed_at,
-      cncNotes: r.cnc_notes,
-      cncCertificatePdfUrl: r.cnc_certificate_pdf_url,
-      cncCertificateGeneratedAt: r.cnc_certificate_generated_at,
-      cncCertificateNumber: r.cnc_certificate_number,
+      cncDepositReference: r.cnc_deposit_reference,
       certifiedAt: r.certified_at, certificateNumber: r.certificate_number,
       rejectionReason: r.rejection_reason, adminNotes: r.admin_notes,
       companyMessage: r.company_message,
@@ -164,7 +158,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       entries, byMonth, byCategory, topEmitters,
       documents: docsResult.rows.map(d => ({
         id: d.id, docType: d.doc_type, originalName: d.original_name,
-        fileSize: d.file_size, createdAt: d.created_at,
+        fileSize: d.file_size, mimeType: d.mime_type, createdAt: d.created_at,
       })),
       auditDocuments: auditDocsResult.rows.map(d => ({
         id:          d.id,
@@ -187,7 +181,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getSession('admin')
-    if (!await requireAdmin(session)) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+    if (!await requireAdmin(session)) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
     const certId = parseInt(params.id)
     const body = await request.json()
@@ -197,7 +191,11 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       const { expertUserId, inspectionDate, adminNotes } = body
 
       if (!expertUserId) {
-        return NextResponse.json({ error: 'SÃ©lectionnez un expert' }, { status: 400 })
+        return NextResponse.json({ error: 'Sélectionnez un expert' }, { status: 400 })
+      }
+      const current = await query(`SELECT status FROM certification_requests WHERE id = $1`, [certId])
+      if (!['pending', 'assigned', 'in_progress'].includes(current.rows[0]?.status)) {
+        return NextResponse.json({ error: "L'expert ne peut plus être changé à ce stade" }, { status: 400 })
       }
 
       // Look up expert name/email from users table
@@ -261,6 +259,10 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       )
     } else if (action === 'reject') {
       const { rejectionReason, adminNotes } = body
+      const current = await query(`SELECT status FROM certification_requests WHERE id = $1`, [certId])
+      if (['certified', 'rejected'].includes(current.rows[0]?.status)) {
+        return NextResponse.json({ error: 'Cette demande est déjà clôturée' }, { status: 400 })
+      }
       await query(
         `UPDATE certification_requests
          SET status = 'rejected', rejection_reason = $1, admin_notes = $2, updated_at = NOW()
@@ -364,123 +366,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         `UPDATE certification_requests SET admin_notes = $1, updated_at = NOW() WHERE id = $2`,
         [adminNotes, certId]
       )
-
-    } else if (action === 'audit_done') {
-      const { auditChecklist, inspectionNotes } = body
-      await query(
-        `UPDATE certification_requests
-         SET status = 'audit_done',
-             audit_checklist = $1,
-             inspection_notes = $2,
-             inspection_date = COALESCE(inspection_date, NOW()::DATE),
-             updated_at = NOW()
-         WHERE id = $3`,
-        [
-          auditChecklist ? JSON.stringify(auditChecklist) : null,
-          inspectionNotes || null,
-          certId,
-        ]
-      )
-
-    } else if (action === 'certify') {
-      const { adminNotes } = body
-      const year = new Date().getFullYear()
-      const random = Math.floor(100000 + Math.random() * 900000)
-      const certificateNumber = `CT-GL-${year}-${random}`
-
-      await query(
-        `UPDATE certification_requests
-         SET status = 'certified',
-             certificate_number = $1,
-             certified_at = NOW(),
-             admin_notes = COALESCE($2, admin_notes),
-             updated_at = NOW()
-         WHERE id = $3`,
-        [certificateNumber, adminNotes || null, certId]
-      )
-      await query(
-        `UPDATE assessments SET status = 'completed', updated_at = NOW()
-         WHERE id = (SELECT assessment_id FROM certification_requests WHERE id = $1)`,
-        [certId]
-      )
-      const cInfo = await query(
-        `SELECT cr.company_id, a.name as assessment_name, cr.certificate_number
-         FROM certification_requests cr JOIN assessments a ON a.id = cr.assessment_id
-         WHERE cr.id = $1`, [certId]
-      )
-      if (cInfo.rows.length > 0) {
-        await notifyCompanyUsers(
-          cInfo.rows[0].company_id,
-          'cert_validated',
-          '🎉 Bilan carbone certifié !',
-          `Votre bilan "${cInfo.rows[0].assessment_name}" a été certifié (N° ${cInfo.rows[0].certificate_number}).`,
-          `/dashboard/certifications`
-        )
-      }
-
-      // Auto-generate expert audit report PDF
-      try {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`
-        await fetch(`${appUrl}/api/admin/certifications/${certId}/generate-pdf`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-internal-key': process.env.INTERNAL_API_KEY || 'carbontrack-internal',
-          },
-        })
-      } catch (pdfErr) {
-        console.error('Auto PDF generation failed (non-fatal):', pdfErr)
-      }
-
-    } else if (action === 'send_to_cnc') {
-      const { cncUserId, adminNotes } = body
-      if (!cncUserId) {
-        return NextResponse.json({ error: 'Sélectionnez un membre CNC' }, { status: 400 })
-      }
-
-      const cncResult = await query(
-        `SELECT first_name, last_name, email FROM users WHERE id = $1 AND role = 'cnc'`,
-        [cncUserId]
-      )
-      if (cncResult.rows.length === 0) {
-        return NextResponse.json({ error: 'Membre CNC introuvable' }, { status: 404 })
-      }
-
-      await query(
-        `UPDATE certification_requests
-         SET status = 'submitted_to_cnc',
-             cnc_user_id = $1,
-             submitted_to_cnc_at = NOW(),
-             admin_notes = COALESCE($2, admin_notes),
-             updated_at = NOW()
-         WHERE id = $3`,
-        [cncUserId, adminNotes || null, certId]
-      )
-
-      const scInfo = await query(
-        `SELECT cr.company_id, a.name as assessment_name, c.name as company_name
-         FROM certification_requests cr
-         JOIN assessments a ON a.id = cr.assessment_id
-         JOIN companies c ON c.id = cr.company_id
-         WHERE cr.id = $1`, [certId]
-      )
-      if (scInfo.rows.length > 0) {
-        const { company_id, assessment_name, company_name } = scInfo.rows[0]
-        await createNotification(
-          cncUserId,
-          'cert_assigned',
-          'Nouveau dossier à certifier',
-          `Le dossier de ${company_name} — "${assessment_name}" vous a été soumis pour certification finale.`,
-          `/cnc/certifications/${certId}`
-        )
-        await notifyCompanyUsers(
-          company_id,
-          'cert_comment',
-          'Dossier soumis au CNC',
-          `Votre dossier "${assessment_name}" a été soumis au Conseil National du Climat pour certification finale.`,
-          `/dashboard/certifications`
-        )
-      }
 
     } else {
       return NextResponse.json({ error: 'Action invalide' }, { status: 400 })

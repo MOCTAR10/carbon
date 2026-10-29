@@ -5,7 +5,7 @@ import { query } from '@/lib/db'
 // Detect which portal the request comes from so we read the right cookie
 function portalFrom(req: NextRequest) {
   const p = req.nextUrl.searchParams.get('portal')
-  if (p === 'admin' || p === 'expert' || p === 'cnc') return p
+  if (p === 'admin' || p === 'expert') return p
   return 'user' as const
 }
 

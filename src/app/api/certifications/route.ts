@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { getSession } from '@/lib/auth'
-import { notifyAllAdmins, notifyAllCnc } from '@/lib/notifications'
+import { notifyAllAdmins } from '@/lib/notifications'
+import { OPEN_CERT_STATUSES } from '@/lib/certification'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,7 +10,7 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifie' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const result = await query(
       `SELECT cr.*, 
@@ -79,6 +80,8 @@ export async function GET() {
           avisTotalCo2eq: cert.avis_total_co2eq ? parseFloat(cert.avis_total_co2eq) : null,
           expertReportPdfUrl: cert.expert_report_pdf_url,
           dossierCompiledAt: cert.dossier_compiled_at,
+          submittedToCncAt: cert.submitted_to_cnc_at,
+          cncDepositReference: cert.cnc_deposit_reference,
           documents: certDocs.map(d => ({
             id: d.id,
             docType: d.doc_type,
@@ -101,7 +104,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifie' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const { assessmentId, message } = await request.json()
 
@@ -118,22 +121,23 @@ export async function POST(request: NextRequest) {
     )
 
     if (assessment.rows.length === 0) {
-      return NextResponse.json({ error: 'Bilan non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Bilan non trouvé' }, { status: 404 })
     }
 
     // Check if there's already a pending/in_progress/certified request
     const existing = await query(
-      `SELECT id, status FROM certification_requests 
-       WHERE assessment_id = $1 AND status IN ('pending', 'assigned', 'in_progress', 'certified')`,
-      [assessmentId]
+      `SELECT id, status FROM certification_requests
+       WHERE assessment_id = $1 AND status = ANY($2)
+       ORDER BY requested_at DESC LIMIT 1`,
+      [assessmentId, OPEN_CERT_STATUSES]
     )
 
     if (existing.rows.length > 0) {
       const s = existing.rows[0].status
       if (s === 'certified') {
-        return NextResponse.json({ error: 'Ce bilan est deja certifie' }, { status: 409 })
+        return NextResponse.json({ error: 'Ce bilan est déjà certifié' }, { status: 409 })
       }
-      return NextResponse.json({ error: 'Une demande de certification est deja en cours pour ce bilan' }, { status: 409 })
+      return NextResponse.json({ error: 'Une demande de certification est déjà en cours pour ce bilan' }, { status: 409 })
     }
 
     // Create the certification request
@@ -147,23 +151,16 @@ export async function POST(request: NextRequest) {
     const newCertId = result.rows[0].id
     const assessmentName = assessment.rows[0].name
 
-    // Notify all admins and CNC about the new request
     await notifyAllAdmins(
       'cert_request',
       'Nouvelle demande de certification',
       `${assessmentName} — demande soumise par l'entreprise`,
       `/admin/certifications/${newCertId}`
     )
-    await notifyAllCnc(
-      'cert_request',
-      'Nouveau dossier à certifier',
-      `${assessmentName} — nouvelle demande soumise par l'entreprise`,
-      `/cnc/certifications/${newCertId}`
-    )
 
     return NextResponse.json({
       success: true,
-      message: 'Demande de certification envoyee avec succes',
+      message: 'Demande de certification envoyée avec succès',
       certification: {
         id: result.rows[0].id,
         status: result.rows[0].status,

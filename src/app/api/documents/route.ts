@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { writeFile, mkdir, unlink } from 'fs/promises'
@@ -13,7 +13,7 @@ const UPLOAD_DIR = path.join(process.cwd(), 'uploads')
 export async function GET(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const sp = request.nextUrl.searchParams
     const assessmentId = sp.get('assessmentId')
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       'SELECT a.id FROM assessments a JOIN sites s ON a.site_id = s.id WHERE a.id = $1 AND s.company_id = $2',
       [assessmentId, session.companyId]
     )
-    if (ac.rows.length === 0) return NextResponse.json({ error: 'Non trouvÃ©' }, { status: 404 })
+    if (ac.rows.length === 0) return NextResponse.json({ error: 'Non trouvé' }, { status: 404 })
 
     const factorId = sp.get('factorId')
     const year = sp.get('year')
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     const month = formData.get('month') as string
 
     if (!file || !assessmentId || !factorId || !year || !month) {
-      return NextResponse.json({ error: 'DonnÃ©es manquantes' }, { status: 400 })
+      return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
     }
 
     // Access check
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       'SELECT a.id FROM assessments a JOIN sites s ON a.site_id = s.id WHERE a.id = $1 AND s.company_id = $2',
       [assessmentId, session.companyId]
     )
-    if (ac.rows.length === 0) return NextResponse.json({ error: 'Non trouvÃ©' }, { status: 404 })
+    if (ac.rows.length === 0) return NextResponse.json({ error: 'Non trouvé' }, { status: 404 })
 
     // Ensure upload dir exists
     const assessmentDir = path.join(UPLOAD_DIR, assessmentId)
@@ -123,21 +123,21 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const { id, assessmentId } = await request.json()
-    if (!id || !assessmentId) return NextResponse.json({ error: 'DonnÃ©es manquantes' }, { status: 400 })
+    if (!id || !assessmentId) return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
 
     // Access check
     const ac = await query(
       'SELECT a.id FROM assessments a JOIN sites s ON a.site_id = s.id WHERE a.id = $1 AND s.company_id = $2',
       [assessmentId, session.companyId]
     )
-    if (ac.rows.length === 0) return NextResponse.json({ error: 'Non trouvÃ©' }, { status: 404 })
+    if (ac.rows.length === 0) return NextResponse.json({ error: 'Non trouvé' }, { status: 404 })
 
     // Get doc info before deleting
     const doc = await query('SELECT * FROM audit_documents WHERE id = $1 AND assessment_id = $2', [id, assessmentId])
-    if (doc.rows.length === 0) return NextResponse.json({ error: 'Document non trouvÃ©' }, { status: 404 })
+    if (doc.rows.length === 0) return NextResponse.json({ error: 'Document non trouvé' }, { status: 404 })
 
     // Delete file from disk
     const filePath = path.join(UPLOAD_DIR, String(assessmentId), doc.rows[0].filename)

@@ -1,6 +1,6 @@
-﻿/**
- * GET  /api/admin/credits        â€” list all credits (registry overview)
- * POST /api/admin/credits/issue  â€” issue new credits from an MRV period
+/**
+ * GET  /api/admin/credits        — list all credits (registry overview)
+ * POST /api/admin/credits/issue  — issue new credits from an MRV period
  *
  * Auth: admin only.
  */
@@ -21,7 +21,7 @@ async function requireAdmin() {
 
 // â”€â”€â”€ Internal reference generator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Format: REF-{projectId:04d}-{vintageYear}-{sequence:05d}
-// This is an internal CarbonTrack tracking reference â€” NOT a Verra serial number.
+// This is an internal CarbonTrack tracking reference — NOT a Verra serial number.
 // The real Verra serial (e.g. VCS-4271-2024-001) is stored in verra_credit_ref
 // and can be filled in via the link_verra action once Verra issues the credits.
 
@@ -39,7 +39,7 @@ async function nextInternalRef(projectId: number, vintageYear: number): Promise<
 
 export async function GET(req: NextRequest) {
   const session = await requireAdmin()
-  if (!session) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+  if (!session) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
   const { searchParams } = new URL(req.url)
   const projectId  = searchParams.get('project_id')
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await requireAdmin()
-  if (!session) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+  if (!session) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
   const body = await req.json()
   const { projectId, periodId, vintageYear, vintageStart, vintageEnd, quantity, verraSerial, notes } = body
@@ -152,8 +152,8 @@ export async function POST(req: NextRequest) {
       verraSerial ? [verraSerial] : [internalRef],
       session.userId,
       verraSerial
-        ? `Ã‰mission enregistrÃ©e â€” ${verraSerial} â€” vintage ${vintageYear}`
-        : `Ã‰mission enregistrÃ©e â€” rÃ©f. interne ${internalRef} â€” vintage ${vintageYear} (nÂ° Verra Ã  renseigner)`,
+        ? `Émission enregistrée — ${verraSerial} — vintage ${vintageYear}`
+        : `Émission enregistrée — réf. interne ${internalRef} — vintage ${vintageYear} (n° Verra à renseigner)`,
     ]
   )
 

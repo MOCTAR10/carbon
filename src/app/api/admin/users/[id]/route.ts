@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 
@@ -13,18 +13,18 @@ async function requireAdmin(session: Awaited<ReturnType<typeof getSession>>) {
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getSession('admin')
-    if (!await requireAdmin(session)) return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+    if (!await requireAdmin(session)) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
 
     const userId = parseInt(params.id)
     const { role } = await request.json()
 
-    if (!['user', 'admin', 'expert', 'cnc'].includes(role)) {
-      return NextResponse.json({ error: 'RÃ´le invalide' }, { status: 400 })
+    if (!['user', 'admin', 'expert'].includes(role)) {
+      return NextResponse.json({ error: 'Rôle invalide' }, { status: 400 })
     }
 
     // Prevent admin from removing their own admin role
     if (session && userId === session.userId && role !== 'admin') {
-      return NextResponse.json({ error: 'Vous ne pouvez pas retirer votre propre rÃ´le admin' }, { status: 400 })
+      return NextResponse.json({ error: 'Vous ne pouvez pas retirer votre propre rôle admin' }, { status: 400 })
     }
 
     await query('UPDATE users SET role = $1 WHERE id = $2', [role, userId])

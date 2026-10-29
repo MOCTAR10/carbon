@@ -51,7 +51,7 @@ function RoleAvatarBg(role: string) {
 function RoleLabel(role: string) {
   if (role === 'admin') return 'Administrateur'
   if (role === 'expert') return 'Expert'
-  if (role === 'cnc') return 'CNC'
+  if (role === 'cnc') return 'CNC (inactif)'
   return 'Utilisateur'
 }
 
@@ -171,7 +171,6 @@ export default function AdminUsers() {
           <option value="user">Utilisateur</option>
           <option value="admin">Administrateur</option>
           <option value="expert">Expert</option>
-          <option value="cnc">CNC</option>
         </select>
         <button
           onClick={() => loadUsers(1)}
@@ -323,7 +322,6 @@ export default function AdminUsers() {
                     className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-500">
                     <option value="user">Utilisateur (entreprise)</option>
                     <option value="expert">Expert GreenLeaves</option>
-                    <option value="cnc">Membre CNC</option>
                     <option value="admin">Administrateur</option>
                   </select>
                 </div>

@@ -36,14 +36,14 @@ export const PORTAL_COOKIE = {
   admin:  'adm_token',
   expert: 'exp_token',
   user:   'token',
-  cnc:    'cnc_token',
 } as const
 
 type Portal = keyof typeof PORTAL_COOKIE
 
 export async function getSession(portal: Portal = 'user') {
-  const cookieStore = cookies()
-  const token = cookieStore.get(PORTAL_COOKIE[portal])?.value
+  const cookieName = PORTAL_COOKIE[portal]
+  if (!cookieName) return null // unknown portal (e.g. legacy ?portal=cnc)
+  const token = cookies().get(cookieName)?.value
   if (!token) return null
   return verifyToken(token)
 }

@@ -49,9 +49,8 @@ const CERT_STATUS: Record<string, { label: string; dot: string; badge: string }>
   assigned:   { label: 'Assigné',          dot: 'bg-blue-400',   badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
   in_progress:{ label: 'En cours',         dot: 'bg-violet-400', badge: 'bg-violet-500/15 text-violet-300 border-violet-500/30' },
   audit_done: { label: 'Audit terminé',    dot: 'bg-purple-400', badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30' },
+  submitted_to_cnc: { label: 'Déposé au CNC', dot: 'bg-amber-400', badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
   certified:  { label: 'Certifié ✓',      dot: 'bg-green-400',  badge: 'bg-green-500/15 text-green-300 border-green-500/30' },
-  submitted_to_cnc:    { label: 'Transmis au CNC',    dot: 'bg-amber-400', badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
-  certificate_generated:{ label: 'Certificat CNC émis', dot: 'bg-emerald-400', badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
   rejected:   { label: 'Rejeté',          dot: 'bg-red-400',    badge: 'bg-red-500/15 text-red-300 border-red-500/30' },
 }
 
@@ -222,9 +221,9 @@ export default function AdminDashboard() {
             <Send className="w-5 h-5 text-amber-400" />
           </div>
           <div>
-            <p className="text-xs text-gray-400">Transmis au CNC</p>
+            <p className="text-xs text-gray-400">Déposés au CNC</p>
             <p className="text-lg font-bold text-white">{cncPending}</p>
-            <span className="text-xs text-gray-500">{cncComplete} certif. émis</span>
+            <span className="text-xs text-gray-500">{cncComplete} certificat{cncComplete > 1 ? 's' : ''} reçu{cncComplete > 1 ? 's' : ''}</span>
           </div>
         </div>
       </div>
@@ -301,7 +300,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Send className="w-4 h-4 text-emerald-400" />
-              <h2 className="text-sm font-semibold text-white">Flux CNC</h2>
+              <h2 className="text-sm font-semibold text-white">Dépôts au CNC (par les experts)</h2>
             </div>
             <Link href="/admin/certifications?status=submitted_to_cnc" className="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1">
               Voir <ArrowRight className="w-3 h-3" />
@@ -312,7 +311,7 @@ export default function AdminDashboard() {
               <div className="text-3xl font-bold text-white">{cncPending}</div>
               <div className="flex items-center justify-center gap-1.5 mt-2">
                 <span className="w-2 h-2 rounded-full bg-amber-400" />
-                <span className="text-xs text-gray-400">En attente</span>
+                <span className="text-xs text-gray-400">En attente du certificat</span>
               </div>
               <div className="mt-2 h-1.5 rounded-full bg-gray-700 overflow-hidden">
                 <div className={`h-full rounded-full bg-amber-500 transition-all`}
@@ -324,7 +323,7 @@ export default function AdminDashboard() {
               <div className="text-3xl font-bold text-white">{cncComplete}</div>
               <div className="flex items-center justify-center gap-1.5 mt-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="text-xs text-gray-400">Certificats émis</span>
+                <span className="text-xs text-gray-400">Certificats reçus</span>
               </div>
               <div className="mt-2 h-1.5 rounded-full bg-gray-700 overflow-hidden">
                 <div className={`h-full rounded-full bg-emerald-500 transition-all`}
@@ -333,10 +332,10 @@ export default function AdminDashboard() {
             </div>
           </div>
           {stats.cncStats && stats.cncStats.total > 0 && (
-            <p className="text-center text-xs text-gray-500">{stats.cncStats.total} dossier{stats.cncStats.total > 1 ? 's' : ''} passé{stats.cncStats.total > 1 ? 's' : ''} par le CNC</p>
+            <p className="text-center text-xs text-gray-500">{stats.cncStats.total} dossier{stats.cncStats.total > 1 ? 's' : ''} déposé{stats.cncStats.total > 1 ? 's' : ''} au CNC</p>
           )}
           {(!stats.cncStats || stats.cncStats.total === 0) && (
-            <p className="text-center text-xs text-gray-500 py-4">Aucun dossier transmis au CNC pour le moment</p>
+            <p className="text-center text-xs text-gray-500 py-4">Aucun dossier déposé au CNC pour le moment</p>
           )}
         </div>
       </div>

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 
@@ -11,7 +11,7 @@ export async function GET(
 ) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifie' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const assessmentId = parseInt(params.assessmentId)
 
@@ -52,6 +52,10 @@ export async function GET(
         adminNotes: cert.admin_notes,
         rejectionReason: cert.rejection_reason,
         requestedAt: cert.requested_at,
+        auditScheduledDate: cert.audit_scheduled_date,
+        auditLocation: cert.audit_location,
+        submittedToCncAt: cert.submitted_to_cnc_at,
+        cncDepositReference: cert.cnc_deposit_reference,
         documents: docs.rows.map(d => ({
           id: d.id,
           docType: d.doc_type,

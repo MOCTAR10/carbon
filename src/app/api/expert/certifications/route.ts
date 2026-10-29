@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 
@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const session = await getSession('expert')
     if (!session || session.role !== 'expert') {
-      return NextResponse.json({ error: 'AccÃ¨s refusÃ©' }, { status: 403 })
+      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
     }
 
     const result = await query(

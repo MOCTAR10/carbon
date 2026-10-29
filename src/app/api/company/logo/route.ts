@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { writeFile, mkdir } from 'fs/promises'
@@ -14,14 +14,14 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     const formData = await request.formData()
     const file = formData.get('logo') as File | null
 
     if (!file) return NextResponse.json({ error: 'Fichier requis' }, { status: 400 })
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: 'Format invalide. AcceptÃ© : JPG, PNG, WebP, SVG' }, { status: 400 })
+      return NextResponse.json({ error: 'Format invalide. Accepté : JPG, PNG, WebP, SVG' }, { status: 400 })
     }
     if (file.size > MAX_SIZE) {
       return NextResponse.json({ error: 'Fichier trop lourd (max 2 Mo)' }, { status: 400 })
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifiÃ©' }, { status: 401 })
+    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
     await query('UPDATE companies SET logo_url = NULL, updated_at = NOW() WHERE id = $1', [session.companyId])
     return NextResponse.json({ success: true })
