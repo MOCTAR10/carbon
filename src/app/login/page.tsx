@@ -2,11 +2,19 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Leaf, Mail, Lock, ArrowRight, AlertCircle, Loader2, X } from 'lucide-react'
+import { Leaf, Mail, Lock, ArrowRight, AlertCircle, Loader2, X, Eye, EyeOff, ShieldCheck, FileCheck2, MapPin } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+
+const TRUST_POINTS = [
+  { icon: FileCheck2,  title: 'Bilan GES conforme',       text: 'ISO 14064-1 et GHG Protocol, scopes 1, 2 et 3.' },
+  { icon: MapPin,      title: 'Audit terrain accrédité',  text: 'Un expert GreenLeaves vérifie vos données sur site.' },
+  { icon: ShieldCheck, title: 'Dépôt au CNC',             text: 'Votre dossier complet est déposé auprès du CNC.' },
+]
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -41,41 +49,88 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-50 flex items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-5">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
-              <Leaf className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg font-bold text-gray-900">CarbonTrack</span>
-          </Link>
-          <h1 className="text-xl font-bold text-gray-900">Connexion</h1>
-          <p className="text-gray-500 text-sm mt-1">Accédez à votre tableau de bord</p>
+    <div className="flex min-h-screen bg-ivory-100 font-sans text-ink-800">
+
+      {/* ── Brand panel ── */}
+      <aside className="relative hidden w-[46%] max-w-[640px] flex-col justify-between overflow-hidden bg-forest-900 bg-forest-grain p-12 text-ivory-50 lg:flex">
+        <div className="pointer-events-none absolute -bottom-40 -right-40 size-[520px] rounded-full border border-gold-400/10" />
+        <div className="pointer-events-none absolute -bottom-24 -right-24 size-[360px] rounded-full border border-gold-400/10" />
+
+        <Link href="/" className="relative flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-xl bg-gold-500/15 ring-1 ring-gold-400/40">
+            <Leaf className="size-5 text-gold-300" strokeWidth={1.8} />
+          </span>
+          <span className="font-display text-2xl tracking-tight">CarbonTrack</span>
+        </Link>
+
+        <div className="relative">
+          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-300/90">Bilan carbone &amp; certification</p>
+          <h2 className="font-display text-5xl font-light leading-[1.08] tracking-tight">
+            Mesurez, auditez,<br />
+            <em className="font-normal text-gold-200">certifiez</em> votre empreinte.
+          </h2>
+          <ul className="mt-10 space-y-5">
+            {TRUST_POINTS.map(p => (
+              <li key={p.title} className="flex gap-4">
+                <span className="flex size-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
+                  <p.icon className="size-[18px] text-gold-300" strokeWidth={1.7} />
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold text-ivory-50">{p.title}</span>
+                  <span className="block text-sm text-forest-100/60">{p.text}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <div className="card p-6">
+        <div className="relative flex items-center gap-2 text-xs text-forest-100/50">
+          <svg className="h-2.5 w-4 rounded-[2px]" viewBox="0 0 3 2" aria-hidden>
+            <rect width="3" height="0.67" fill="#009E60" />
+            <rect y="0.66" width="3" height="0.67" fill="#FCD116" />
+            <rect y="1.33" width="3" height="0.67" fill="#3A75C4" />
+          </svg>
+          République Gabonaise · Plateforme opérée par GreenLeaves
+        </div>
+      </aside>
+
+      {/* ── Form ── */}
+      <main className="flex flex-1 items-center justify-center p-6 sm:p-12">
+        <div className="w-full max-w-[400px] animate-fade-up">
+          <Link href="/" className="mb-10 flex items-center gap-2.5 lg:hidden">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-forest-900">
+              <Leaf className="size-[18px] text-gold-300" strokeWidth={1.8} />
+            </span>
+            <span className="font-display text-xl text-forest-900">CarbonTrack</span>
+          </Link>
+
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-600">Espace sécurisé</p>
+          <h1 className="mt-2 font-display text-4xl font-normal tracking-tight text-forest-900">Bon retour parmi nous</h1>
+          <p className="mt-2 text-sm text-ink-500">Connectez-vous pour accéder à votre tableau de bord.</p>
+
           {error && (
-            <div className="flex items-start gap-2 bg-red-50 text-red-700 border border-red-200 px-3.5 py-2.5 rounded-xl mb-4 text-sm">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <div role="alert" className="mt-6 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+              <AlertCircle className="mt-0.5 size-4 flex-shrink-0" />
               <span className="flex-1">{error}</span>
-              <button onClick={() => setError('')} className="text-red-400/70 hover:text-red-400 flex-shrink-0 p-0.5">
-                <X className="w-3.5 h-3.5" />
+              <button onClick={() => setError('')} className="flex-shrink-0 p-0.5 text-red-400 hover:text-red-600" aria-label="Fermer">
+                <X className="size-3.5" />
               </button>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label htmlFor="email" className="mb-1.5 block text-[13px] font-semibold text-ink-700">Adresse email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-400" />
                 <input
+                  id="email"
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={e => { setEmail(e.target.value); setError('') }}
-                  className="input-field pl-10 py-2.5 text-sm"
-                  placeholder="votre@email.com"
+                  className="h-12 w-full rounded-xl border border-ivory-400 bg-white pl-10 pr-4 text-sm text-ink-800 outline-none transition placeholder:text-ink-400 focus:border-forest-500 focus:ring-4 focus:ring-forest-100 disabled:opacity-60"
+                  placeholder="vous@entreprise.ga"
                   required
                   disabled={loading}
                 />
@@ -83,51 +138,56 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+              <label htmlFor="password" className="mb-1.5 block text-[13px] font-semibold text-ink-700">Mot de passe</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-400" />
                 <input
-                  type="password"
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   value={password}
                   onChange={e => { setPassword(e.target.value); setError('') }}
-                  className="input-field pl-10 py-2.5 text-sm"
+                  className="h-12 w-full rounded-xl border border-ivory-400 bg-white pl-10 pr-11 text-sm text-ink-800 outline-none transition placeholder:text-ink-400 focus:border-forest-500 focus:ring-4 focus:ring-forest-100 disabled:opacity-60"
                   placeholder="Votre mot de passe"
                   required
                   disabled={loading}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ivory-100 hover:text-ink-700"
+                  aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-            >
+            <Button type="submit" size="lg" disabled={loading} className="w-full">
               {loading
-                ? <><Loader2 className="w-4 h-4 animate-spin" /> Connexion en cours...</>
-                : <><span>Se connecter</span><ArrowRight className="w-4 h-4" /></>
-              }
-            </button>
+                ? <><Loader2 className="animate-spin" /> Connexion en cours…</>
+                : <>Se connecter <ArrowRight /></>}
+            </Button>
           </form>
-        </div>
 
-        <div className="text-center mt-4 space-y-3">
-          <p className="text-sm text-gray-500">
-            Pas encore de compte ?{' '}
-            <Link href="/register" className="text-brand-600 hover:text-brand-700 font-medium">
-              Créer un compte
-            </Link>
-          </p>
-          <div className="inline-flex items-center gap-1.5 text-[10px] text-gray-400">
-            <svg className="w-3 h-3 rounded-sm" viewBox="0 0 3 2">
-              <rect width="3" height="0.67" fill="#009E60" />
-              <rect y="0.66" width="3" height="0.67" fill="#FCD116" />
-              <rect y="1.33" width="3" height="0.67" fill="#3A75C4" />
-            </svg>
-            <span>République Gabonaise &copy; 2026</span>
+          <div className="my-8 flex items-center gap-4">
+            <span className="h-px flex-1 bg-ivory-300" />
+            <span className="text-xs text-ink-400">Nouveau sur CarbonTrack ?</span>
+            <span className="h-px flex-1 bg-ivory-300" />
           </div>
+
+          <Button asChild variant="outline" size="lg" className="w-full">
+            <Link href="/register">Créer un compte entreprise</Link>
+          </Button>
+
+          <p className="mt-10 text-center text-xs text-ink-400">
+            En vous connectant, vous acceptez les{' '}
+            <Link href="/conditions-utilisation" className="font-medium text-forest-700 hover:underline">conditions d&apos;utilisation</Link>
+            {' '}et la{' '}
+            <Link href="/privacy" className="font-medium text-forest-700 hover:underline">politique de confidentialité</Link>.
+          </p>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

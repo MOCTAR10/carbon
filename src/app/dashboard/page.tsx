@@ -2,11 +2,20 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import {
-  Building2, ClipboardList, TrendingDown, Plus, ArrowRight,
-  Leaf, Upload, Award, CheckCircle2, Clock, AlertCircle,
-  BarChart3, Globe2, RefreshCw, XCircle,
+  Building2, ClipboardList, Plus, ArrowRight, ArrowUpRight,
+  Leaf, Upload, Award, Globe2, RefreshCw, Check, FileCheck2,
 } from 'lucide-react'
+import { cn, fmtCO2, fmtCO2Text, fmtDate } from '@/lib/utils'
+import { sectorLabel } from '@/lib/sectors'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardContent } from '@/components/ui/card'
+import { CertStatusBadge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Stagger, Reveal } from '@/components/ui/motion'
 
 interface DashboardData {
   company: {
@@ -26,26 +35,31 @@ interface DashboardData {
     certificate_number: string | null; expert_name: string | null
     assessment_name: string; assessment_year: number
   }>
-  certCounts: { pending: number; inProgress: number; certified: number; rejected: number }
+  certCounts: { pending: number; inProgress: number; atCnc?: number; certified: number; rejected: number }
 }
 
-const CERT_STATUS: Record<string, { label: string; color: string }> = {
-  pending:    { label: 'En attente',   color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  assigned:   { label: 'Assigné',      color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  in_progress:{ label: 'En cours',     color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  audit_done: { label: 'Audit terminé',color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  certified:  { label: 'Certifié ✓',  color: 'bg-green-50 text-green-700 border-green-200' },
-  rejected:   { label: 'Rejeté',       color: 'bg-red-50 text-red-700 border-red-200' },
+const SCOPES = [
+  { key: 'totalScope1', label: 'Scope 1', sub: 'Émissions directes',      bar: 'bg-gold-400',   dot: 'bg-gold-400' },
+  { key: 'totalScope2', label: 'Scope 2', sub: 'Énergie indirecte',       bar: 'bg-ivory-200',  dot: 'bg-ivory-200' },
+  { key: 'totalScope3', label: 'Scope 3', sub: 'Autres indirectes',       bar: 'bg-forest-400', dot: 'bg-forest-400' },
+] as const
+
+const JOURNEY = [
+  { status: 'pending',          label: 'Demande' },
+  { status: 'assigned',         label: 'Expert' },
+  { status: 'in_progress',      label: 'Audit terrain' },
+  { status: 'audit_done',       label: 'Audit validé' },
+  { status: 'submitted_to_cnc', label: 'Dépôt CNC' },
+  { status: 'certified',        label: 'Certificat' },
+]
+
+const ASSESSMENT_STATUS: Record<string, string> = {
+  draft: 'Brouillon', in_progress: 'En cours', completed: 'Finalisé',
 }
 
-function fmtCO2(v: number) {
-  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(2)} MtCO₂e`
-  if (v >= 1_000)     return `${(v / 1_000).toFixed(2)} tCO₂e`
-  return `${v.toFixed(0)} kgCO₂e`
-}
-
-function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+function todayLabel() {
+  const s = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 export default function DashboardPage() {
@@ -59,6 +73,7 @@ export default function DashboardPage() {
     try {
       const res = await fetch('/api/dashboard/stats')
       if (res.ok) setData(await res.json())
+      else if (silent) toast.error('Impossible de rafraîchir les données')
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -76,234 +91,372 @@ export default function DashboardPage() {
     if (res.ok) {
       const d = await res.json()
       setData(prev => prev ? { ...prev, company: { ...prev.company, logoUrl: d.logoUrl } } : prev)
+      toast.success('Logo mis à jour')
+    } else {
+      toast.error('Échec du téléversement du logo')
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-10 h-10 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
-      </div>
-    )
-  }
-
+  if (loading) return <DashboardSkeleton />
   if (!data) return null
 
   const { company, totals, byCountry, sites, assessments, certifications, certCounts } = data
   const countryStats = Object.entries(byCountry).sort((a, b) => b[1] - a[1])
+  const total = fmtCO2(totals.totalCo2eq)
+  const share = (v: number) => (totals.totalCo2eq > 0 ? (v / totals.totalCo2eq) * 100 : 0)
+  const latestCert = certifications[0]
+  const completedCount = assessments.filter(a => a.status === 'completed').length
 
   return (
-    <div className="space-y-6">
+    <Stagger className="space-y-8">
 
-      {/* ── Welcome banner ── */}
-      <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-5 shadow-sm">
-        <div className="relative group flex-shrink-0">
-          <div className="h-14 min-w-[56px] max-w-[200px] px-2 flex items-center justify-center">
-            {company.logoUrl
-              ? <img src={company.logoUrl} alt={company.name} className="h-full w-auto object-contain" />
-              : <div className="w-14 h-14 bg-brand-50 border border-brand-100 rounded-xl flex items-center justify-center"><Leaf className="w-7 h-7 text-brand-400" /></div>}
-          </div>
-          <label className="absolute inset-0 rounded-xl bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer gap-0.5">
-            <Upload className="w-4 h-4 text-white" />
-            <span className="text-white text-[9px] font-medium">Changer</span>
-            <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-          </label>
-        </div>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-bold text-gray-900 truncate">{company.name}</h1>
-          <p className="text-gray-400 text-sm">
-            {company.sector ? `${company.sector} · ` : ''}
-            {sites.length} site{sites.length > 1 ? 's' : ''} ·{' '}
-            {assessments.length} bilan{assessments.length > 1 ? 's' : ''}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={() => load(true)}
-            className={`p-2 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors ${refreshing ? 'animate-spin' : ''}`}
-            title="Rafraîchir"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-          <Link href="/dashboard/assessments/new" className="btn-primary inline-flex items-center gap-2 text-sm">
-            <Plus className="w-4 h-4" /> Nouveau bilan
-          </Link>
-        </div>
-      </div>
+      {/* ── Header ── */}
+      <Reveal>
+        <PageHeader
+          eyebrow={todayLabel()}
+          title={
+            <span className="flex items-center gap-4">
+              <label className="group relative flex size-14 flex-shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-ivory-300 bg-white shadow-soft">
+                {company.logoUrl
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={company.logoUrl} alt={company.name} className="h-full w-full object-contain p-1.5" />
+                  : <Leaf className="size-6 text-forest-400" strokeWidth={1.6} />}
+                <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-forest-950/70 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Upload className="size-4 text-ivory-50" />
+                  <span className="font-sans text-[9px] font-semibold text-ivory-50">Changer</span>
+                </span>
+                <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+              </label>
+              <span className="truncate">{company.name}</span>
+            </span>
+          }
+          description={
+            <>
+              {company.sector ? `${sectorLabel(company.sector)} · ` : ''}
+              {sites.length} site{sites.length > 1 ? 's' : ''} · {assessments.length} bilan{assessments.length > 1 ? 's' : ''} carbone
+            </>
+          }
+          actions={
+            <>
+              <Button variant="outline" size="icon" onClick={() => load(true)} aria-label="Rafraîchir">
+                <RefreshCw className={cn(refreshing && 'animate-spin')} />
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard/assessments?new=1"><Plus /> Nouveau bilan</Link>
+              </Button>
+            </>
+          }
+        />
+      </Reveal>
 
-      {/* ── Emissions KPIs ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Émissions totales', value: fmtCO2(totals.totalCo2eq), icon: TrendingDown, bg: 'bg-brand-50', ico: 'text-brand-600' },
-          { label: 'Scope 1 — Direct',  value: fmtCO2(totals.totalScope1), icon: BarChart3,   bg: 'bg-red-50',   ico: 'text-red-500' },
-          { label: 'Scope 2 — Énergie', value: fmtCO2(totals.totalScope2), icon: BarChart3,   bg: 'bg-orange-50',ico: 'text-orange-500' },
-          { label: 'Scope 3 — Indirect',value: fmtCO2(totals.totalScope3), icon: BarChart3,   bg: 'bg-blue-50',  ico: 'text-blue-500' },
-        ].map((s, i) => (
-          <div key={i} className="card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-gray-500">{s.label}</span>
-              <div className={`w-8 h-8 ${s.bg} rounded-lg flex items-center justify-center`}>
-                <s.icon className={`w-4 h-4 ${s.ico}`} />
-              </div>
+      {/* ── Hero: footprint + certification journey ── */}
+      <div className="grid gap-6 xl:grid-cols-5">
+        <Reveal className="xl:col-span-3">
+          <div className="relative flex h-full flex-col overflow-hidden rounded-3xl bg-forest-900 bg-forest-grain p-8 text-ivory-50 shadow-lifted">
+            <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full border border-gold-400/10" />
+            <div className="pointer-events-none absolute -right-4 -top-4 size-40 rounded-full border border-gold-400/10" />
+
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300/90">Empreinte carbone totale</p>
+            <div className="mt-3 flex items-baseline gap-3">
+              <span className="font-display text-6xl font-light tracking-tight tabular-nums md:text-7xl">{total.value}</span>
+              <span className="text-lg font-medium text-forest-100/70">{total.unit}</span>
             </div>
-            <p className="text-xl font-bold text-gray-900">{s.value}</p>
-          </div>
-        ))}
-      </div>
+            <p className="mt-2 text-sm text-forest-100/60">Cumul de l&apos;ensemble des bilans, tous sites confondus</p>
 
-      {/* ── Certification KPIs ── */}
-      {certifications.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: 'En attente',    value: certCounts.pending,    icon: Clock,         bg: 'bg-yellow-50', ico: 'text-yellow-600' },
-            { label: 'En cours',      value: certCounts.inProgress, icon: AlertCircle,   bg: 'bg-blue-50',   ico: 'text-blue-600' },
-            { label: 'Certifiés ✓',   value: certCounts.certified,  icon: CheckCircle2,  bg: 'bg-green-50',  ico: 'text-green-600' },
-            { label: 'Rejetés',       value: certCounts.rejected,   icon: XCircle,       bg: 'bg-red-50',    ico: 'text-red-500' },
-          ].map((s, i) => (
-            <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-3 shadow-sm">
-              <div className={`w-10 h-10 ${s.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                <s.icon className={`w-5 h-5 ${s.ico}`} />
-              </div>
+            <dl className="mb-10 mt-8 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-6">
+              {[
+                { label: 'Bilans finalisés', value: `${completedCount}/${assessments.length}` },
+                { label: 'Sites couverts',   value: String(sites.length) },
+                { label: 'Dernier bilan',    value: assessments[0] ? String(assessments[0].year) : '—' },
+              ].map(f => (
+                <div key={f.label}>
+                  <dt className="text-[11px] text-forest-100/50">{f.label}</dt>
+                  <dd className="mt-1 font-display text-2xl tabular-nums text-ivory-50">{f.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            {/* Scope split */}
+            <div className="mt-auto flex h-2.5 overflow-hidden rounded-full bg-white/10">
+              {SCOPES.map(s => (
+                <div key={s.key} className={cn(s.bar, 'h-full transition-all duration-700')} style={{ width: `${share(totals[s.key])}%` }} />
+              ))}
+            </div>
+            <div className="mt-6 grid grid-cols-3 gap-4">
+              {SCOPES.map(s => (
+                <div key={s.key} className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={cn('size-2 rounded-full', s.dot)} />
+                    <span className="text-xs font-semibold text-ivory-50">{s.label}</span>
+                    <span className="text-xs tabular-nums text-forest-100/50">{share(totals[s.key]).toFixed(0)} %</span>
+                  </div>
+                  <p className="mt-1.5 truncate font-display text-xl tabular-nums">{fmtCO2Text(totals[s.key])}</p>
+                  <p className="text-[11px] text-forest-100/50">{s.sub}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal className="xl:col-span-2">
+          <Card className="flex h-full flex-col p-7">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-                <p className="text-xs text-gray-500">{s.label}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-600">Parcours de certification</p>
+                <h2 className="mt-1 font-display text-xl text-forest-900">
+                  {latestCert ? latestCert.assessment_name : 'Faites certifier votre bilan'}
+                </h2>
               </div>
+              {latestCert && <CertStatusBadge status={latestCert.status} />}
             </div>
-          ))}
-        </div>
+
+            {latestCert ? (
+              <>
+                <JourneyStepper status={latestCert.status} />
+                <p className="mt-auto pt-6 text-xs text-ink-500">
+                  {latestCert.status === 'certified' && latestCert.certificate_number
+                    ? <>Certificat n° <span className="font-semibold text-forest-800">{latestCert.certificate_number}</span></>
+                    : latestCert.expert_name
+                      ? <>Expert : <span className="font-semibold text-ink-700">{latestCert.expert_name}</span></>
+                      : <>Demande du {fmtDate(latestCert.requested_at)}</>}
+                </p>
+              </>
+            ) : (
+              <p className="mt-3 text-sm leading-relaxed text-ink-500">
+                Finalisez un bilan puis soumettez-le : un expert accrédité réalise l&apos;audit terrain
+                et dépose votre dossier auprès du CNC.
+              </p>
+            )}
+
+            <Button asChild variant="outline" className="mt-6 w-full">
+              <Link href="/dashboard/certifications">
+                {latestCert ? 'Suivre mes demandes' : 'Voir les certifications'} <ArrowRight />
+              </Link>
+            </Button>
+          </Card>
+        </Reveal>
+      </div>
+
+      {/* ── Certification pipeline ── */}
+      {certifications.length > 0 && (
+        <Reveal>
+          <Card className="grid grid-cols-2 divide-ivory-300 sm:grid-cols-5 sm:divide-x">
+            {[
+              { label: 'En attente',     value: certCounts.pending },
+              { label: 'Audit en cours', value: certCounts.inProgress },
+              { label: 'Déposés au CNC', value: certCounts.atCnc ?? 0 },
+              { label: 'Certifiés',      value: certCounts.certified, accent: true },
+              { label: 'Rejetés',        value: certCounts.rejected },
+            ].map(s => (
+              <div key={s.label} className="px-6 py-5">
+                <p className={cn('font-display text-3xl tabular-nums', s.accent ? 'text-gold-600' : 'text-forest-900')}>{s.value}</p>
+                <p className="mt-1 text-xs font-medium text-ink-500">{s.label}</p>
+              </div>
+            ))}
+          </Card>
+        </Reveal>
       )}
 
       {/* ── Emissions by country ── */}
       {countryStats.length > 1 && (
-        <div className="card p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Globe2 className="w-4 h-4 text-brand-600" />
-            <h2 className="font-semibold text-gray-900">Émissions par pays</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {countryStats.map(([country, val]) => (
-              <div key={country} className="bg-gray-50 rounded-xl p-3 border border-gray-100 text-center">
-                <p className="text-xs font-semibold text-gray-600 mb-1">{country}</p>
-                <p className="text-base font-bold text-brand-600">{fmtCO2(val)}</p>
-                <p className="text-[10px] text-gray-400 mt-0.5">
-                  {totals.totalCo2eq > 0 ? ((val / totals.totalCo2eq) * 100).toFixed(1) + ' %' : '—'}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="grid lg:grid-cols-3 gap-6">
-
-        {/* ── Sites ── */}
-        <div className="card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900">Sites & Entités</h2>
-            <Link href="/dashboard/sites" className="text-brand-600 hover:text-brand-700 text-xs font-medium flex items-center gap-1">
-              Voir tout <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-          {sites.length === 0 ? (
-            <div className="text-center py-6">
-              <Building2 className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-gray-400 text-sm mb-3">Aucun site enregistré</p>
-              <Link href="/dashboard/sites" className="btn-primary inline-flex items-center gap-1.5 text-xs">
-                <Plus className="w-3.5 h-3.5" /> Ajouter
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {sites.slice(0, 5).map(site => (
-                <div key={site.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 hover:bg-brand-50 transition-colors">
-                  <div className="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-4 h-4 text-brand-600" />
+        <Reveal>
+          <Card>
+            <CardHeader eyebrow="Répartition" title={<span className="flex items-center gap-2"><Globe2 className="size-4 text-gold-500" /> Émissions par pays</span>} />
+            <CardContent className="space-y-3">
+              {countryStats.map(([country, val]) => (
+                <div key={country} className="grid grid-cols-[140px_1fr_auto] items-center gap-4">
+                  <span className="truncate text-sm font-medium text-ink-700">{country}</span>
+                  <div className="h-2 overflow-hidden rounded-full bg-ivory-200">
+                    <div className="h-full rounded-full bg-forest-600" style={{ width: `${share(val)}%` }} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{site.name}</p>
-                    <p className="text-xs text-gray-400">{site.type}{site.country ? ` · ${site.country}` : ''} · {site.assessment_count} bilan{site.assessment_count > 1 ? 's' : ''}</p>
-                  </div>
+                  <span className="w-40 text-right text-sm tabular-nums text-ink-600">
+                    <span className="font-semibold text-forest-900">{fmtCO2Text(val)}</span> · {share(val).toFixed(1)} %
+                  </span>
                 </div>
               ))}
-              {sites.length > 5 && (
-                <Link href="/dashboard/sites" className="block text-center text-xs text-brand-600 hover:text-brand-700 py-1">
-                  +{sites.length - 5} de plus
-                </Link>
+            </CardContent>
+          </Card>
+        </Reveal>
+      )}
+
+      {/* ── Lists ── */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Reveal>
+          <Card className="h-full">
+            <CardHeader eyebrow="Périmètre" title="Sites & Entités" action={<SeeAll href="/dashboard/sites" />} />
+            <CardContent>
+              {sites.length === 0 ? (
+                <EmptyState
+                  icon={Building2}
+                  title="Aucun site enregistré"
+                  description="Ajoutez vos sites pour structurer vos bilans."
+                  action={<Button asChild size="sm"><Link href="/dashboard/sites"><Plus /> Ajouter un site</Link></Button>}
+                />
+              ) : (
+                <ul className="-mx-2">
+                  {sites.slice(0, 5).map(site => (
+                    <li key={site.id}>
+                      <Link href="/dashboard/sites" className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-ivory-100">
+                        <span className="flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-forest-50 text-forest-600">
+                          <Building2 className="size-4" strokeWidth={1.8} />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold text-ink-800">{site.name}</span>
+                          <span className="block truncate text-xs text-ink-400 first-letter:uppercase">
+                            {site.type}{site.country ? ` · ${site.country}` : ''}
+                          </span>
+                        </span>
+                        <span className="text-xs tabular-nums text-ink-400">{site.assessment_count} bilan{site.assessment_count > 1 ? 's' : ''}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               )}
-            </div>
-          )}
-        </div>
+            </CardContent>
+          </Card>
+        </Reveal>
 
-        {/* ── Recent assessments ── */}
-        <div className="card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900">Bilans récents</h2>
-            <Link href="/dashboard/assessments" className="text-brand-600 hover:text-brand-700 text-xs font-medium flex items-center gap-1">
-              Voir tout <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-          {assessments.length === 0 ? (
-            <div className="text-center py-6">
-              <ClipboardList className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-gray-400 text-sm mb-3">Aucun bilan carbone</p>
-              <Link href="/dashboard/assessments" className="btn-primary inline-flex items-center gap-1.5 text-xs">
-                <Plus className="w-3.5 h-3.5" /> Créer
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {assessments.slice(0, 5).map(a => (
-                <Link key={a.id} href={`/dashboard/assessments/${a.id}`}
-                  className="flex items-center justify-between p-2.5 rounded-lg bg-gray-50 hover:bg-brand-50 transition-colors">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{a.name}</p>
-                    <p className="text-xs text-gray-400">{a.site_name} · {a.year}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0 ml-2">
-                    <p className="text-sm font-semibold text-gray-900">{fmtCO2(parseFloat(String(a.total_co2eq)) || 0)}</p>
-                    <p className="text-[10px] text-gray-400">{fmtDate(a.created_at)}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+        <Reveal>
+          <Card className="h-full">
+            <CardHeader eyebrow="Activité" title="Bilans récents" action={<SeeAll href="/dashboard/assessments" />} />
+            <CardContent>
+              {assessments.length === 0 ? (
+                <EmptyState
+                  icon={ClipboardList}
+                  title="Aucun bilan carbone"
+                  description="Créez votre premier bilan GES."
+                  action={<Button asChild size="sm"><Link href="/dashboard/assessments?new=1"><Plus /> Créer un bilan</Link></Button>}
+                />
+              ) : (
+                <ul className="-mx-2">
+                  {assessments.slice(0, 5).map(a => (
+                    <li key={a.id}>
+                      <Link href={`/dashboard/assessments/${a.id}`} className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-ivory-100">
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold text-ink-800">{a.name}</span>
+                          <span className="block truncate text-xs text-ink-400">
+                            {a.site_name} · {a.year} · {ASSESSMENT_STATUS[a.status] ?? a.status}
+                          </span>
+                        </span>
+                        <span className="text-right">
+                          <span className="block text-sm font-semibold tabular-nums text-forest-900">
+                            {fmtCO2Text(parseFloat(String(a.total_co2eq)) || 0)}
+                          </span>
+                          <span className="block text-[11px] text-ink-400">{fmtDate(a.created_at)}</span>
+                        </span>
+                        <ArrowUpRight className="size-4 text-ink-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </Reveal>
 
-        {/* ── Certifications ── */}
-        <div className="card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900">Certifications</h2>
-            <Link href="/dashboard/certifications" className="text-brand-600 hover:text-brand-700 text-xs font-medium flex items-center gap-1">
-              Voir tout <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-          {certifications.length === 0 ? (
-            <div className="text-center py-6">
-              <Award className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-gray-400 text-sm mb-1">Aucune certification</p>
-              <p className="text-xs text-gray-400">Finalisez un bilan puis soumettez-le</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {certifications.slice(0, 5).map(c => {
-                const s = CERT_STATUS[c.status] ?? { label: c.status, color: 'bg-gray-50 text-gray-700 border-gray-200' }
-                return (
-                  <Link key={c.id} href={`/dashboard/certifications`}
-                    className="flex items-center justify-between p-2.5 rounded-lg bg-gray-50 hover:bg-brand-50 transition-colors">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{c.assessment_name}</p>
-                      <p className="text-xs text-gray-400">{c.assessment_year} · {fmtDate(c.requested_at)}</p>
-                    </div>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border flex-shrink-0 ml-2 ${s.color}`}>
-                      {s.label}
-                    </span>
-                  </Link>
-                )
-              })}
-            </div>
-          )}
-        </div>
+        <Reveal>
+          <Card className="h-full">
+            <CardHeader eyebrow="Conformité" title="Certifications" action={<SeeAll href="/dashboard/certifications" />} />
+            <CardContent>
+              {certifications.length === 0 ? (
+                <EmptyState
+                  icon={Award}
+                  title="Aucune certification"
+                  description="Finalisez un bilan puis soumettez-le à certification."
+                />
+              ) : (
+                <ul className="-mx-2">
+                  {certifications.slice(0, 5).map(c => (
+                    <li key={c.id}>
+                      <Link href="/dashboard/certifications" className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-ivory-100">
+                        <span className={cn(
+                          'flex size-9 flex-shrink-0 items-center justify-center rounded-lg',
+                          c.status === 'certified' ? 'bg-gold-50 text-gold-600' : 'bg-ivory-200 text-ink-500',
+                        )}>
+                          {c.status === 'certified' ? <FileCheck2 className="size-4" strokeWidth={1.8} /> : <Award className="size-4" strokeWidth={1.8} />}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold text-ink-800">{c.assessment_name}</span>
+                          <span className="block truncate text-xs text-ink-400">{c.assessment_year} · {fmtDate(c.requested_at)}</span>
+                        </span>
+                        <CertStatusBadge status={c.status} />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </Reveal>
+      </div>
+    </Stagger>
+  )
+}
 
+function SeeAll({ href }: { href: string }) {
+  return (
+    <Link href={href} className="inline-flex items-center gap-1 text-xs font-semibold text-forest-700 transition-colors hover:text-gold-600">
+      Voir tout <ArrowRight className="size-3" />
+    </Link>
+  )
+}
+
+function JourneyStepper({ status }: { status: string }) {
+  const rejected = status === 'rejected'
+  const idx = JOURNEY.findIndex(s => s.status === status)
+  return (
+    <ol className="mt-6 space-y-0">
+      {JOURNEY.map((step, i) => {
+        const done = !rejected && (i < idx || status === 'certified')
+        const active = !rejected && i === idx && status !== 'certified'
+        return (
+          <li key={step.status} className="relative flex items-center gap-3 pb-3 last:pb-0">
+            {i < JOURNEY.length - 1 && (
+              <span className={cn('absolute left-[11px] top-6 h-[calc(100%-12px)] w-px', done ? 'bg-forest-600' : 'bg-ivory-300')} />
+            )}
+            <span className={cn(
+              'relative z-10 flex size-6 flex-shrink-0 items-center justify-center rounded-full border text-[10px] font-bold',
+              done   && 'border-forest-700 bg-forest-700 text-ivory-50',
+              active && 'border-gold-500 bg-gold-50 text-gold-700 ring-4 ring-gold-100',
+              !done && !active && 'border-ivory-400 bg-white text-ink-400',
+            )}>
+              {done ? <Check className="size-3" strokeWidth={3} /> : i + 1}
+            </span>
+            <span className={cn(
+              'text-sm',
+              done ? 'text-ink-700' : active ? 'font-semibold text-forest-900' : 'text-ink-400',
+            )}>
+              {step.label}
+            </span>
+          </li>
+        )
+      })}
+      {rejected && (
+        <p className="pt-2 text-xs text-red-600">Demande rejetée — consultez le motif dans vos certifications.</p>
+      )}
+    </ol>
+  )
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-8">
+      <div className="flex items-end justify-between">
+        <div className="space-y-3">
+          <Skeleton className="h-3 w-40" />
+          <Skeleton className="h-10 w-80" />
+          <Skeleton className="h-3 w-56" />
+        </div>
+        <Skeleton className="h-10 w-36" />
+      </div>
+      <div className="grid gap-6 xl:grid-cols-5">
+        <Skeleton className="h-72 rounded-3xl xl:col-span-3" />
+        <Skeleton className="h-72 rounded-2xl xl:col-span-2" />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Skeleton className="h-64 rounded-2xl" />
+        <Skeleton className="h-64 rounded-2xl" />
+        <Skeleton className="h-64 rounded-2xl" />
       </div>
     </div>
   )

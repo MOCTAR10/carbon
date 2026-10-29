@@ -90,6 +90,7 @@ export async function GET() {
     const certCounts = {
       pending:    certifications.filter(c => c.status === 'pending').length,
       inProgress: certifications.filter(c => ['assigned', 'in_progress', 'audit_done'].includes(c.status)).length,
+      atCnc:      certifications.filter(c => c.status === 'submitted_to_cnc').length,
       certified:  certifications.filter(c => c.status === 'certified').length,
       rejected:   certifications.filter(c => c.status === 'rejected').length,
     }

@@ -44,6 +44,11 @@ export default function AssessmentsPage() {
   const [filterSite, setFilterSite] = useState('')
   const [filterYear, setFilterYear] = useState('')
 
+  // Deep link from the dashboard: /dashboard/assessments?new=1 opens the creation form
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('new') === '1') setShowForm(true)
+  }, [])
+
   useEffect(() => {
     fetch('/api/sites').then(r => r.json()).then(d => { if (Array.isArray(d)) setSites(d) }).catch(() => {})
     fetch('/api/assessments').then(r => r.json()).then(d => { if (Array.isArray(d)) setAssessments(d) }).catch(() => {})
