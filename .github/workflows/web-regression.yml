@@ -1,0 +1,148 @@
+name: Web regression
+
+# Regression suite for the web app (carbon-app/): static checks, schema migrations from scratch,
+# then the Playwright API + browser suite against a production build on a real PostgreSQL.
+on:
+  push:
+    branches: [main]
+    paths: ['carbon-app/**', '.github/workflows/web-regression.yml']
+  pull_request:
+    paths: ['carbon-app/**', '.github/workflows/web-regression.yml']
+  schedule:
+    - cron: '0 3 * * *' # nightly, 04:00 Libreville
+  workflow_dispatch:
+
+concurrency:
+  group: web-regression-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: carbon-app
+
+env:
+  NODE_VERSION: '20'
+  NODE_OPTIONS: --max-old-space-size=4096
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  quality:
+    name: Types & lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: carbon-app/package-lock.json
+      - run: npm ci
+      - name: TypeScript (app + tests)
+        run: npm run typecheck
+      - name: ESLint
+        run: npm run lint
+
+  migrations:
+    name: Migrations (fresh install + re-run)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres, POSTGRES_DB: carbontrack }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/carbontrack
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: carbon-app/package-lock.json
+      - run: npm ci
+      - name: Apply all migrations on an empty database
+        run: npm run db:migrate
+      - name: Re-apply (no version table — every script must be idempotent)
+        run: npm run db:migrate
+
+  regression:
+    name: Regression (API + desktop + mobile)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres, POSTGRES_DB: carbontrack }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      CI: 'true'
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/carbontrack
+      JWT_SECRET: ci-only-${{ github.run_id }}-${{ github.run_attempt }}-not-a-real-secret
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3100
+      # The suite runs against `next start` (production build), like PM2 in prod
+      BASE_URL: http://127.0.0.1:3100
+      TEST_SERVER_CMD: npx next start -p 3100 -H 127.0.0.1
+      TEST_PROD_SERVER: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: carbon-app/package-lock.json
+      - run: npm ci
+
+      - name: Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - name: Install Chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Install Chromium system deps
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Database schema
+        run: npm run db:migrate
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: carbon-app/.next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('carbon-app/package-lock.json') }}-${{ hashFiles('carbon-app/src/**') }}
+          restore-keys: next-${{ runner.os }}-${{ hashFiles('carbon-app/package-lock.json') }}-
+      - name: Production build
+        run: npm run build
+
+      - name: Run regression suite
+        run: npx playwright test
+
+      - name: Upload HTML report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: carbon-app/playwright-report/
+          retention-days: 14
+      - name: Upload traces of failed tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: carbon-app/test-results/
+          retention-days: 7
