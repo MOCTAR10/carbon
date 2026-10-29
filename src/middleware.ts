@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
+import { jwtSecret } from '@/lib/jwt-secret'
 import { isDisabledPath } from '@/lib/features'
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'carbontrack-secret-key-change-in-production'
-)
 
 const COOKIE = {
   admin:  'adm_token',
@@ -14,7 +12,7 @@ const COOKIE = {
 
 async function verifyRole(token: string): Promise<string | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
+    const { payload } = await jwtVerify(token, jwtSecret())
     return (payload.role as string) ?? null
   } catch {
     return null

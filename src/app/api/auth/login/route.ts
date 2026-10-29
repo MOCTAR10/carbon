@@ -2,17 +2,31 @@ import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { verifyPassword, createToken, PORTAL_COOKIE } from '@/lib/auth'
 import { FEATURES } from '@/lib/features'
+import { clientIp, rateLimit, resetRateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const body = await request.json().catch(() => ({}))
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+    const password = typeof body.password === 'string' ? body.password : ''
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email et mot de passe requis' }, { status: 400 })
     }
 
+    // Brute-force damping: per account+IP and per IP
+    const ip = clientIp(request)
+    const accountKey = `login:${ip}:${email}`
+    const wait = rateLimit(accountKey, 8, 15 * 60 * 1000) || rateLimit(`login-ip:${ip}`, 40, 15 * 60 * 1000)
+    if (wait) {
+      return NextResponse.json(
+        { error: `Trop de tentatives. Réessayez dans ${Math.ceil(wait / 60)} min.` },
+        { status: 429, headers: { 'Retry-After': String(wait) } }
+      )
+    }
+
     const result = await query(
-      'SELECT id, email, password_hash, company_id, partner_id, role, first_name, last_name FROM users WHERE email = $1',
+      'SELECT id, email, password_hash, company_id, partner_id, role, first_name, last_name FROM users WHERE LOWER(email) = $1 ORDER BY id LIMIT 1',
       [email]
     )
 
@@ -26,6 +40,8 @@ export async function POST(request: NextRequest) {
     if (!valid) {
       return NextResponse.json({ error: 'Email ou mot de passe incorrect' }, { status: 401 })
     }
+
+    resetRateLimit(accountKey)
 
     // The CNC portal was removed — legacy CNC accounts can no longer sign in
     if (user.role === 'cnc') {

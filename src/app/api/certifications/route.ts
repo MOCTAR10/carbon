@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
-import { getSession } from '@/lib/auth'
+import { getCompanySession as getSession, parseId } from '@/lib/company'
 import { notifyAllAdmins } from '@/lib/notifications'
 import { OPEN_CERT_STATUSES } from '@/lib/certification'
 
@@ -58,9 +58,9 @@ export async function GET() {
           expertName: cert.expert_name,
           expertEmail: cert.expert_email,
           inspectionDate: cert.inspection_date,
-          inspectionNotes: cert.inspection_notes,
+          inspectionNotes: null, // expert working notes stay internal
           companyMessage: cert.company_message,
-          adminNotes: cert.admin_notes,
+          adminNotes: null, // internal admin notes are never sent to the company
           rejectionReason: cert.rejection_reason,
           certifiedAt: cert.status === 'certified' ? cert.certified_at : null,
           certificateNumber: cert.status === 'certified' ? cert.certificate_number : null,
@@ -78,7 +78,8 @@ export async function GET() {
           avisPeriodStart: cert.avis_period_start,
           avisPeriodEnd: cert.avis_period_end,
           avisTotalCo2eq: cert.avis_total_co2eq ? parseFloat(cert.avis_total_co2eq) : null,
-          expertReportPdfUrl: cert.expert_report_pdf_url,
+          // The company sees the expert report only once the field audit is finished
+          expertReportPdfUrl: ['audit_done', 'submitted_to_cnc', 'certified'].includes(cert.status) ? (cert.expert_report_pdf_url ?? 'available') : null,
           dossierCompiledAt: cert.dossier_compiled_at,
           submittedToCncAt: cert.submitted_to_cnc_at,
           cncDepositReference: cert.cnc_deposit_reference,
@@ -106,7 +107,9 @@ export async function POST(request: NextRequest) {
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
-    const { assessmentId, message } = await request.json()
+    const body = await request.json().catch(() => ({}))
+    const assessmentId = parseId(body.assessmentId)
+    const message = typeof body.message === 'string' ? body.message.trim().slice(0, 2000) : ''
 
     if (!assessmentId) {
       return NextResponse.json({ error: 'ID du bilan requis' }, { status: 400 })
@@ -122,6 +125,11 @@ export async function POST(request: NextRequest) {
 
     if (assessment.rows.length === 0) {
       return NextResponse.json({ error: 'Bilan non trouvé' }, { status: 404 })
+    }
+
+    // An empty bilan cannot be audited
+    if (!(parseFloat(assessment.rows[0].total_co2eq) > 0)) {
+      return NextResponse.json({ error: 'Saisissez et enregistrez vos données d’émissions avant de demander la certification' }, { status: 400 })
     }
 
     // Check if there's already a pending/in_progress/certified request
@@ -168,6 +176,10 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
+    // Unique index uniq_cert_request_live_assessment: a concurrent request won the race
+    if ((error as { code?: string })?.code === '23505') {
+      return NextResponse.json({ error: 'Une demande de certification est déjà en cours pour ce bilan' }, { status: 409 })
+    }
     console.error('Certification request error:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }

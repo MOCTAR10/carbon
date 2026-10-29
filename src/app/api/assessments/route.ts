@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
-import { getSession } from '@/lib/auth'
+import { getCompanySession as getSession, parseId } from '@/lib/company'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,11 +22,11 @@ export async function GET(request: NextRequest) {
 
     if (siteId) {
       sql += ` AND a.site_id = $${params.length + 1}`
-      params.push(siteId)
+      params.push(parseId(siteId) ?? 0)
     }
     if (year) {
       sql += ` AND a.year = $${params.length + 1}`
-      params.push(parseInt(year))
+      params.push(parseId(year) ?? 0)
     }
     sql += ' ORDER BY a.created_at DESC'
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
-import { getSession } from '@/lib/auth'
+import { getCompanySession as getSession, parseId } from '@/lib/company'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +12,8 @@ export async function GET(
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
-    const { assessmentId } = params
+    const assessmentId = parseId(params.assessmentId)
+    if (!assessmentId) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
 
     // Fetch assessment with site and company info
     const assessmentResult = await query(

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSession } from '@/lib/auth'
+import { getCompanySession as getSession } from '@/lib/company'
 import { query } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
@@ -81,6 +81,20 @@ export async function GET() {
     const totalScope2 = assessments.reduce((s, a) => s + (parseFloat(a.scope2_co2eq) || 0), 0)
     const totalScope3 = assessments.reduce((s, a) => s + (parseFloat(a.scope3_co2eq) || 0), 0)
 
+    // Totals per reporting year — the dashboard headlines the latest year, not a cross-year sum
+    const yearMap = new Map<number, { year: number; total: number; scope1: number; scope2: number; scope3: number; assessments: number }>()
+    for (const a of assessments) {
+      const y = Number(a.year)
+      const row = yearMap.get(y) ?? { year: y, total: 0, scope1: 0, scope2: 0, scope3: 0, assessments: 0 }
+      row.total  += parseFloat(a.total_co2eq)  || 0
+      row.scope1 += parseFloat(a.scope1_co2eq) || 0
+      row.scope2 += parseFloat(a.scope2_co2eq) || 0
+      row.scope3 += parseFloat(a.scope3_co2eq) || 0
+      row.assessments++
+      yearMap.set(y, row)
+    }
+    const byYear = Array.from(yearMap.values()).sort((a, b) => b.year - a.year)
+
     // Emissions by country (server-side)
     const byCountry: Record<string, number> = {}
     for (const a of assessments) {
@@ -113,6 +127,7 @@ export async function GET() {
         expiresAt: subscription.expires_at,
       } : null,
       totals: { totalCo2eq, totalScope1, totalScope2, totalScope3 },
+      byYear,
       byCountry,
       sites,
       assessments,

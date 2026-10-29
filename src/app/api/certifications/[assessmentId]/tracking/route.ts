@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
-import { getSession } from '@/lib/auth'
+import { getCompanySession as getSession, parseId } from '@/lib/company'
 import { query } from '@/lib/db'
 import { CERT_STATUS_LABELS, CertStatus } from '@/lib/certification'
 import { generateSuiviDemandePDF } from '@/lib/documents/SuiviDemandePDF'
@@ -23,7 +23,8 @@ export async function GET(_request: NextRequest, { params }: { params: { assessm
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
-    const certId = parseInt(params.assessmentId)
+    const certId = parseId(params.assessmentId)
+    if (!certId) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
     const result = await query(
       `SELECT cr.*, a.name as assessment_name, a.year as assessment_year,
               a.total_co2eq, a.scope1_co2eq, a.scope2_co2eq, a.scope3_co2eq,

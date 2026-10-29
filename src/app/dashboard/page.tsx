@@ -125,7 +125,7 @@ export default function DashboardPage() {
                   <Upload className="size-4 text-ivory-50" />
                   <span className="font-sans text-[9px] font-semibold text-ivory-50">Changer</span>
                 </span>
-                <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleLogoUpload} className="hidden" />
               </label>
               <span className="truncate">{company.name}</span>
             </span>

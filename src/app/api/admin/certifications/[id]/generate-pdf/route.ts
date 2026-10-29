@@ -8,9 +8,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
+import { parseId } from '@/lib/company'
 import { buildExpertReport, ReportUnavailableError } from '@/lib/documents/build-expert-report'
 
 export const dynamic = 'force-dynamic'
+
+const COMPANY_REPORT_STATUSES = ['audit_done', 'submitted_to_cnc', 'certified']
 
 export async function POST(
   _request: NextRequest,
@@ -24,23 +27,28 @@ export async function POST(
       return NextResponse.json({ error: 'Session expirée — reconnectez-vous' }, { status: 403 })
     }
 
-    const certId = parseInt(params.id)
+    const certId = parseId(params.id)
+    if (!certId) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
     const access = await query(
-      `SELECT company_id, expert_user_id FROM certification_requests WHERE id = $1`,
+      `SELECT company_id, expert_user_id, status FROM certification_requests WHERE id = $1`,
       [certId]
     )
     if (access.rows.length === 0) {
       return NextResponse.json({ error: 'Certification introuvable' }, { status: 404 })
     }
-    const { company_id, expert_user_id } = access.rows[0]
+    const { company_id, expert_user_id, status } = access.rows[0]
 
     // Each portal cookie is checked against its own role
-    const allowed =
+    const staff =
       adminSession?.role === 'admin' ||
-      (expertSession?.role === 'expert' && expertSession.userId === expert_user_id) ||
-      (userSession?.role === 'user' && userSession.companyId === company_id)
-    if (!allowed) {
+      (expertSession?.role === 'expert' && expertSession.userId === expert_user_id)
+    const company = userSession?.role === 'user' && userSession.companyId === company_id
+    if (!staff && !company) {
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
+    }
+    // The company only gets the report once the expert has finished the field audit
+    if (!staff && !COMPANY_REPORT_STATUSES.includes(status)) {
+      return NextResponse.json({ error: 'Le rapport sera disponible une fois l’audit terrain terminé.' }, { status: 403 })
     }
 
     const { buffer, filename } = await buildExpertReport(certId)

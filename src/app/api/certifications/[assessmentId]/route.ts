@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
-import { getSession } from '@/lib/auth'
+import { getCompanySession as getSession, parseId } from '@/lib/company'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +13,8 @@ export async function GET(
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
-    const assessmentId = parseInt(params.assessmentId)
+    const assessmentId = parseId(params.assessmentId)
+    if (!assessmentId) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
 
     const result = await query(
       `SELECT cr.*, 
@@ -49,7 +50,7 @@ export async function GET(
         certifiedAt: cert.status === 'certified' ? cert.certified_at : null,
         certificateNumber: cert.status === 'certified' ? cert.certificate_number : null,
         companyMessage: cert.company_message,
-        adminNotes: cert.admin_notes,
+        adminNotes: null, // internal admin notes are never sent to the company
         rejectionReason: cert.rejection_reason,
         requestedAt: cert.requested_at,
         auditScheduledDate: cert.audit_scheduled_date,

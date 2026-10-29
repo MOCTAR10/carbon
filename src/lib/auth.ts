@@ -1,10 +1,8 @@
 import { SignJWT, jwtVerify } from 'jose'
+import { jwtSecret } from '@/lib/jwt-secret'
 import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'carbontrack-secret-key-change-in-production'
-)
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12)
@@ -19,12 +17,12 @@ export async function createToken(payload: { userId: number; email: string; comp
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('7d')
     .setIssuedAt()
-    .sign(JWT_SECRET)
+    .sign(jwtSecret())
 }
 
 export async function verifyToken(token: string) {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
+    const { payload } = await jwtVerify(token, jwtSecret())
     return payload as { userId: number; email: string; companyId: number | null; role: string; partnerId?: number | null }
   } catch {
     return null

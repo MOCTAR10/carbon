@@ -1,39 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { query } from '@/lib/db'
-import { getSession } from '@/lib/auth'
+import { rm } from 'fs/promises'
+import path from 'path'
+import { query, withTransaction } from '@/lib/db'
+import { getCompanySession, unauthorized, parseId, certificationLock, lockedResponse } from '@/lib/company'
 
 export const dynamic = 'force-dynamic'
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+const UPLOAD_DIR = path.join(process.cwd(), 'uploads')
+
+async function findOwned(id: number, companyId: number) {
+  const r = await query(
+    `SELECT a.*, s.name AS site_name, s.type AS site_type, s.country AS site_country, s.address AS site_address
+     FROM assessments a JOIN sites s ON a.site_id = s.id
+     WHERE a.id = $1 AND s.company_id = $2`,
+    [id, companyId]
+  )
+  return r.rows[0] ?? null
+}
+
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    const session = await getCompanySession()
+    if (!session) return unauthorized()
+    const id = parseId(params.id)
+    if (!id) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
 
-    const id = parseInt(params.id)
-    if (isNaN(id)) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
+    const assessment = await findOwned(id, session.companyId)
+    if (!assessment) return NextResponse.json({ error: 'Bilan non trouvé' }, { status: 404 })
+    return NextResponse.json({ ...assessment, certification_lock: await certificationLock(id) })
+  } catch (error) {
+    console.error('Assessment fetch error:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}
 
-    const { status } = await request.json()
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const session = await getCompanySession()
+    if (!session) return unauthorized()
+
+    const id = parseId(params.id)
+    if (!id) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
+
+    const { status } = await request.json().catch(() => ({}))
     if (!['in_progress', 'completed'].includes(status)) {
       return NextResponse.json({ error: 'Statut invalide' }, { status: 400 })
     }
 
-    const check = await query(
-      `SELECT a.id FROM assessments a JOIN sites s ON a.site_id = s.id
-       WHERE a.id = $1 AND s.company_id = $2`,
-      [id, session.companyId]
-    )
-    if (check.rows.length === 0) {
+    if (!(await findOwned(id, session.companyId))) {
       return NextResponse.json({ error: 'Bilan non trouvé' }, { status: 404 })
     }
+    // While a certification request is open, the bilan's state is owned by the workflow
+    if (await certificationLock(id)) return lockedResponse()
 
-    await query(
-      'UPDATE assessments SET status = $1, updated_at = NOW() WHERE id = $2',
+    const result = await query(
+      'UPDATE assessments SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
       [status, id]
     )
-    const result = await query('SELECT * FROM assessments WHERE id = $1', [id])
     return NextResponse.json(result.rows[0])
   } catch (error) {
     console.error('Assessment status update error:', error)
@@ -41,41 +64,36 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    const session = await getCompanySession()
+    if (!session) return unauthorized()
 
-    const id = parseInt(params.id)
-    if (isNaN(id)) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
+    const id = parseId(params.id)
+    if (!id) return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
 
-    // Verify bilan belongs to user's company
-    const check = await query(
-      `SELECT a.id, a.status
-       FROM assessments a
-       JOIN sites s ON a.site_id = s.id
-       WHERE a.id = $1 AND s.company_id = $2`,
-      [id, session.companyId]
-    )
-
-    if (check.rows.length === 0) {
+    if (!(await findOwned(id, session.companyId))) {
       return NextResponse.json({ error: 'Bilan non trouvé' }, { status: 404 })
     }
-
-    if (check.rows[0].status !== 'draft') {
+    if (await certificationLock(id)) {
       return NextResponse.json(
-        { error: 'Seuls les bilans en brouillon peuvent être supprimés' },
-        { status: 400 }
+        { error: 'Un bilan soumis à certification ne peut pas être supprimé.' },
+        { status: 409 }
       )
     }
 
-    // Remove child records first (FK constraints)
-    await query('DELETE FROM emission_entries WHERE assessment_id = $1', [id])
-    await query('DELETE FROM certification_requests WHERE assessment_id = $1', [id]).catch(() => {})
-    await query('DELETE FROM assessments WHERE id = $1', [id])
+    // Remaining requests are rejected ones (history) — removed with the bilan, atomically
+    await withTransaction(async (client) => {
+      await client.query(
+        'DELETE FROM certification_documents WHERE certification_id IN (SELECT id FROM certification_requests WHERE assessment_id = $1)',
+        [id]
+      )
+      await client.query('DELETE FROM certification_requests WHERE assessment_id = $1', [id])
+      await client.query('DELETE FROM audit_documents WHERE assessment_id = $1', [id])
+      await client.query('DELETE FROM emission_entries WHERE assessment_id = $1', [id])
+      await client.query('DELETE FROM assessments WHERE id = $1', [id])
+    })
+    await rm(path.join(UPLOAD_DIR, String(id)), { recursive: true, force: true }).catch(() => {})
 
     return NextResponse.json({ success: true })
   } catch (error) {

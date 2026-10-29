@@ -378,7 +378,7 @@ export default function RegisterPage() {
                     </span>
                     <span className="text-sm font-semibold">Cliquer pour téléverser le logo</span>
                     <span className="px-4 text-center text-xs text-ink-400">
-                      PNG, JPG, WebP, SVG — max 2 Mo · recommandé : 500×500 px, fond transparent
+                      PNG, JPG, WebP — max 2 Mo · recommandé : 500×500 px, fond transparent
                     </span>
                   </button>
                 )}
@@ -386,7 +386,7 @@ export default function RegisterPage() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                  accept="image/jpeg,image/png,image/webp"
                   onChange={handleLogoChange}
                   className="hidden"
                 />
