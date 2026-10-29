@@ -1,31 +1,40 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Building2, Plus, MapPin, X, Ruler } from 'lucide-react'
+import Link from 'next/link'
+import { toast } from 'sonner'
+import { Building2, Plus, MapPin, X, Ruler, ClipboardList, ArrowUpRight, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Stagger, Reveal } from '@/components/ui/motion'
 
 const COUNTRIES = [
-  "Afghanistan", "Afrique du Sud", "Albanie", "Algérie", "Allemagne", "Andorre", "Angola", "Antigua-et-Barbuda", 
-  "Arabie Saoudite", "Argentine", "Arménie", "Australie", "Autriche", "Azerbaïdjan", "Bahamas", "Bahreïn", 
-  "Bangladesh", "Barbade", "Belgique", "Bélize", "Bénin", "Bhoutan", "Biélorussie", "Birmanie (Myanmar)", 
-  "Bolivie", "Bosnie-Herzégovine", "Botswana", "Brésil", "Brunei", "Bulgarie", "Burkina Faso", "Burundi", 
-  "Cambodge", "Cameroun", "Canada", "Cap-Vert", "Centrafrique", "Chili", "Chine", "Chypre", "Colombie", 
-  "Comores", "Congo (Brazzaville)", "Congo (Kinshasa)", "Corée du Nord", "Corée du Sud", "Costa Rica", 
-  "Côte d'Ivoire", "Croatie", "Cuba", "Danemark", "Djibouti", "Dominique", "Égypte", "Émirats Arabes Unis", 
-  "Équateur", "Érythrée", "Espagne", "Estonie", "Eswatini", "États-Unis", "Éthiopie", "Fidji", "Finlande", 
-  "France", "Gabon", "Gambie", "Géorgie", "Ghana", "Grèce", "Grenade", "Guatemala", "Guinée", "Guinée équatoriale", 
-  "Guinée-Bissau", "Guyana", "Haïti", "Honduras", "Hongrie", "Inde", "Indonésie", "Irak", "Iran", "Irlande", 
-  "Islande", "Israël", "Italie", "Jamaïque", "Japon", "Jordanie", "Kazakhstan", "Kenya", "Kirghizistan", 
-  "Kiribati", "Koweït", "Laos", "Lesotho", "Lettonie", "Liban", "Libéria", "Libye", "Liechtenstein", "Lituanie", 
-  "Luxembourg", "Macédoine du Nord", "Madagascar", "Malaisie", "Malawi", "Maldives", "Mali", "Malte", "Maroc", 
-  "Maurice", "Mauritanie", "Mexique", "Micronésie", "Moldavie", "Monaco", "Mongolie", "Monténégro", "Mozambique", 
-  "Namibie", "Nauru", "Népal", "Nicaragua", "Niger", "Nigeria", "Norvège", "Nouvelle-Zélande", "Oman", 
-  "Ouganda", "Ouzbékistan", "Pakistan", "Palaos", "Panama", "Papouasie-Nouvelle-Guinée", "Paraguay", "Pays-Bas", 
-  "Pérou", "Philippines", "Pologne", "Portugal", "Qatar", "République Dominicaine", "République Tchèque", 
+  "Afghanistan", "Afrique du Sud", "Albanie", "Algérie", "Allemagne", "Andorre", "Angola", "Antigua-et-Barbuda",
+  "Arabie Saoudite", "Argentine", "Arménie", "Australie", "Autriche", "Azerbaïdjan", "Bahamas", "Bahreïn",
+  "Bangladesh", "Barbade", "Belgique", "Bélize", "Bénin", "Bhoutan", "Biélorussie", "Birmanie (Myanmar)",
+  "Bolivie", "Bosnie-Herzégovine", "Botswana", "Brésil", "Brunei", "Bulgarie", "Burkina Faso", "Burundi",
+  "Cambodge", "Cameroun", "Canada", "Cap-Vert", "Centrafrique", "Chili", "Chine", "Chypre", "Colombie",
+  "Comores", "Congo (Brazzaville)", "Congo (Kinshasa)", "Corée du Nord", "Corée du Sud", "Costa Rica",
+  "Côte d'Ivoire", "Croatie", "Cuba", "Danemark", "Djibouti", "Dominique", "Égypte", "Émirats Arabes Unis",
+  "Équateur", "Érythrée", "Espagne", "Estonie", "Eswatini", "États-Unis", "Éthiopie", "Fidji", "Finlande",
+  "France", "Gabon", "Gambie", "Géorgie", "Ghana", "Grèce", "Grenade", "Guatemala", "Guinée", "Guinée équatoriale",
+  "Guinée-Bissau", "Guyana", "Haïti", "Honduras", "Hongrie", "Inde", "Indonésie", "Irak", "Iran", "Irlande",
+  "Islande", "Israël", "Italie", "Jamaïque", "Japon", "Jordanie", "Kazakhstan", "Kenya", "Kirghizistan",
+  "Kiribati", "Koweït", "Laos", "Lesotho", "Lettonie", "Liban", "Libéria", "Libye", "Liechtenstein", "Lituanie",
+  "Luxembourg", "Macédoine du Nord", "Madagascar", "Malaisie", "Malawi", "Maldives", "Mali", "Malte", "Maroc",
+  "Maurice", "Mauritanie", "Mexique", "Micronésie", "Moldavie", "Monaco", "Mongolie", "Monténégro", "Mozambique",
+  "Namibie", "Nauru", "Népal", "Nicaragua", "Niger", "Nigeria", "Norvège", "Nouvelle-Zélande", "Oman",
+  "Ouganda", "Ouzbékistan", "Pakistan", "Palaos", "Panama", "Papouasie-Nouvelle-Guinée", "Paraguay", "Pays-Bas",
+  "Pérou", "Philippines", "Pologne", "Portugal", "Qatar", "République Dominicaine", "République Tchèque",
   "Roumanie", "Royaume-Uni", "Russie", "Rwanda", "Saint-Kitts-et-Nevis", "Saint-Marin", "Saint-Vincent-et-les-Grenadines",
-  "Sainte-Lucie", "Salvador", "Samoa", "São Tomé-et-Príncipe", "Sénégal", "Serbie", "Seychelles", "Sierra Leone", 
-  "Singapour", "Slovaquie", "Slovénie", "Somalie", "Soudan", "Soudan du Sud", "Sri Lanka", "Suède", "Suisse", 
-  "Suriname", "Syrie", "Tadjikistan", "Tanzanie", "Tchad", "Thaïlande", "Timor oriental", "Togo", "Tonga", 
-  "Trinité-et-Tobago", "Tunisie", "Turkménistan", "Turquie", "Tuvalu", "Ukraine", "Uruguay", "Vanuatu", 
+  "Sainte-Lucie", "Salvador", "Samoa", "São Tomé-et-Príncipe", "Sénégal", "Serbie", "Seychelles", "Sierra Leone",
+  "Singapour", "Slovaquie", "Slovénie", "Somalie", "Soudan", "Soudan du Sud", "Sri Lanka", "Suède", "Suisse",
+  "Suriname", "Syrie", "Tadjikistan", "Tanzanie", "Tchad", "Thaïlande", "Timor oriental", "Togo", "Tonga",
+  "Trinité-et-Tobago", "Tunisie", "Turkménistan", "Turquie", "Tuvalu", "Ukraine", "Uruguay", "Vanuatu",
   "Vatican", "Venezuela", "Vietnam", "Yémen", "Zambie", "Zimbabwe"
 ]
 
@@ -62,8 +71,12 @@ const SITE_TYPES = [
   { value: 'autre', label: 'Autre' }
 ]
 
+const FIELD = 'h-11 w-full rounded-xl border border-ivory-400 bg-white px-3.5 text-sm text-ink-800 outline-none transition placeholder:text-ink-400 focus:border-forest-500 focus:ring-4 focus:ring-forest-100'
+const LABEL = 'mb-1.5 block text-[13px] font-semibold text-ink-700'
+
 export default function SitesPage() {
   const [sites, setSites] = useState<Site[]>([])
+  const [loaded, setLoaded] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ name: '', type: 'bureau', address: '', surface: '', description: '', country: 'Gabon' })
   const [loading, setLoading] = useState(false)
@@ -73,7 +86,11 @@ export default function SitesPage() {
   }, [])
 
   const fetchSites = () => {
-    fetch('/api/sites').then(r => r.json()).then(d => { if (Array.isArray(d)) setSites(d) }).catch(() => {})
+    fetch('/api/sites')
+      .then(r => r.json())
+      .then(d => { if (Array.isArray(d)) setSites(d) })
+      .catch(() => {})
+      .finally(() => setLoaded(true))
   }
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -89,57 +106,83 @@ export default function SitesPage() {
         setShowForm(false)
         setForm({ name: '', type: 'bureau', address: '', surface: '', description: '', country: 'Gabon' })
         fetchSites()
+        toast.success('Site créé')
+      } else {
+        const d = await res.json().catch(() => null)
+        toast.error(d?.error ?? 'Impossible de créer le site')
       }
     } finally {
       setLoading(false)
     }
   }
 
+  const totalAssessments = sites.reduce((n, s) => n + Number(s.assessment_count || 0), 0)
+  const countries = new Set(sites.map(s => s.country).filter(Boolean)).size
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Sites & Entités</h1>
-          <p className="text-gray-500 mt-1">Gérez les différents sites de votre entreprise</p>
-        </div>
-        <button onClick={() => setShowForm(true)} className="btn-primary inline-flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Ajouter un site
-        </button>
-      </div>
+    <Stagger className="space-y-8">
+      <Reveal>
+        <PageHeader
+          eyebrow="Périmètre organisationnel"
+          title="Sites & Entités"
+          description="Gérez les différents sites de votre entreprise. Chaque bilan carbone est rattaché à un site."
+          actions={<Button onClick={() => setShowForm(true)}><Plus /> Ajouter un site</Button>}
+        />
+      </Reveal>
+
+      {loaded && sites.length > 0 && (
+        <Reveal>
+          <Card className="grid grid-cols-3 divide-x divide-ivory-300">
+            {[
+              { label: 'Sites enregistrés', value: sites.length },
+              { label: 'Pays couverts',     value: countries },
+              { label: 'Bilans rattachés',  value: totalAssessments },
+            ].map(s => (
+              <div key={s.label} className="px-6 py-5">
+                <p className="font-display text-3xl tabular-nums text-forest-900">{s.value}</p>
+                <p className="mt-1 text-xs font-medium text-ink-500">{s.label}</p>
+              </div>
+            ))}
+          </Card>
+        </Reveal>
+      )}
 
       {/* Create form modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-forest-950/40 p-4 font-sans backdrop-blur-sm animate-in fade-in-0">
+          <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-2xl bg-white shadow-lifted animate-in zoom-in-95">
 
             {/* Header — never scrolls */}
-            <div className="flex items-center justify-between px-8 pt-7 pb-5 flex-shrink-0 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900">Nouveau site</h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
-                <X className="w-5 h-5" />
+            <div className="flex flex-shrink-0 items-start justify-between border-b border-ivory-300 px-8 pb-5 pt-7">
+              <div>
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-600">Nouveau site</p>
+                <h2 className="font-display text-2xl text-forest-900">Ajouter un site</h2>
+              </div>
+              <button onClick={() => setShowForm(false)} className="rounded-lg p-1.5 text-ink-400 transition-colors hover:bg-ivory-100 hover:text-ink-700" aria-label="Fermer">
+                <X className="size-5" />
               </button>
             </div>
 
             {/* Scrollable form body */}
-            <div className="overflow-y-auto flex-1 px-8 py-6">
+            <div className="flex-1 overflow-y-auto px-8 py-6">
               <form id="site-form" onSubmit={handleCreate} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom du site *</label>
+                  <label className={LABEL}>Nom du site *</label>
                   <input
                     type="text"
                     value={form.name}
                     onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
-                    className="input-field"
-                    placeholder="Ex: Siège social Libreville"
+                    className={FIELD}
+                    placeholder="Ex : Siège social Libreville"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Type de site</label>
+                  <label className={LABEL}>Type de site</label>
                   <select
                     value={form.type}
                     onChange={e => setForm(prev => ({ ...prev, type: e.target.value }))}
-                    className="input-field"
+                    className={FIELD}
                   >
                     {SITE_TYPES.map(t => (
                       <option key={t.value} value={t.value}>{t.label}</option>
@@ -148,59 +191,59 @@ export default function SitesPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Pays *</label>
+                    <label className={LABEL}>Pays *</label>
                     <select
                       value={form.country}
                       onChange={e => setForm(prev => ({ ...prev, country: e.target.value }))}
-                      className="input-field"
+                      className={FIELD}
                       required
                     >
-                      <option value="" disabled>Sélectionnez un pays...</option>
+                      <option value="" disabled>Sélectionnez un pays…</option>
                       {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Adresse</label>
+                    <label className={LABEL}>Adresse</label>
                     <input
                       type="text"
                       value={form.address}
                       onChange={e => setForm(prev => ({ ...prev, address: e.target.value }))}
-                      className="input-field"
+                      className={FIELD}
                       placeholder="Adresse du site"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Surface (m&sup2;)</label>
+                  <label className={LABEL}>Surface (m&sup2;)</label>
                   <input
                     type="number"
                     value={form.surface}
                     onChange={e => setForm(prev => ({ ...prev, surface: e.target.value }))}
-                    className="input-field"
-                    placeholder="Ex: 500"
+                    className={FIELD}
+                    placeholder="Ex : 500"
                     min={0}
                     step="0.01"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                  <label className={LABEL}>Description</label>
                   <textarea
                     value={form.description}
                     onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
-                    className="input-field"
+                    className={`${FIELD} h-auto py-2.5`}
                     rows={3}
-                    placeholder="Description optionnelle..."
+                    placeholder="Description optionnelle…"
                   />
                 </div>
               </form>
             </div>
 
             {/* Footer buttons — never scrolls */}
-            <div className="flex gap-3 px-8 py-5 border-t border-gray-100 flex-shrink-0">
-              <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1">Annuler</button>
-              <button type="submit" form="site-form" disabled={loading} className="btn-primary flex-1 disabled:opacity-50">
-                {loading ? 'Création...' : 'Créer le site'}
-              </button>
+            <div className="flex flex-shrink-0 gap-3 border-t border-ivory-300 px-8 py-5">
+              <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="flex-1">Annuler</Button>
+              <Button type="submit" form="site-form" disabled={loading} className="flex-1">
+                {loading ? <><Loader2 className="animate-spin" /> Création…</> : 'Créer le site'}
+              </Button>
             </div>
 
           </div>
@@ -208,43 +251,67 @@ export default function SitesPage() {
       )}
 
       {/* Sites grid */}
-      {sites.length === 0 ? (
-        <div className="card p-16 text-center">
-          <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucun site enregistré</h3>
-          <p className="text-gray-500 mb-6">Ajoutez votre premier site pour commencer votre bilan carbone.</p>
-          <button onClick={() => setShowForm(true)} className="btn-primary inline-flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Ajouter un site
-          </button>
+      {!loaded ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map(i => <Skeleton key={i} className="h-56 rounded-2xl" />)}
         </div>
+      ) : sites.length === 0 ? (
+        <Reveal>
+          <Card className="p-10">
+            <EmptyState
+              icon={Building2}
+              title="Aucun site enregistré"
+              description="Ajoutez votre premier site pour commencer votre bilan carbone."
+              action={<Button onClick={() => setShowForm(true)}><Plus /> Ajouter un site</Button>}
+            />
+          </Card>
+        </Reveal>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {sites.map(site => (
-            <div key={site.id} className="card p-6 hover:border-brand-200">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-brand-50 rounded-xl flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-brand-600" />
+            <Reveal key={site.id}>
+              <Card className="group flex h-full flex-col p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-forest-200 hover:shadow-lifted">
+                <div className="mb-5 flex items-start justify-between gap-3">
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-forest-900 text-gold-300">
+                    <Building2 className="size-5" strokeWidth={1.7} />
+                  </div>
+                  <Badge tone="neutral">{SITE_TYPES.find(t => t.value === site.type)?.label || site.type}</Badge>
                 </div>
-                <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-medium">
-                  {SITE_TYPES.find(t => t.value === site.type)?.label || site.type}
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">{site.name}</h3>
-              <p className="text-sm text-gray-400 flex items-center gap-1 mb-1 truncate">
-                <MapPin className="w-3 h-3 flex-shrink-0" /> {[site.address, site.country].filter(Boolean).join(' · ') || 'Aucune adresse'}
-              </p>
-              {site.surface && (
-                <p className="text-sm text-gray-400 flex items-center gap-1 mb-1">
-                  <Ruler className="w-3 h-3" /> {Number(site.surface).toLocaleString('fr-FR')} m&sup2;
-                </p>
-              )}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <span className="text-sm text-gray-500">{site.assessment_count} bilan(s)</span>
-              </div>
-            </div>
+                <h3 className="font-display text-xl text-forest-900">{site.name}</h3>
+                <div className="mt-2 space-y-1.5 text-sm text-ink-500">
+                  <p className="flex items-center gap-2 truncate">
+                    <MapPin className="size-3.5 flex-shrink-0 text-gold-500" />
+                    <span className="truncate">{[site.address, site.country].filter(Boolean).join(' · ') || 'Aucune adresse'}</span>
+                  </p>
+                  {site.surface && (
+                    <p className="flex items-center gap-2">
+                      <Ruler className="size-3.5 flex-shrink-0 text-gold-500" />
+                      <span className="tabular-nums">{Number(site.surface).toLocaleString('fr-FR')} m&sup2;</span>
+                    </p>
+                  )}
+                </div>
+                {site.description && (
+                  <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-ink-400">{site.description}</p>
+                )}
+                <div className="min-h-5 flex-1" />
+                <div className="flex items-center justify-between border-t border-ivory-300 pt-4">
+                  <span className="flex items-center gap-2 text-sm text-ink-600">
+                    <ClipboardList className="size-4 text-forest-500" strokeWidth={1.8} />
+                    <span className="font-semibold tabular-nums text-forest-900">{site.assessment_count}</span>
+                    bilan{Number(site.assessment_count) > 1 ? 's' : ''}
+                  </span>
+                  <Link
+                    href="/dashboard/assessments"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-forest-700 transition-colors hover:text-gold-600"
+                  >
+                    Voir les bilans <ArrowUpRight className="size-3.5" />
+                  </Link>
+                </div>
+              </Card>
+            </Reveal>
           ))}
         </div>
       )}
-    </div>
+    </Stagger>
   )
 }

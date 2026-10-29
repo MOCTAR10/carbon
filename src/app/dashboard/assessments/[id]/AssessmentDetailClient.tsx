@@ -1,9 +1,18 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, Save, Flame, Package, Truck, Users, Trash2, Building, Factory, ChevronDown, ChevronRight, AlertCircle, CheckCircle2, BarChart3, X, Calendar, Paperclip, Upload, FileText, Eye, Trash, Shield, Award } from 'lucide-react'
+import { toast } from 'sonner'
+import { ArrowLeft, ArrowRight, Save, Flame, Package, Truck, Users, Trash2, Building, Factory, ChevronDown, BarChart3, X, Calendar, Paperclip, Upload, FileText, Eye, Trash, Shield, Award, Loader2 } from 'lucide-react'
+import { cn, fmtCO2 } from '@/lib/utils'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { Card, CardHeader, CardContent } from '@/components/ui/card'
+import { Badge, CertStatusBadge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Stagger, Reveal } from '@/components/ui/motion'
 import {
   ENERGY_FUELS_STATIONARY, ENERGY_FUELS_ORGANIC, ENERGY_FUELS_MOBILE,
   ELECTRICITY_FACTORS, STEAM_COOLING_FACTORS, REFRIGERANT_FACTORS,
@@ -54,30 +63,30 @@ interface AuditDoc {
 const MONTHS = [
   { id: 0, label: 'Annuel', short: 'An' },
   { id: 1, label: 'Janvier', short: 'Jan' },
-  { id: 2, label: 'Fevrier', short: 'Fev' },
+  { id: 2, label: 'Février', short: 'Fév' },
   { id: 3, label: 'Mars', short: 'Mar' },
   { id: 4, label: 'Avril', short: 'Avr' },
   { id: 5, label: 'Mai', short: 'Mai' },
   { id: 6, label: 'Juin', short: 'Jun' },
   { id: 7, label: 'Juillet', short: 'Jul' },
-  { id: 8, label: 'Aout', short: 'Aou' },
+  { id: 8, label: 'Août', short: 'Aoû' },
   { id: 9, label: 'Septembre', short: 'Sep' },
   { id: 10, label: 'Octobre', short: 'Oct' },
   { id: 11, label: 'Novembre', short: 'Nov' },
-  { id: 12, label: 'Decembre', short: 'Dec' },
+  { id: 12, label: 'Décembre', short: 'Déc' },
 ]
 
 /* ============================================================
    TAB DEFINITIONS  (7 main tabs matching Excel sheets)
    ============================================================ */
 const TABS = [
-  { id: 'energy',        label: 'Energie',              icon: Flame,   color: 'red' },
-  { id: 'non_energy',    label: 'Hors Energie',         icon: Factory, color: 'red' },
+  { id: 'energy',        label: 'Énergie',              icon: Flame,   color: 'red' },
+  { id: 'non_energy',    label: 'Hors énergie',         icon: Factory, color: 'red' },
   { id: 'inputs',        label: 'Intrants',             icon: Package, color: 'blue' },
   { id: 'freight',       label: 'Fret',                 icon: Truck,   color: 'blue' },
   { id: 'transport',     label: 'Transport',            icon: Users,   color: 'blue' },
-  { id: 'waste',         label: 'Dechets',              icon: Trash2,  color: 'blue' },
-  { id: 'capital',       label: 'Immo.',                icon: Building,color: 'blue' },
+  { id: 'waste',         label: 'Déchets',              icon: Trash2,  color: 'blue' },
+  { id: 'capital',       label: 'Immobilisations',      icon: Building,color: 'blue' },
 ]
 
 /* Each tab has sub-sections with their emission factors */
@@ -93,43 +102,43 @@ interface SubSection {
 const TAB_SECTIONS: Record<string, SubSection[]> = {
   energy: [
     { id: 'fuels_stationary', label: '1 - Combustibles fossiles (sources fixes)', scopeLabel: 'Scope 1', scope: 1, factors: ENERGY_FUELS_STATIONARY, description: 'Butane, Propane, Gaz naturel, Diesel, Charbon, Coke - Consommation directe sur site' },
-    { id: 'fuels_organic', label: '2 - Combustibles d\'origine organique', scopeLabel: 'Scope 1', scope: 1, factors: ENERGY_FUELS_ORGANIC, description: 'Biodiesel, Biomethane, Bois, Granules - Sources renouvelables' },
-    { id: 'fuels_mobile', label: '3 - Combustibles (sources mobiles)', scopeLabel: 'Scope 1', scope: 1, factors: ENERGY_FUELS_MOBILE, description: 'Essence, Diesel, GPL, GNL, Kerosene - Vehicules et engins' },
-    { id: 'steam', label: '4 - Achat de vapeur et froid', scopeLabel: 'Scope 2', scope: 2, factors: STEAM_COOLING_FACTORS, description: 'Reseaux de chaleur, reseaux de froid' },
-    { id: 'electricity', label: '5 - Achat d\'electricite', scopeLabel: 'Scope 2', scope: 2, factors: ELECTRICITY_FACTORS, description: 'Electricite par pays/region et par usage (chauffage, industrie, transport...)' },
+    { id: 'fuels_organic', label: '2 - Combustibles d\'origine organique', scopeLabel: 'Scope 1', scope: 1, factors: ENERGY_FUELS_ORGANIC, description: 'Biodiesel, Biométhane, Bois, Granules - Sources renouvelables' },
+    { id: 'fuels_mobile', label: '3 - Combustibles (sources mobiles)', scopeLabel: 'Scope 1', scope: 1, factors: ENERGY_FUELS_MOBILE, description: 'Essence, Diesel, GPL, GNL, Kérosène - Véhicules et engins' },
+    { id: 'steam', label: '4 - Achat de vapeur et froid', scopeLabel: 'Scope 2', scope: 2, factors: STEAM_COOLING_FACTORS, description: 'Réseaux de chaleur, réseaux de froid' },
+    { id: 'electricity', label: '5 - Achat d’électricité', scopeLabel: 'Scope 2', scope: 2, factors: ELECTRICITY_FACTORS, description: 'Électricité par pays/région et par usage (chauffage, industrie, transport...)' },
   ],
   non_energy: [
-    { id: 'refrigerants', label: '1 - Fluides frigorigenes (HFC)', scopeLabel: 'Scope 1', scope: 1, factors: REFRIGERANT_FACTORS.filter(f => f.subcategory === 'refrigerants'), description: 'Fuites de climatisation, refrigeration' },
-    { id: 'process', label: '2 - Emissions de procedes', scopeLabel: 'Scope 1', scope: 1, factors: REFRIGERANT_FACTORS.filter(f => f.subcategory === 'process'), description: 'CO2, N2O, CH4 - Emissions directes hors combustion' },
+    { id: 'refrigerants', label: '1 - Fluides frigorigènes (HFC)', scopeLabel: 'Scope 1', scope: 1, factors: REFRIGERANT_FACTORS.filter(f => f.subcategory === 'refrigerants'), description: 'Fuites de climatisation, réfrigération' },
+    { id: 'process', label: '2 - Émissions de procédés', scopeLabel: 'Scope 1', scope: 1, factors: REFRIGERANT_FACTORS.filter(f => f.subcategory === 'process'), description: 'CO2, N2O, CH4 - Émissions directes hors combustion' },
   ],
   inputs: [
-    { id: 'metals', label: '1 - Metaux', scopeLabel: 'Scope 3', scope: 3, factors: INPUTS_METALS, description: 'Acier, Aluminium, Cuivre, Nickel - neufs et recycles' },
+    { id: 'metals', label: '1 - Métaux', scopeLabel: 'Scope 3', scope: 3, factors: INPUTS_METALS, description: 'Acier, Aluminium, Cuivre, Nickel - neufs et recyclés' },
     { id: 'plastics', label: '2 - Plastiques', scopeLabel: 'Scope 3', scope: 3, factors: INPUTS_PLASTICS, description: 'PET, PEHD, PVC, Nylon, Plastique moyen' },
-    { id: 'other_inputs', label: '3 - Verre, Papier, Construction, Eau', scopeLabel: 'Scope 3', scope: 3, factors: INPUTS_OTHER, description: 'Verre, Papier/Carton, Beton, Ciment, Eau potable' },
+    { id: 'other_inputs', label: '3 - Verre, Papier, Construction, Eau', scopeLabel: 'Scope 3', scope: 3, factors: INPUTS_OTHER, description: 'Verre, Papier/Carton, Béton, Ciment, Eau potable' },
   ],
   freight: [
-    { id: 'road', label: '1 - Fret routier', scopeLabel: 'Scope 3', scope: 3, factors: FREIGHT_FACTORS.filter(f => f.subcategory === 'road'), description: 'Camions articules, rigides, utilitaires' },
-    { id: 'air_freight', label: '2 - Fret aerien', scopeLabel: 'Scope 3', scope: 3, factors: FREIGHT_FACTORS.filter(f => f.subcategory === 'air'), description: 'Transport aerien de marchandises' },
+    { id: 'road', label: '1 - Fret routier', scopeLabel: 'Scope 3', scope: 3, factors: FREIGHT_FACTORS.filter(f => f.subcategory === 'road'), description: 'Camions articulés, rigides, utilitaires' },
+    { id: 'air_freight', label: '2 - Fret aérien', scopeLabel: 'Scope 3', scope: 3, factors: FREIGHT_FACTORS.filter(f => f.subcategory === 'air'), description: 'Transport aérien de marchandises' },
     { id: 'rail_freight', label: '3 - Fret ferroviaire', scopeLabel: 'Scope 3', scope: 3, factors: FREIGHT_FACTORS.filter(f => f.subcategory === 'rail'), description: 'Transport ferroviaire de marchandises' },
     { id: 'maritime_freight', label: '4 - Fret maritime et fluvial', scopeLabel: 'Scope 3', scope: 3, factors: FREIGHT_FACTORS.filter(f => f.subcategory === 'maritime' || f.subcategory === 'river'), description: 'Container maritime, fret fluvial' },
   ],
   transport: [
-    { id: 'car', label: '1 - Voitures', scopeLabel: 'Scope 3', scope: 3, factors: TRANSPORT_PEOPLE_FACTORS.filter(f => f.subcategory === 'car'), description: 'Essence, Diesel, Electrique, Hybride' },
-    { id: 'public', label: '2 - Transports en commun', scopeLabel: 'Scope 3', scope: 3, factors: TRANSPORT_PEOPLE_FACTORS.filter(f => ['bus', 'train', 'metro'].includes(f.subcategory)), description: 'Bus, TGV, TER, Metro' },
+    { id: 'car', label: '1 - Voitures', scopeLabel: 'Scope 3', scope: 3, factors: TRANSPORT_PEOPLE_FACTORS.filter(f => f.subcategory === 'car'), description: 'Essence, Diesel, Électrique, Hybride' },
+    { id: 'public', label: '2 - Transports en commun', scopeLabel: 'Scope 3', scope: 3, factors: TRANSPORT_PEOPLE_FACTORS.filter(f => ['bus', 'train', 'metro'].includes(f.subcategory)), description: 'Bus, TGV, TER, Métro' },
     { id: 'plane', label: '3 - Avion', scopeLabel: 'Scope 3', scope: 3, factors: TRANSPORT_PEOPLE_FACTORS.filter(f => f.subcategory === 'plane'), description: 'Court, moyen et long courrier' },
   ],
   waste: [
-    { id: 'building_waste', label: '1 - Dechets du batiment', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'building'), description: 'Beton, Bois, Dechets inertes, Platre' },
-    { id: 'mineral_waste', label: '2 - Dechets mineraux', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'mineral'), description: 'Incineration, Enfouissement' },
-    { id: 'organic_waste', label: '3 - Dechets organiques', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'organic'), description: 'Compost, Papier, Carton' },
-    { id: 'plastic_waste', label: '4 - Dechets plastiques', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'plastic'), description: 'Plastique moyen, PE, PVC' },
-    { id: 'household_waste', label: '5 - Ordures menageres', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'household'), description: 'Dechets menagers courants' },
-    { id: 'dangerous_waste', label: '6 - Dechets dangereux', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'dangerous'), description: 'Dechets industriels speciaux' },
-    { id: 'wastewater', label: '7 - Eaux usees', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'water'), description: 'Traitement des eaux usees' },
+    { id: 'building_waste', label: '1 - Déchets du bâtiment', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'building'), description: 'Béton, Bois, Déchets inertes, Plâtre' },
+    { id: 'mineral_waste', label: '2 - Déchets minéraux', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'mineral'), description: 'Incinération, Enfouissement' },
+    { id: 'organic_waste', label: '3 - Déchets organiques', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'organic'), description: 'Compost, Papier, Carton' },
+    { id: 'plastic_waste', label: '4 - Déchets plastiques', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'plastic'), description: 'Plastique moyen, PE, PVC' },
+    { id: 'household_waste', label: '5 - Ordures ménagères', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'household'), description: 'Déchets ménagers courants' },
+    { id: 'dangerous_waste', label: '6 - Déchets dangereux', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'dangerous'), description: 'Déchets industriels spéciaux' },
+    { id: 'wastewater', label: '7 - Eaux usées', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'water'), description: 'Traitement des eaux usées' },
   ],
   capital: [
-    { id: 'buildings', label: '1 - Batiments (methode surface)', scopeLabel: 'Scope 3', scope: 3, factors: CAPITAL_GOODS_FACTORS.filter(f => f.subcategory === 'buildings'), description: 'Bureau, Entrepot, Industriel - kgCO2eq/m2 amorti' },
-    { id: 'vehicles', label: '2 - Vehicules', scopeLabel: 'Scope 3', scope: 3, factors: CAPITAL_GOODS_FACTORS.filter(f => f.subcategory === 'vehicles'), description: 'Vehicules de societe, camions' },
+    { id: 'buildings', label: '1 - Bâtiments (méthode surface)', scopeLabel: 'Scope 3', scope: 3, factors: CAPITAL_GOODS_FACTORS.filter(f => f.subcategory === 'buildings'), description: 'Bureau, Entrepôt, Industriel - kgCO2eq/m2 amorti' },
+    { id: 'vehicles', label: '2 - Véhicules', scopeLabel: 'Scope 3', scope: 3, factors: CAPITAL_GOODS_FACTORS.filter(f => f.subcategory === 'vehicles'), description: 'Véhicules de société, camions' },
     { id: 'it', label: '3 - Informatique', scopeLabel: 'Scope 3', scope: 3, factors: CAPITAL_GOODS_FACTORS.filter(f => f.subcategory === 'it'), description: 'Ordinateurs, serveurs, smartphones' },
     { id: 'furniture', label: '4 - Mobilier', scopeLabel: 'Scope 3', scope: 3, factors: CAPITAL_GOODS_FACTORS.filter(f => f.subcategory === 'furniture'), description: 'Bureaux, chaises' },
   ],
@@ -138,10 +147,12 @@ const TAB_SECTIONS: Record<string, SubSection[]> = {
 /* ============================================================
    HELPER: format CO2
    ============================================================ */
+// Values are in kgCO2e; keeps one decimal below 1 t so small entries stay visible
 function formatCO2(v: number): string {
-  if (Math.abs(v) >= 1000000) return `${(v / 1000000).toFixed(2)} ktCO2eq`
-  if (Math.abs(v) >= 1000) return `${(v / 1000).toFixed(2)} tCO2eq`
-  return `${v.toFixed(1)} kgCO2eq`
+  const fr = (n: number, d: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d })
+  if (Math.abs(v) >= 1000000) return `${fr(v / 1000000, 2)} ktCO₂e`
+  if (Math.abs(v) >= 1000) return `${fr(v / 1000, 2)} tCO₂e`
+  return `${fr(v, 1)} kgCO₂e`
 }
 
 function formatNum(v: number): string {
@@ -167,12 +178,10 @@ export default function AssessmentDetailClient() {
   const [showSummary, setShowSummary] = useState(false)
   // Raw string values for decimal-safe inputs (factorId_year_month → raw string)
   const [rawValues, setRawValues] = useState<Record<string, string>>({})
-  // Toast notification
-  const [toast, setToast] = useState<{ visible: boolean; type: 'success' | 'error'; message: string }>({ visible: false, type: 'success', message: '' })
-
+  // Save feedback (global sonner toaster)
   const showToast = (type: 'success' | 'error', message: string) => {
-    setToast({ visible: true, type, message })
-    setTimeout(() => setToast(t => ({ ...t, visible: false })), 4000)
+    if (type === 'success') toast.success('Bilan sauvegardé', { description: message })
+    else toast.error('Erreur de sauvegarde', { description: message })
   }
 
   // Document upload state
@@ -270,8 +279,14 @@ export default function AssessmentDetailClient() {
         setCertStatus('pending')
         setShowCertModal(false)
         setCertMessage('')
+        toast.success('Demande de certification envoyée', { description: 'Un expert accrédité va être assigné à votre bilan.' })
+      } else {
+        const data = await res.json().catch(() => null)
+        toast.error(data?.error || 'Impossible d’envoyer la demande.')
       }
-    } catch { /* ignore */ }
+    } catch {
+      toast.error('Erreur de connexion au serveur.')
+    }
     setCertSubmitting(false)
   }
 
@@ -516,133 +531,153 @@ export default function AssessmentDetailClient() {
     setOpenSections(prev => ({ ...prev, [id]: !prev[id] }))
   }
 
-  /* ---- Scope color helpers ---- */
+  /* ---- Scope color helpers (light surfaces: S1 forest, S2 gold, S3 sage) ---- */
   const scopeColor = (scope: number) => {
-    if (scope === 1) return { bg: 'bg-red-50', text: 'text-red-600', badge: 'bg-red-100 text-red-700', border: 'border-red-200' }
-    if (scope === 2) return { bg: 'bg-orange-50', text: 'text-orange-600', badge: 'bg-orange-100 text-orange-700', border: 'border-orange-200' }
-    return { bg: 'bg-blue-50', text: 'text-blue-600', badge: 'bg-blue-100 text-blue-700', border: 'border-blue-200' }
+    if (scope === 1) return { square: 'bg-forest-700 text-ivory-50', chip: 'forest' as const, bar: 'bg-forest-700' }
+    if (scope === 2) return { square: 'bg-gold-500 text-forest-950', chip: 'gold' as const, bar: 'bg-gold-500' }
+    return { square: 'bg-forest-300 text-forest-950', chip: 'neutral' as const, bar: 'bg-forest-300' }
   }
+
+  const certInProgress = !!certStatus && ['pending', 'assigned', 'in_progress', 'audit_done', 'submitted_to_cnc'].includes(certStatus)
+  const grand = fmtCO2(grandTotal)
 
   /* ============================================================
      RENDER
      ============================================================ */
   return (
-    <div className="max-w-[1400px] mx-auto">
+    <Stagger className="space-y-6">
       {/* ---- HEADER ---- */}
-      <div className="flex flex-wrap items-center gap-4 mb-6">
-        <Link href="/dashboard/assessments" className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-          <ArrowLeft className="w-5 h-5 text-gray-500" />
+      <Reveal>
+        <Link
+          href="/dashboard/assessments"
+          className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-ink-500 transition-colors hover:text-forest-800"
+        >
+          <ArrowLeft className="size-3.5" /> Bilans carbone
         </Link>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold text-gray-900 truncate">{assessment?.name || 'Chargement...'}</h1>
-          <p className="text-gray-500 text-sm truncate">{assessment?.site_name} &bull; Annee {assessment?.year}</p>
-        </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <button
-            onClick={() => setShowSummary(!showSummary)}
-            className={`px-4 py-2 text-sm rounded-lg transition-colors inline-flex items-center gap-2 font-medium border ${
-              showSummary
-                ? 'bg-brand-600 text-white border-brand-600 shadow-sm'
-                : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            <BarChart3 className="w-4 h-4" /> Synthèse
-          </button>
-          <button onClick={handleSave} disabled={saving} className="btn-primary inline-flex items-center gap-2 disabled:opacity-50">
-            <Save className="w-4 h-4" /> {saving ? 'Sauvegarde...' : 'Sauvegarder'}
-          </button>
-        </div>
-      </div>
+        <PageHeader
+          eyebrow="Bilan carbone"
+          title={<span className="[text-wrap:balance]">{assessment?.name || 'Chargement…'}</span>}
+          description={assessment ? <>{assessment.site_name} · Année {assessment.year}</> : undefined}
+          actions={
+            <>
+              <Button
+                variant={showSummary ? 'primary' : 'outline'}
+                onClick={() => setShowSummary(!showSummary)}
+                aria-pressed={showSummary}
+              >
+                <BarChart3 /> Synthèse
+              </Button>
+              <Button variant="gold" onClick={handleSave} disabled={saving}>
+                {saving ? <Loader2 className="animate-spin" /> : <Save />}
+                {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+              </Button>
+            </>
+          }
+        />
+      </Reveal>
 
-      {/* Certification status bar */}
-      <div className="mb-5">
+      {/* ---- Certification status bar ---- */}
+      <Reveal>
         {certStatus === 'certified' ? (
-          <div className="flex items-center gap-3 px-5 py-3.5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl shadow-sm">
-            <div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Award className="w-5 h-5 text-green-600" />
+          <Card className="flex items-center gap-4 border-gold-200 bg-gradient-to-r from-gold-50 to-white px-6 py-4">
+            <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-forest-900 text-gold-300">
+              <Award className="size-5" strokeWidth={1.8} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-lg text-forest-900">Bilan certifié</p>
+              <p className="text-xs text-ink-500">Ce bilan a été audité par un expert accrédité et certifié par le CNC.</p>
             </div>
-            <div>
-              <p className="text-green-800 font-semibold text-sm">Bilan certifie</p>
-              <p className="text-green-600 text-xs">Ce bilan a ete verifie et certifie par nos experts accredites</p>
+            <CertStatusBadge status="certified" />
+          </Card>
+        ) : certInProgress ? (
+          <Card className="flex items-center gap-4 px-6 py-4">
+            <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-gold-50 text-gold-600 ring-1 ring-gold-200">
+              <Shield className="size-5" strokeWidth={1.8} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-lg text-forest-900">Certification en cours</p>
+              <p className="text-xs text-ink-500">Votre demande est suivie par un expert accrédité GreenLeaves jusqu’au dépôt au CNC.</p>
             </div>
-          </div>
-        ) : certStatus === 'pending' || certStatus === 'assigned' || certStatus === 'in_progress' ? (
-          <div className="flex items-center gap-3 px-5 py-3.5 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl shadow-sm">
-            <div className="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0 animate-pulse">
-              <Shield className="w-5 h-5 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-amber-800 font-semibold text-sm">Certification en cours</p>
-              <p className="text-amber-600 text-xs">Votre demande est en traitement par notre equipe d&apos;experts</p>
-            </div>
-          </div>
+            <CertStatusBadge status={certStatus!} />
+            <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+              <Link href="/dashboard/certifications">Suivre <ArrowRight /></Link>
+            </Button>
+          </Card>
         ) : certStatus === 'rejected' ? (
-          <button onClick={() => setShowCertModal(true)} className="w-full flex items-center gap-3 px-5 py-3.5 bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-300 rounded-xl shadow-sm hover:shadow-md hover:border-red-400 transition-all text-left group">
-            <div className="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Shield className="w-5 h-5 text-red-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-red-800 font-semibold text-sm">Certification refusee</p>
-              <p className="text-red-600 text-xs">Cliquez ici pour soumettre une nouvelle demande</p>
-            </div>
-            <ArrowRight className="w-4 h-4 text-red-400 group-hover:translate-x-1 transition-transform" />
+          <button
+            onClick={() => setShowCertModal(true)}
+            className="group flex w-full items-center gap-4 rounded-2xl border border-red-200 bg-white px-6 py-4 text-left shadow-soft transition-all hover:border-red-300 hover:shadow-lifted"
+          >
+            <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600 ring-1 ring-red-100">
+              <Shield className="size-5" strokeWidth={1.8} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-lg text-forest-900">Certification refusée</span>
+              <span className="block text-xs text-ink-500">Corrigez vos données puis soumettez une nouvelle demande.</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-700">
+              Nouvelle demande <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </span>
           </button>
         ) : (
-          <button onClick={() => setShowCertModal(true)} className="w-full flex items-center gap-3 px-5 py-3.5 bg-gradient-to-r from-brand-50 to-emerald-50 border-2 border-brand-300 rounded-xl shadow-sm hover:shadow-md hover:border-brand-400 transition-all text-left group">
-            <div className="w-9 h-9 bg-brand-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Shield className="w-5 h-5 text-brand-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-brand-800 font-semibold text-sm">Certifier ce bilan carbone par nos experts</p>
-              <p className="text-brand-600 text-xs">Demandez un audit et une certification officielle de vos donnees</p>
-            </div>
-            <ArrowRight className="w-4 h-4 text-brand-400 group-hover:translate-x-1 transition-transform" />
+          <button
+            onClick={() => setShowCertModal(true)}
+            className="group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl bg-forest-900 bg-forest-grain px-6 py-5 text-left text-ivory-50 shadow-lifted transition-transform hover:-translate-y-0.5"
+          >
+            <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-gold-500/15 text-gold-300 ring-1 ring-gold-400/40">
+              <Shield className="size-5" strokeWidth={1.8} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-lg">Faire certifier ce bilan carbone</span>
+              <span className="block text-xs text-forest-100/70">Audit terrain par un expert accrédité, puis dépôt de votre dossier au CNC.</span>
+            </span>
+            <span className={cn(buttonVariants({ variant: 'gold', size: 'sm' }), 'pointer-events-none')}>
+              Demander <ArrowRight />
+            </span>
           </button>
         )}
-      </div>
+      </Reveal>
 
       {/* Certification Request Modal */}
-      {showCertModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
+      {showCertModal && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-forest-950/40 p-4 font-sans backdrop-blur-sm animate-in fade-in-0">
+          <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-2xl bg-white shadow-lifted animate-in zoom-in-95">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+            <div className="flex flex-shrink-0 items-start justify-between gap-4 border-b border-ivory-300 px-6 py-5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-brand-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Shield className="w-5 h-5 text-brand-600" />
-                </div>
+                <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-forest-900 text-gold-300">
+                  <Shield className="size-5" strokeWidth={1.8} />
+                </span>
                 <div>
-                  <h3 className="font-bold text-gray-900 leading-tight">Certifier ce bilan carbone</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Demande d&apos;audit par nos experts accredites</p>
+                  <h3 className="font-display text-xl leading-tight text-forest-900">Certifier ce bilan carbone</h3>
+                  <p className="mt-0.5 text-xs text-ink-500">Demande d’audit par un expert accrédité</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowCertModal(false)}
-                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ivory-100 hover:text-ink-700"
+                aria-label="Fermer"
               >
-                <X className="w-5 h-5 text-gray-400" />
+                <X className="size-4" />
               </button>
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+            <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
 
               {/* Steps */}
-              <div className="bg-gradient-to-br from-brand-50 to-emerald-50 border border-brand-100 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Award className="w-4 h-4 text-brand-600" />
-                  <p className="text-sm font-semibold text-brand-800">Processus de certification</p>
-                </div>
-                <ol className="space-y-2">
+              <div className="rounded-xl border border-ivory-300 bg-ivory-50 p-5">
+                <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-600">Processus de certification</p>
+                <ol className="space-y-3">
                   {[
-                    'Votre demande est transmise a notre equipe',
-                    'Un expert certifie est assigne pour l\'audit',
-                    'Inspection sur site et verification des donnees',
-                    'Rapport et certificat officiel delivres',
+                    'Votre demande est transmise à l’équipe GreenLeaves',
+                    'Un expert accrédité est assigné et fixe la date d’audit',
+                    'Audit terrain et vérification de vos données',
+                    'Dépôt du dossier au CNC, puis remise du certificat',
                   ].map((step, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-brand-700">
-                      <span className="w-5 h-5 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <li key={i} className="flex items-start gap-3 text-sm text-ink-700">
+                      <span className="mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded-full bg-forest-900 text-[10px] font-bold text-gold-200">
                         {i + 1}
                       </span>
                       {step}
@@ -653,113 +688,125 @@ export default function AssessmentDetailClient() {
 
               {/* Message */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Message pour l&apos;expert <span className="text-gray-400 font-normal">(optionnel)</span>
+                <label htmlFor="cert-message" className="mb-1.5 block text-[13px] font-semibold text-ink-700">
+                  Message pour l’expert <span className="font-normal text-ink-400">(optionnel)</span>
                 </label>
                 <textarea
+                  id="cert-message"
                   value={certMessage}
                   onChange={(e) => setCertMessage(e.target.value)}
                   rows={4}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 resize-none transition-colors"
-                  placeholder="Precisions sur votre bilan, contraintes particulieres, questions..."
+                  className="w-full resize-none rounded-xl border border-ivory-400 bg-white px-4 py-3 text-sm text-ink-800 outline-none transition placeholder:text-ink-400 focus:border-forest-500 focus:ring-4 focus:ring-forest-100"
+                  placeholder="Précisions sur votre bilan, contraintes particulières, questions…"
                 />
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 flex-shrink-0 bg-gray-50 rounded-b-2xl">
-              <button
-                onClick={() => setShowCertModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleCertRequest}
-                disabled={certSubmitting}
-                className="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Shield className="w-4 h-4" />
-                {certSubmitting ? 'Envoi en cours...' : 'Envoyer la demande'}
-              </button>
+            <div className="flex flex-shrink-0 items-center justify-end gap-2 rounded-b-2xl border-t border-ivory-300 bg-ivory-50 px-6 py-4">
+              <Button variant="ghost" onClick={() => setShowCertModal(false)}>Annuler</Button>
+              <Button onClick={handleCertRequest} disabled={certSubmitting}>
+                {certSubmitting ? <Loader2 className="animate-spin" /> : <Shield />}
+                {certSubmitting ? 'Envoi en cours…' : 'Envoyer la demande'}
+              </Button>
             </div>
 
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* ---- SCOPE SUMMARY CARDS ---- */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <Reveal className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="relative overflow-hidden rounded-2xl bg-forest-900 bg-forest-grain p-5 text-ivory-50 shadow-lifted">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-300/90">Total général</p>
+          <p className="mt-2 flex items-baseline gap-2">
+            <span className="font-display text-4xl font-light tabular-nums">{grand.value}</span>
+            <span className="text-sm text-forest-100/70">{grand.unit}</span>
+          </p>
+          <p className="mt-1 text-[11px] text-forest-100/50">Toutes années et tous mois confondus</p>
+        </div>
         {[
-          { label: 'Total general', value: grandTotal, color: 'bg-gradient-to-br from-brand-50 to-brand-100 text-brand-700 border border-brand-200' },
-          { label: 'Scope 1 - Direct', value: scope1Total, color: 'bg-gradient-to-br from-red-50 to-red-100 text-red-700 border border-red-200' },
-          { label: 'Scope 2 - Energie', value: scope2Total, color: 'bg-gradient-to-br from-orange-50 to-orange-100 text-orange-700 border border-orange-200' },
-          { label: 'Scope 3 - Indirect', value: scope3Total, color: 'bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 border border-blue-200' },
-        ].map((s, i) => (
-          <div key={i} className={`rounded-xl p-4 ${s.color}`}>
-            <p className="text-xs font-medium opacity-70 mb-1">{s.label}</p>
-            <p className="text-lg font-bold">{formatCO2(s.value)}</p>
-            {grandTotal > 0 && i > 0 && (
-              <div className="mt-2 h-1.5 bg-white/50 rounded-full overflow-hidden">
-                <div className="h-full bg-current opacity-40 rounded-full" style={{ width: `${Math.min(100, (s.value / grandTotal) * 100)}%` }} />
+          { label: 'Scope 1', sub: 'Émissions directes', value: scope1Total, scope: 1 },
+          { label: 'Scope 2', sub: 'Énergie indirecte',  value: scope2Total, scope: 2 },
+          { label: 'Scope 3', sub: 'Autres indirectes',  value: scope3Total, scope: 3 },
+        ].map(s => {
+          const pct = grandTotal > 0 ? Math.min(100, (s.value / grandTotal) * 100) : 0
+          return (
+            <Card key={s.label} className="p-5">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-xs font-semibold text-ink-700">
+                  <span className={cn('size-2 rounded-full', scopeColor(s.scope).bar)} />
+                  {s.label}
+                </span>
+                <span className="text-xs tabular-nums text-ink-400">{pct.toFixed(0)} %</span>
               </div>
-            )}
-          </div>
-        ))}
-      </div>
+              <p className="mt-2 font-display text-2xl tabular-nums text-forest-900">{formatCO2(s.value)}</p>
+              <p className="text-[11px] text-ink-400">{s.sub}</p>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ivory-200">
+                <div className={cn('h-full rounded-full transition-all duration-700', scopeColor(s.scope).bar)} style={{ width: `${pct}%` }} />
+              </div>
+            </Card>
+          )
+        })}
+      </Reveal>
 
       {/* ---- GHG / ISO SUMMARY PANEL ---- */}
       {showSummary && (
-        <div className="card mb-6 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900">Synthese GHG Protocol / ISO 14069</h2>
-            <button onClick={() => setShowSummary(false)} className="p-1 hover:bg-gray-100 rounded"><X className="w-4 h-4" /></button>
-          </div>
-          <div className="grid grid-cols-2 gap-6">
+        <Card className="animate-fade-up">
+          <CardHeader
+            eyebrow="Synthèse"
+            title="GHG Protocol / ISO 14069"
+            action={
+              <Button variant="ghost" size="icon" onClick={() => setShowSummary(false)} aria-label="Fermer la synthèse">
+                <X />
+              </Button>
+            }
+          />
+          <CardContent className="grid gap-8 md:grid-cols-2">
             {/* GHG Protocol */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 pb-2 border-b">GHG Protocol - Categories</h3>
-              <div className="space-y-2">
+              <h3 className="mb-3 border-b border-ivory-300 pb-2 text-xs font-semibold uppercase tracking-[0.12em] text-ink-500">GHG Protocol — Catégories</h3>
+              <div className="space-y-1">
                 {ghgBreakdown.map(([cat, vals]) => (
-                  <div key={cat} className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 truncate mr-2">{cat}</span>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <span className="text-xs text-gray-400">amont: {formatNum(vals.upstream)} | comb: {formatNum(vals.combustion)}</span>
-                      <span className="font-semibold text-gray-900 w-28 text-right">{formatCO2(vals.total)}</span>
+                  <div key={cat} className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-ivory-50">
+                    <span className="min-w-0 truncate text-ink-700">{cat}</span>
+                    <div className="flex flex-shrink-0 items-center gap-3">
+                      <span className="hidden text-[11px] tabular-nums text-ink-400 lg:inline">amont {formatNum(vals.upstream)} · comb. {formatNum(vals.combustion)}</span>
+                      <span className="w-28 text-right font-semibold tabular-nums text-forest-900">{formatCO2(vals.total)}</span>
                     </div>
                   </div>
                 ))}
-                {ghgBreakdown.length === 0 && <p className="text-gray-400 text-sm">Aucune donnee saisie</p>}
+                {ghgBreakdown.length === 0 && <p className="text-sm text-ink-400">Aucune donnée saisie</p>}
               </div>
             </div>
             {/* ISO 14069 */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 pb-2 border-b">ISO 14069 - Postes</h3>
-              <div className="space-y-2">
+              <h3 className="mb-3 border-b border-ivory-300 pb-2 text-xs font-semibold uppercase tracking-[0.12em] text-ink-500">ISO 14069 — Postes</h3>
+              <div className="space-y-1">
                 {isoBreakdown.map(([cat, val]) => (
-                  <div key={cat} className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 truncate mr-2">{cat}</span>
-                    <span className="font-semibold text-gray-900 flex-shrink-0">{formatCO2(val)}</span>
+                  <div key={cat} className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-ivory-50">
+                    <span className="min-w-0 truncate text-ink-700">{cat}</span>
+                    <span className="flex-shrink-0 font-semibold tabular-nums text-forest-900">{formatCO2(val)}</span>
                   </div>
                 ))}
-                {isoBreakdown.length === 0 && <p className="text-gray-400 text-sm">Aucune donnee saisie</p>}
+                {isoBreakdown.length === 0 && <p className="text-sm text-ink-400">Aucune donnée saisie</p>}
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* ---- YEAR + MONTH SELECTOR ---- */}
-      <div className="card mb-6 p-3">
-        <div className="flex flex-wrap items-center gap-3">
+      <Reveal>
+        <Card className="flex flex-wrap items-center gap-x-5 gap-y-3 px-5 py-3.5">
           {/* Year selector */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <span className="text-xs font-medium text-gray-500">Annee :</span>
+          <label className="flex flex-shrink-0 items-center gap-2">
+            <Calendar className="size-4 text-gold-500" />
+            <span className="text-xs font-semibold text-ink-500">Année</span>
             <select
               value={activeYear}
               onChange={e => setActiveYear(parseInt(e.target.value))}
-              className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-bold text-gray-900 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none cursor-pointer"
+              className="h-9 cursor-pointer rounded-xl border border-ivory-400 bg-white px-3 text-sm font-semibold text-forest-900 outline-none transition focus:border-forest-500 focus:ring-4 focus:ring-forest-100"
             >
               {(() => {
                 const now = new Date().getFullYear()
@@ -774,15 +821,13 @@ export default function AssessmentDetailClient() {
                 ))
               })()}
             </select>
-          </div>
+          </label>
 
-          <div className="w-px h-6 bg-gray-200 flex-shrink-0" />
+          <span className="hidden h-6 w-px flex-shrink-0 bg-ivory-300 sm:block" />
 
           {/* Month selector */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <span className="text-xs font-medium text-gray-500">Mois :</span>
-          </div>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="mr-1 text-xs font-semibold text-ink-500">Mois</span>
             {MONTHS.map(m => {
               const isActive = activeMonth === m.id
               const isAnnual = m.id === 0
@@ -790,13 +835,16 @@ export default function AssessmentDetailClient() {
                 <button
                   key={m.id}
                   onClick={() => setActiveMonth(m.id)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  title={m.label}
+                  className={cn(
+                    'h-8 rounded-lg px-2.5 text-xs font-semibold transition-all',
                     isActive
                       ? isAnnual
-                        ? 'bg-brand-600 text-white shadow-sm'
-                        : 'bg-gray-900 text-white shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                  }`}
+                        ? 'bg-gold-500 text-forest-950 shadow-soft'
+                        : 'bg-forest-900 text-ivory-50 shadow-soft'
+                      : 'text-ink-500 hover:bg-ivory-100 hover:text-forest-900',
+                    isAnnual && !isActive && 'text-gold-700',
+                  )}
                 >
                   {m.short}
                 </button>
@@ -804,38 +852,44 @@ export default function AssessmentDetailClient() {
             })}
           </div>
           {activeMonth === 0 && (
-            <span className="text-[10px] text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-100 whitespace-nowrap">Lecture seule - somme {activeYear}</span>
+            <Badge tone="gold" className="ml-auto">Lecture seule · somme {activeYear}</Badge>
           )}
-        </div>
-      </div>
+        </Card>
+      </Reveal>
 
       {/* ---- MAIN TABS ---- */}
-      <div className="flex flex-wrap gap-1 mb-6 bg-gray-100 p-1 rounded-xl">
-        {TABS.map(tab => {
-          const tabTotal = calcTabTotal(tab.id)
-          const Icon = tab.icon
-          const isActive = activeTab === tab.id
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                isActive
-                  ? 'bg-white text-brand-700 shadow-md ring-1 ring-brand-200'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-              {tabTotal > 0 && (
-                <span className={`text-xs px-1.5 py-0.5 rounded-full ${isActive ? 'bg-brand-100 text-brand-700' : 'bg-gray-200 text-gray-600'}`}>
-                  {formatCO2(tabTotal)}
-                </span>
-              )}
-            </button>
-          )
-        })}
-      </div>
+      <Reveal>
+        <div className="flex flex-wrap gap-1 rounded-2xl border border-ivory-300 bg-ivory-200/60 p-1">
+          {TABS.map(tab => {
+            const tabTotal = calcTabTotal(tab.id)
+            const Icon = tab.icon
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  'flex flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition-all',
+                  isActive
+                    ? 'bg-white text-forest-900 shadow-soft ring-1 ring-ivory-300'
+                    : 'text-ink-500 hover:bg-white/60 hover:text-forest-900',
+                )}
+              >
+                <Icon className={cn('size-4', isActive ? 'text-gold-500' : 'text-ink-400')} strokeWidth={1.8} />
+                <span>{tab.label}</span>
+                {tabTotal > 0 && (
+                  <span className={cn(
+                    'rounded-full px-2 py-0.5 text-[11px] tabular-nums',
+                    isActive ? 'bg-forest-50 text-forest-700' : 'bg-ivory-300/70 text-ink-600',
+                  )}>
+                    {formatCO2(tabTotal)}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </Reveal>
 
       {/* ---- TAB CONTENT ---- */}
       <div className="space-y-4">
@@ -845,68 +899,71 @@ export default function AssessmentDetailClient() {
           const sc = scopeColor(section.scope)
 
           return (
-            <div key={section.id} className="card overflow-hidden">
+            <Card key={section.id} className="overflow-hidden">
               {/* Section header */}
               <button
                 onClick={() => toggleSection(section.id)}
-                className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
+                aria-expanded={isOpen}
+                className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-colors hover:bg-ivory-50"
               >
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${sc.bg}`}>
-                    <span className={`text-xs font-bold ${sc.text}`}>{section.scope}</span>
-                  </div>
-                  <div className="text-left">
-                    <h3 className="font-semibold text-gray-900 text-sm">{section.label}</h3>
+                <div className="flex min-w-0 items-center gap-4">
+                  <span className={cn('flex size-9 flex-shrink-0 items-center justify-center rounded-xl text-xs font-bold', sc.square)}>
+                    S{section.scope}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-display text-[17px] text-forest-900">{section.label}</h3>
+                      <Badge tone={sc.chip}>{section.scopeLabel}</Badge>
+                    </div>
                     {section.description && (
-                      <p className="text-xs text-gray-400 mt-0.5">{section.description}</p>
+                      <p className="mt-0.5 truncate text-xs text-ink-400">{section.description}</p>
                     )}
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${sc.badge}`}>{section.scopeLabel}</span>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-shrink-0 items-center gap-4">
                   {sectionTotal > 0 && (
-                    <span className="text-sm font-bold text-gray-800">{formatCO2(sectionTotal)}</span>
+                    <span className="text-sm font-semibold tabular-nums text-forest-900">{formatCO2(sectionTotal)}</span>
                   )}
-                  {isOpen ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
+                  <ChevronDown className={cn('size-4 text-ink-400 transition-transform duration-200', !isOpen && '-rotate-90')} />
                 </div>
               </button>
 
               {/* Section table */}
               {isOpen && (
-                <div className="border-t border-gray-100">
+                <div className="border-t border-ivory-300">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                          <th className="text-left px-4 py-3 font-medium" style={{width:'38%'}}>Source d&apos;emission</th>
-                          <th className="text-left px-3 py-3 font-medium" style={{width:'8%'}}>Unite</th>
-                          <th className="text-right px-3 py-3 font-medium" style={{width:'14%'}}>Quantite</th>
-                          <th className="text-right px-3 py-3 font-medium" style={{width:'10%'}}>FE</th>
-                          <th className="text-right px-3 py-3 font-medium" style={{width:'18%'}}>Total</th>
-                          <th className="text-center px-3 py-3 font-medium" style={{width:'12%'}}>Justif.</th>
+                        <tr className="bg-ivory-100 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-400">
+                          <th className="px-6 py-3 text-left font-semibold" style={{ width: '38%' }}>Source d’émission</th>
+                          <th className="px-3 py-3 text-left font-semibold" style={{ width: '8%' }}>Unité</th>
+                          <th className="px-3 py-3 text-right font-semibold" style={{ width: '14%' }}>Quantité</th>
+                          <th className="px-3 py-3 text-right font-semibold" style={{ width: '10%' }}>FE</th>
+                          <th className="px-3 py-3 text-right font-semibold" style={{ width: '18%' }}>Total</th>
+                          <th className="px-3 py-3 text-center font-semibold" style={{ width: '12%' }}>Justif.</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-50">
+                      <tbody className="divide-y divide-ivory-200">
                         {section.factors.map(factor => {
                           const qty = getQuantity(factor.id)
                           const upstream = calcUpstream(factor)
                           const combustion = calcCombustion(factor)
                           const total = upstream + combustion
                           return (
-                            <tr key={factor.id} className={`hover:bg-gray-50 transition-colors ${total > 0 ? 'bg-brand-50/30' : ''}`}>
-                              <td className="px-4 py-3 min-w-0">
-                                <p className="font-medium text-gray-800 text-sm truncate">{factor.nameFr}</p>
-                                <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-100">{factor.source}</span>
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-gray-100 text-gray-600">{factor.sourceRef}</span>
-                                  <span className="text-[10px] text-gray-400">{factor.region} ±{(factor.uncertainty * 100).toFixed(0)}%</span>
+                            <tr key={factor.id} className={cn('transition-colors hover:bg-ivory-50', total > 0 && 'bg-forest-50/40')}>
+                              <td className="min-w-0 px-6 py-3">
+                                <p className="truncate text-sm font-semibold text-ink-800">{factor.nameFr}</p>
+                                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                                  <span className="inline-flex items-center rounded-md border border-forest-100 bg-forest-50 px-1.5 py-0.5 text-[10px] font-semibold text-forest-700">{factor.source}</span>
+                                  <span className="inline-flex items-center rounded-md bg-ivory-200 px-1.5 py-0.5 font-mono text-[10px] text-ink-600">{factor.sourceRef}</span>
+                                  <span className="text-[10px] text-ink-400">{factor.region} ±{(factor.uncertainty * 100).toFixed(0)} %</span>
                                 </div>
                               </td>
-                              <td className="px-3 py-3 text-gray-500 whitespace-nowrap text-xs">{factor.unit.replace('kgCO2eq/', '')}</td>
+                              <td className="whitespace-nowrap px-3 py-3 text-xs text-ink-500">{factor.unit.replace('kgCO2eq/', '')}</td>
                               <td className="px-3 py-3">
                                 {activeMonth === 0 ? (
-                                  <div className="w-28 text-right px-2 py-1.5 text-sm text-gray-600 bg-gray-50 rounded-lg border border-gray-100">
-                                    {qty ? formatNum(qty) : '-'}
+                                  <div className="ml-auto w-28 rounded-xl border border-ivory-300 bg-ivory-100 px-3 py-2 text-right text-sm tabular-nums text-ink-600">
+                                    {qty ? formatNum(qty) : '–'}
                                   </div>
                                 ) : (() => {
                                   const rawKey = `${factor.id}_${activeYear}_${activeMonth}`
@@ -932,15 +989,16 @@ export default function AssessmentDetailClient() {
                                         setRawValues(prev => ({ ...prev, [rawKey]: parsed > 0 ? String(parsed) : '' }))
                                         setQuantity(factor.id, activeYear, activeMonth, parsed)
                                       }}
-                                      className="w-28 text-right px-2 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-sm bg-white"
+                                      className="ml-auto block w-28 rounded-xl border border-ivory-400 bg-white px-3 py-2 text-right text-sm tabular-nums text-ink-800 outline-none transition placeholder:text-ink-400 focus:border-forest-500 focus:ring-4 focus:ring-forest-100"
                                       placeholder="0"
+                                      aria-label={`Quantité — ${factor.nameFr}`}
                                     />
                                   )
                                 })()}
                               </td>
-                              <td className="px-3 py-3 text-right text-xs text-gray-600 font-medium">{factor.factorTotal}</td>
-                              <td className="px-3 py-3 text-right font-semibold text-gray-900">
-                                {total > 0 ? formatCO2(total) : '-'}
+                              <td className="px-3 py-3 text-right text-xs font-medium tabular-nums text-ink-500">{factor.factorTotal}</td>
+                              <td className="px-3 py-3 text-right font-semibold tabular-nums text-forest-900">
+                                {total > 0 ? formatCO2(total) : <span className="text-ink-400">–</span>}
                               </td>
                               <td className="px-3 py-3 text-center">
                                 {(() => {
@@ -950,29 +1008,28 @@ export default function AssessmentDetailClient() {
                                   return (
                                     <button
                                       onClick={() => setDocPanel({ factorId: factor.id, factorName: factor.nameFr })}
-                                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium transition-all ${
+                                      className={cn(
+                                        'inline-flex h-7 items-center gap-1 rounded-lg border px-2 text-[11px] font-semibold transition-all',
                                         hasDocsForView
-                                          ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+                                          ? 'border-forest-200 bg-forest-50 text-forest-700 hover:bg-forest-100'
                                           : qty > 0
-                                            ? 'bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100'
-                                            : 'bg-gray-50 text-gray-400 border border-gray-100 hover:bg-gray-100'
-                                      }`}
-                                      title={hasDocsForView ? `${factorDocs.length} doc(s) justificatif(s)` : 'Ajouter un justificatif'}
+                                            ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
+                                            : 'border-ivory-300 bg-white text-ink-400 hover:border-ivory-400 hover:text-ink-600',
+                                      )}
+                                      title={hasDocsForView ? `${factorDocs.length} justificatif(s)` : 'Ajouter un justificatif'}
                                     >
                                       {hasDocsForView ? (
                                         <>
-                                          <Paperclip className="w-3 h-3" />
+                                          <Paperclip className="size-3" />
                                           <span>{factorDocs.length}</span>
                                         </>
                                       ) : qty > 0 ? (
-                                        <>
-                                          <Upload className="w-3 h-3" />
-                                        </>
+                                        <Upload className="size-3" />
                                       ) : (
-                                        <Paperclip className="w-3 h-3" />
+                                        <Paperclip className="size-3" />
                                       )}
                                       {totalDocs > 0 && totalDocs !== factorDocs.length && (
-                                        <span className="text-gray-400">/{totalDocs}</span>
+                                        <span className="text-ink-400">/{totalDocs}</span>
                                       )}
                                     </button>
                                   )
@@ -983,9 +1040,9 @@ export default function AssessmentDetailClient() {
                         })}
                       </tbody>
                       <tfoot>
-                        <tr className="bg-gray-50 font-semibold text-sm">
-                          <td colSpan={4} className="px-4 py-3 text-gray-700">Total</td>
-                          <td className="px-3 py-3 text-right text-gray-900">{formatCO2(sectionTotal)}</td>
+                        <tr className="border-t border-ivory-300 bg-ivory-100 text-sm">
+                          <td colSpan={4} className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-ink-500">Total de la section</td>
+                          <td className="px-3 py-3 text-right font-display text-base tabular-nums text-forest-900">{formatCO2(sectionTotal)}</td>
                           <td></td>
                         </tr>
                       </tfoot>
@@ -993,33 +1050,36 @@ export default function AssessmentDetailClient() {
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
           )
         })}
       </div>
 
-      {/* ---- DOCUMENT PANEL (modal slide-over) ---- */}
-      {docPanel && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setDocPanel(null)} />
-          <div className="relative w-full max-w-md bg-white shadow-xl flex flex-col animate-in slide-in-from-right">
+      {/* ---- DOCUMENT PANEL (slide-over) ---- */}
+      {docPanel && createPortal(
+        <div className="fixed inset-0 z-50 flex justify-end font-sans">
+          <div className="absolute inset-0 bg-forest-950/40 backdrop-blur-sm animate-in fade-in-0" onClick={() => setDocPanel(null)} />
+          <div className="relative flex w-full max-w-md flex-col bg-white shadow-lifted animate-in slide-in-from-right">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-start justify-between gap-4 border-b border-ivory-300 px-6 py-5">
               <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-gray-900 text-sm truncate">Justificatifs</h3>
-                <p className="text-xs text-gray-500 truncate">{docPanel.factorName}</p>
-                <p className="text-[10px] text-gray-400 mt-0.5">
-                  {activeMonth === 0 ? `Annee ${activeYear}` : `${MONTHS[activeMonth]?.label} ${activeYear}`}
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-600">
+                  Justificatifs · {activeMonth === 0 ? `Année ${activeYear}` : `${MONTHS[activeMonth]?.label} ${activeYear}`}
                 </p>
+                <h3 className="mt-1 truncate font-display text-xl text-forest-900">{docPanel.factorName}</h3>
               </div>
-              <button onClick={() => setDocPanel(null)} className="p-1.5 hover:bg-gray-100 rounded-lg">
-                <X className="w-4 h-4 text-gray-400" />
+              <button
+                onClick={() => setDocPanel(null)}
+                className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ivory-100 hover:text-ink-700"
+                aria-label="Fermer"
+              >
+                <X className="size-4" />
               </button>
             </div>
 
             {/* Upload area */}
             {activeMonth !== 0 && (
-              <div className="p-4 border-b">
+              <div className="border-b border-ivory-300 p-6">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -1034,121 +1094,100 @@ export default function AssessmentDetailClient() {
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-brand-400 hover:text-brand-600 hover:bg-brand-50 transition-all disabled:opacity-50"
+                  className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-ivory-400 bg-ivory-50 px-4 py-6 text-sm text-ink-500 transition-all hover:border-forest-300 hover:bg-forest-50/50 hover:text-forest-800 disabled:opacity-60"
                 >
-                  <Upload className="w-4 h-4" />
-                  {uploading ? 'Envoi en cours...' : 'Cliquer pour uploader un justificatif'}
+                  <span className="flex size-10 items-center justify-center rounded-full border border-ivory-300 bg-white text-forest-600">
+                    {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+                  </span>
+                  <span className="font-semibold">{uploading ? 'Envoi en cours…' : 'Téléverser un justificatif'}</span>
+                  <span className="text-[11px] text-ink-400">PDF, images, Excel, Word · 10 Mo max.</span>
                 </button>
-                <p className="text-[10px] text-gray-400 mt-2 text-center">PDF, Images, Excel, Word - max 10 Mo</p>
               </div>
             )}
             {activeMonth === 0 && (
-              <div className="p-4 border-b bg-amber-50">
-                <p className="text-xs text-amber-600">Selectionnez un mois pour uploader un justificatif</p>
+              <div className="border-b border-gold-200 bg-gold-50 px-6 py-3">
+                <p className="text-xs text-gold-700">Sélectionnez un mois pour téléverser un justificatif.</p>
               </div>
             )}
 
             {/* Documents list */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-6">
               {(() => {
                 const panelDocs = getDocsForFactor(docPanel.factorId)
                 if (panelDocs.length === 0) {
                   return (
-                    <div className="text-center py-8">
-                      <Paperclip className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                      <p className="text-sm text-gray-400">Aucun justificatif</p>
-                      <p className="text-xs text-gray-300 mt-1">Uploadez un document pour justifier cette entree</p>
-                    </div>
+                    <EmptyState
+                      icon={Paperclip}
+                      title="Aucun justificatif"
+                      description="Ajoutez une facture ou un relevé pour justifier cette entrée."
+                    />
                   )
                 }
                 return (
-                  <div className="space-y-2">
+                  <ul className="space-y-2">
                     {panelDocs.map(doc => (
-                      <div key={doc.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group">
-                        <div className="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
-                          <FileText className="w-4 h-4 text-brand-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-800 truncate">{doc.original_name}</p>
-                          <p className="text-[10px] text-gray-400">
-                            {formatFileSize(doc.file_size)} &bull; {MONTHS[doc.month]?.short} {doc.year} &bull; {new Date(doc.created_at).toLocaleDateString('fr-FR')}
+                      <li key={doc.id} className="group flex items-center gap-3 rounded-xl border border-ivory-300 bg-white p-3 transition-colors hover:border-forest-200 hover:bg-ivory-50">
+                        <span className="flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-forest-50 text-forest-600">
+                          <FileText className="size-4" strokeWidth={1.8} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-ink-800">{doc.original_name}</p>
+                          <p className="text-[11px] text-ink-400">
+                            {formatFileSize(doc.file_size)} · {MONTHS[doc.month]?.short} {doc.year} · {new Date(doc.created_at).toLocaleDateString('fr-FR')}
                           </p>
                         </div>
-                        <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex flex-shrink-0 items-center gap-1 opacity-60 transition-opacity group-hover:opacity-100">
                           <a
                             href={`/api/documents/${doc.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-brand-600"
+                            className="flex size-8 items-center justify-center rounded-lg text-ink-500 hover:bg-white hover:text-forest-700"
                             title="Voir"
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="size-3.5" />
                           </a>
                           <button
                             onClick={() => handleDeleteDoc(doc.id)}
-                            className="p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-red-500"
+                            className="flex size-8 items-center justify-center rounded-lg text-ink-500 hover:bg-red-50 hover:text-red-600"
                             title="Supprimer"
                           >
-                            <Trash className="w-3.5 h-3.5" />
+                            <Trash className="size-3.5" />
                           </button>
                         </div>
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 )
               })()}
             </div>
 
             {/* Footer summary */}
-            <div className="p-3 border-t bg-gray-50 text-[10px] text-gray-400 text-center">
+            <div className="border-t border-ivory-300 bg-ivory-50 px-6 py-3 text-center text-[11px] text-ink-500">
               {getDocCount(docPanel.factorId)} justificatif(s) au total pour cette source
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
-      {/* ---- TOAST NOTIFICATION ---- */}
-      {toast.visible && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 bg-white rounded-2xl shadow-2xl border max-w-sm transition-all duration-300 ${toast.type === 'success' ? 'border-green-200' : 'border-red-200'}`}>
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${toast.type === 'success' ? 'bg-green-100' : 'bg-red-100'}`}>
-            {toast.type === 'success'
-              ? <CheckCircle2 className="w-5 h-5 text-green-600" />
-              : <AlertCircle className="w-5 h-5 text-red-600" />}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className={`text-sm font-semibold ${toast.type === 'success' ? 'text-green-900' : 'text-red-900'}`}>
-              {toast.type === 'success' ? 'Bilan sauvegardé' : 'Erreur de sauvegarde'}
-            </p>
-            <p className="text-xs text-gray-500 mt-0.5">{toast.message}</p>
-          </div>
-          <button onClick={() => setToast(t => ({ ...t, visible: false }))} className="p-1 hover:bg-gray-100 rounded-lg flex-shrink-0">
-            <X className="w-4 h-4 text-gray-400" />
-          </button>
-        </div>
-      )}
-
-      {/* ---- BOTTOM BANNER - Bilan Carbone standards ---- */}
-      <div className="mt-8 card p-6">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4">Normes et standards de reference</h3>
-        <div className="grid grid-cols-4 gap-4 text-xs text-gray-500">
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="font-bold text-gray-700 mb-1">ISO 14064</p>
-            <p>Specification et lignes directrices pour la quantification et la declaration des emissions de GES</p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="font-bold text-gray-700 mb-1">ISO 14069</p>
-            <p>Lignes directrices pour l&apos;application de l&apos;ISO 14064-1 - Categories d&apos;emissions</p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="font-bold text-gray-700 mb-1">GHG Protocol</p>
-            <p>Corporate Standard - Scope 1, 2, 3 - Categories 1 a 15 du protocole</p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="font-bold text-gray-700 mb-1">Bilan Carbone&reg;</p>
-            <p>Methode de l&apos;ADEME - Base Carbone - Facteurs d&apos;emissions France metropolitaine et Europe</p>
-          </div>
-        </div>
-      </div>
-    </div>
+      {/* ---- Reference standards ---- */}
+      <Reveal>
+        <Card>
+          <CardHeader eyebrow="Méthodologie" title="Normes et standards de référence" />
+          <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              { name: 'ISO 14064', text: 'Spécification et lignes directrices pour la quantification et la déclaration des émissions de GES.' },
+              { name: 'ISO 14069', text: 'Lignes directrices pour l’application de l’ISO 14064-1 — catégories d’émissions.' },
+              { name: 'GHG Protocol', text: 'Corporate Standard — scopes 1, 2 et 3, catégories 1 à 15 du protocole.' },
+              { name: 'Bilan Carbone®', text: 'Méthode de l’ADEME — Base Carbone, facteurs d’émission France et Europe.' },
+            ].map(s => (
+              <div key={s.name} className="rounded-xl border border-ivory-300 bg-ivory-50 p-4">
+                <p className="font-display text-base text-forest-900">{s.name}</p>
+                <p className="mt-1 text-xs leading-relaxed text-ink-500">{s.text}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </Reveal>
+    </Stagger>
   )
 }

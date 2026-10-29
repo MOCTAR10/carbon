@@ -1,11 +1,20 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { BarChart3, FileText, Shield, Globe, TrendingDown, Calendar, Download, QrCode, X } from 'lucide-react'
+import { BarChart3, FileText, Shield, Globe, TrendingDown, Calendar, Download, QrCode, X, Loader2 } from 'lucide-react'
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, AreaChart, Area
 } from 'recharts'
+import { toast } from 'sonner'
+import { cn, fmtCO2, fmtCO2Text } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Stagger, Reveal } from '@/components/ui/motion'
 
 interface Assessment {
   id: number; name: string; year: number; site_name: string;
@@ -45,12 +54,46 @@ interface ReportData {
   byYear?: YearData[]
 }
 
-const SCOPE_COLORS = ['#ef4444', '#f97316', '#3b82f6']
-const CATEGORY_COLORS = ['#22c55e', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#eab308']
+// On-screen palette (Forest & Ivory). The generated PDF keeps its own palette below.
+const UI_SCOPE_COLORS = ['#1A402C', '#B8935A', '#7FA98F']
+const UI_SERIES_COLORS = ['#1A402C', '#B8935A', '#7FA98F', '#356A4C', '#D3B27C', '#8A8F87', '#0F2A1D', '#AFCBB9']
+const SCOPE3_SHADES = ['#7FA98F', '#356A4C', '#D3B27C', '#1A402C', '#AFCBB9', '#B8935A', '#538767', '#8A8F87']
+const SCOPE_COLORS = UI_SCOPE_COLORS
+
+const GRID_PROPS = { stroke: '#EAE4D6', strokeDasharray: '3 3', vertical: false }
+const AXIS_PROPS = { tick: { fontSize: 11, fill: '#6B7069' }, axisLine: false, tickLine: false }
+const TOOLTIP_PROPS = {
+  cursor: { fill: '#F4F0E6' },
+  contentStyle: { borderRadius: 12, border: '1px solid #EAE4D6', boxShadow: '0 16px 40px -12px rgba(15,42,29,0.14)', fontSize: 13, padding: '8px 12px' },
+  labelStyle: { color: '#232622', fontWeight: 600, marginBottom: 2 },
+  itemStyle: { color: '#4E534D' },
+}
+const LEGEND_PROPS = {
+  iconType: 'circle' as const, iconSize: 8, wrapperStyle: { fontSize: 12, paddingTop: 12 },
+  formatter: (value: string) => <span style={{ color: '#4E534D', marginLeft: 2 }}>{value}</span>,
+}
+const THEAD_ROW = 'border-y border-ivory-300 bg-ivory-100 text-[11px] uppercase tracking-[0.12em] text-ink-500'
+const TFOOT_ROW = 'border-t border-forest-200 bg-forest-50 font-semibold text-forest-900'
+
+const CATEGORY_COLORS =['#22c55e', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#eab308']
 
 const CATEGORY_FR: Record<string, string> = {
-  energy: 'Energie', non_energy: 'Hors energie', inputs: 'Intrants',
-  freight: 'Fret', transport: 'Transport', waste: 'Dechets', capital: 'Immobilisations',
+  energy: 'Énergie', non_energy: 'Hors énergie', inputs: 'Intrants',
+  freight: 'Fret', transport: 'Transport', waste: 'Déchets', capital: 'Immobilisations',
+}
+
+// Subcategory codes (same ids as the assessment entry tabs) → on-screen labels
+const SUBCATEGORY_FR: Record<string, string> = {
+  fuels_stationary: 'Combustibles fossiles (sources fixes)', fuels_organic: 'Combustibles d’origine organique',
+  fuels_mobile: 'Combustibles (sources mobiles)', steam: 'Achat de vapeur et froid', electricity: 'Achat d’électricité',
+  refrigerants: 'Fluides frigorigènes (HFC)', process: 'Émissions de procédés',
+  metals: 'Métaux', plastics: 'Plastiques', other_inputs: 'Verre, papier, construction, eau',
+  road: 'Fret routier', air_freight: 'Fret aérien', rail_freight: 'Fret ferroviaire', maritime_freight: 'Fret maritime et fluvial',
+  car: 'Voitures', public: 'Transports en commun', plane: 'Avion',
+  building_waste: 'Déchets du bâtiment', mineral_waste: 'Déchets minéraux', organic_waste: 'Déchets organiques',
+  plastic_waste: 'Déchets plastiques', household_waste: 'Ordures ménagères', dangerous_waste: 'Déchets dangereux',
+  wastewater: 'Eaux usées',
+  buildings: 'Bâtiments', vehicles: 'Véhicules', it: 'Informatique', furniture: 'Mobilier',
 }
 
 function formatCO2(v: number): string {
@@ -104,7 +147,7 @@ export default function ReportsPage() {
 
   const scopeData = useMemo(() => report ? [
     { name: 'Scope 1 - Direct', value: report.summary.scope1, fill: SCOPE_COLORS[0] },
-    { name: 'Scope 2 - Energie', value: report.summary.scope2, fill: SCOPE_COLORS[1] },
+    { name: 'Scope 2 - Énergie', value: report.summary.scope2, fill: SCOPE_COLORS[1] },
     { name: 'Scope 3 - Indirect', value: report.summary.scope3, fill: SCOPE_COLORS[2] },
   ].filter(d => d.value > 0) : [], [report])
 
@@ -185,13 +228,16 @@ export default function ReportsPage() {
   const subcategoryData = useMemo(() => {
     if (!report?.bySubcategory) return []
     return Object.entries(report.bySubcategory)
-      .map(([key, val]) => ({
-        name: key.length > 30 ? key.slice(0, 27) + '...' : key,
-        fullName: key,
+      .map(([key, val]) => {
+        const label = SUBCATEGORY_FR[key] || key
+        return {
+        name: label.length > 30 ? label.slice(0, 27) + '…' : label,
+        fullName: label,
         value: Math.round(val.total),
         scope: val.scope,
         category: CATEGORY_FR[val.category] || val.category,
-      }))
+        }
+      })
       .filter(d => d.value > 0)
       .sort((a, b) => b.value - a.value)
       .slice(0, 12)
@@ -910,107 +956,152 @@ export default function ReportsPage() {
       doc.save(fn)
     } catch (err) {
       console.error('PDF generation error:', err)
-      alert('Erreur lors de la generation du PDF')
+      toast.error('Erreur lors de la génération du PDF')
     } finally {
       setPdfGenerating(false)
       setPdfModal(false)
     }
   }, [report, selectedId, isoData, drawPieChart, drawBarChart, drawMonthlyChart, drawCumulativeChart, drawHorizontalBars])
 
+  const scopeTotal = scopeData.reduce((s, e) => s + e.value, 0)
+  const pctOf = (v: number) => (report && report.summary.total > 0 ? (v / report.summary.total) * 100 : 0)
+
   return (
-    <div className="max-w-[1400px] mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Rapports & Synthese</h1>
-          <p className="text-gray-500 mt-1">Bilan Carbone - GHG Protocol / ISO 14064 / ISO 14069</p>
-        </div>
-        {report && (
-          <button onClick={() => setPdfModal(true)} className="btn-primary inline-flex items-center gap-2">
-            <Download className="w-4 h-4" /> Telecharger PDF
-          </button>
-        )}
-      </div>
+    <Stagger className="space-y-8">
+      <Reveal>
+        <PageHeader
+          eyebrow="Analyse & reporting"
+          title="Rapports & synthèse"
+          description="Bilan carbone selon le GHG Protocol, l'ISO 14064-1 et l'ISO 14069"
+          actions={report && (
+            <Button onClick={() => setPdfModal(true)}>
+              <Download /> Télécharger le PDF
+            </Button>
+          )}
+        />
+      </Reveal>
 
       {/* Assessment selector */}
-      <div className="card p-4 mb-6">
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Bilan :</label>
-          <select value={selectedId} onChange={e => setSelectedId(e.target.value)} className="input-field max-w-md">
-            {assessments.map(a => (
-              <option key={a.id} value={a.id}>{a.name} - {a.site_name} ({a.year})</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {assessments.length === 0 && (
-        <div className="card p-16 text-center">
-          <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucun bilan disponible</h3>
-          <p className="text-gray-500">Creez un bilan et saisissez des donnees pour voir les rapports.</p>
-        </div>
+      {assessments.length > 0 && (
+        <Reveal>
+          <Card className="flex flex-col gap-4 p-5 md:flex-row md:items-center">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-forest-50 text-forest-600">
+                <FileText className="size-[18px]" strokeWidth={1.8} />
+              </span>
+              <label htmlFor="report-assessment" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-600">
+                Bilan analysé
+              </label>
+            </div>
+            <select
+              id="report-assessment"
+              value={selectedId}
+              onChange={e => setSelectedId(e.target.value)}
+              className="h-11 w-full max-w-xl rounded-xl border border-ivory-400 bg-white px-4 text-sm font-medium text-ink-800 outline-none transition focus:border-forest-500 focus:ring-4 focus:ring-forest-100"
+            >
+              {assessments.map(a => (
+                <option key={a.id} value={a.id}>{a.name} — {a.site_name} ({a.year})</option>
+              ))}
+            </select>
+            {report && !loading && (
+              <p className="text-xs text-ink-400 md:ml-auto">
+                {report.entries?.length || 0} poste{(report.entries?.length || 0) > 1 ? 's' : ''} d&apos;émission
+              </p>
+            )}
+          </Card>
+        </Reveal>
       )}
 
-      {loading && <div className="text-center py-12 text-gray-500">Chargement du rapport...</div>}
+      {assessments.length === 0 && (
+        <Reveal>
+          <Card className="p-10">
+            <EmptyState
+              icon={BarChart3}
+              title="Aucun bilan disponible"
+              description="Créez un bilan et saisissez des données pour voir les rapports."
+            />
+          </Card>
+        </Reveal>
+      )}
+
+      {loading && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+            {[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-36 rounded-2xl" />)}
+          </div>
+          <Skeleton className="h-12 rounded-xl" />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Skeleton className="h-80 rounded-2xl" />
+            <Skeleton className="h-80 rounded-2xl" />
+          </div>
+        </div>
+      )}
 
       {report && !loading && (
         <div className="space-y-6">
           {/* Summary cards */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="relative flex flex-col overflow-hidden rounded-2xl bg-forest-900 bg-forest-grain p-6 text-ivory-50 shadow-lifted">
+              <div className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full border border-gold-400/15" />
+              <div className="flex items-center gap-2 text-gold-300/90">
+                <TrendingDown className="size-4" strokeWidth={1.8} />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">Émissions totales</p>
+              </div>
+              <p className="mt-4 font-display text-3xl font-light tabular-nums">{fmtCO2Text(report.summary.total)}</p>
+              <p className="mt-auto border-t border-white/10 pt-3 text-xs text-forest-100/60">Scopes 1, 2 et 3 consolidés</p>
+            </div>
             {[
-              { label: 'Total emissions', value: report.summary.total, color: 'brand', icon: TrendingDown },
-              { label: 'Scope 1 - Direct', value: report.summary.scope1, color: 'red', icon: Shield },
-              { label: 'Scope 2 - Energie', value: report.summary.scope2, color: 'orange', icon: Shield },
-              { label: 'Scope 3 - Indirect', value: report.summary.scope3, color: 'blue', icon: Globe },
-            ].map((s, i) => {
+              { scope: 1, label: 'Scope 1', sub: 'Émissions directes', value: report.summary.scope1, icon: Shield },
+              { scope: 2, label: 'Scope 2', sub: 'Énergie indirecte', value: report.summary.scope2, icon: Shield },
+              { scope: 3, label: 'Scope 3', sub: 'Autres indirectes', value: report.summary.scope3, icon: Globe },
+            ].map(s => {
               const Icon = s.icon
+              const pct = pctOf(s.value)
               return (
-                <div key={i} className={`card p-5 border-l-4 ${
-                  s.color === 'brand' ? 'border-l-brand-500' :
-                  s.color === 'red' ? 'border-l-red-500' :
-                  s.color === 'orange' ? 'border-l-orange-500' : 'border-l-blue-500'
-                }`}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icon className="w-4 h-4 text-gray-400" />
-                    <p className="text-sm text-gray-500">{s.label}</p>
+                <Card key={s.scope} className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="size-2 rounded-full" style={{ backgroundColor: scopeColor(s.scope) }} />
+                      <p className="text-sm font-semibold text-ink-800">{s.label}</p>
+                    </div>
+                    <Icon className="size-4 text-ink-400" strokeWidth={1.8} />
                   </div>
-                  <p className="text-xl font-bold text-gray-900">{formatCO2(s.value)}</p>
-                  {report.summary.total > 0 && i > 0 && (
-                    <div className="mt-2">
-                      <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
-                        <span>{((s.value / report.summary.total) * 100).toFixed(1)}% du total</span>
+                  <p className="mt-4 font-display text-2xl tabular-nums text-forest-900">{fmtCO2Text(s.value)}</p>
+                  <p className="text-xs text-ink-400">{s.sub}</p>
+                  {report.summary.total > 0 && (
+                    <div className="mt-4 flex items-center gap-3">
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ivory-200">
+                        <div className="h-full rounded-full" style={{ width: `${Math.min(100, pct)}%`, backgroundColor: scopeColor(s.scope) }} />
                       </div>
-                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full ${
-                          s.color === 'red' ? 'bg-red-400' : s.color === 'orange' ? 'bg-orange-400' : 'bg-blue-400'
-                        }`} style={{ width: `${Math.min(100, (s.value / report.summary.total) * 100)}%` }} />
-                      </div>
+                      <span className="text-xs font-semibold tabular-nums text-ink-500">{pct.toFixed(1)} %</span>
                     </div>
                   )}
-                </div>
+                </Card>
               )
             })}
           </div>
 
           {/* Report tabs */}
-          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl overflow-x-auto">
+          <div className="flex gap-1 overflow-x-auto rounded-xl border border-ivory-300 bg-ivory-200/70 p-1">
             {[
-              { id: 'overview' as const, label: 'Vue d\'ensemble', icon: BarChart3 },
+              { id: 'overview' as const, label: "Vue d'ensemble", icon: BarChart3 },
               { id: 'monthly' as const, label: 'Mensuel', icon: Calendar },
               { id: 'ghg' as const, label: 'GHG Protocol', icon: FileText },
               { id: 'iso' as const, label: 'ISO 14064', icon: Shield },
-              { id: 'detail' as const, label: 'Detail', icon: Globe },
+              { id: 'detail' as const, label: 'Détail', icon: Globe },
             ].map(tab => {
               const Icon = tab.icon
+              const active = activeReportTab === tab.id
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveReportTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                    activeReportTab === tab.id ? 'bg-white text-brand-700 shadow-md ring-1 ring-brand-200' : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                  className={cn(
+                    'flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition-all',
+                    active ? 'bg-white text-forest-900 shadow-soft' : 'text-ink-500 hover:text-forest-900',
+                  )}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className={cn('size-4', active ? 'text-gold-500' : '')} strokeWidth={1.8} />
                   {tab.label}
                 </button>
               )
@@ -1020,359 +1111,378 @@ export default function ReportsPage() {
           {/* ===== OVERVIEW TAB ===== */}
           {activeReportTab === 'overview' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Scope pie chart */}
-                <div className="card p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Repartition par Scope</h3>
-                  {scopeData.length > 0 ? (
-                    <div className="flex items-center gap-6">
-                      {/* Donut */}
-                      <div className="flex-shrink-0" style={{ width: 180, height: 180 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={scopeData}
-                              cx="50%"
-                              cy="50%"
-                              outerRadius={80}
-                              innerRadius={45}
-                              dataKey="value"
-                              paddingAngle={3}
-                              minAngle={20}
-                              strokeWidth={0}
-                            >
-                              {scopeData.map((entry, index) => (
-                                <Cell key={index} fill={entry.fill} />
-                              ))}
-                            </Pie>
-                            <Tooltip formatter={(value: number) => formatCO2(value)} />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-                      {/* Legend */}
-                      <div className="flex-1 space-y-3">
-                        {scopeData.map((entry, i) => {
-                          const total = scopeData.reduce((s, e) => s + e.value, 0)
-                          const pct = total > 0 ? (entry.value / total) * 100 : 0
-                          return (
-                            <div key={i}>
-                              <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: entry.fill }} />
-                                  <span className="text-sm font-medium text-gray-700">{entry.name}</span>
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                {/* Scope donut */}
+                <Card className="flex flex-col">
+                  <CardHeader eyebrow="GHG Protocol" title="Répartition par scope" />
+                  <CardContent className="flex flex-1 flex-col justify-center">
+                    {scopeData.length > 0 ? (
+                      <div className="flex flex-col items-center gap-8 sm:flex-row">
+                        <div className="relative flex-shrink-0" style={{ width: 190, height: 190 }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={scopeData}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={88}
+                                innerRadius={62}
+                                dataKey="value"
+                                paddingAngle={3}
+                                minAngle={20}
+                                strokeWidth={0}
+                                cornerRadius={4}
+                              >
+                                {scopeData.map((entry, index) => (
+                                  <Cell key={index} fill={entry.fill} />
+                                ))}
+                              </Pie>
+                              <Tooltip {...TOOLTIP_PROPS} formatter={(value: number) => fmtCO2Text(value)} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-400">Total</span>
+                            <span className="font-display text-2xl leading-tight tabular-nums text-forest-900">{fmtCO2(scopeTotal).value}</span>
+                            <span className="text-[11px] text-ink-400">{fmtCO2(scopeTotal).unit}</span>
+                          </div>
+                        </div>
+                        <div className="w-full flex-1 space-y-4">
+                          {scopeData.map((entry, i) => {
+                            const pct = scopeTotal > 0 ? (entry.value / scopeTotal) * 100 : 0
+                            return (
+                              <div key={i}>
+                                <div className="mb-1.5 flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-2">
+                                    <span className="size-2.5 flex-shrink-0 rounded-full" style={{ backgroundColor: entry.fill }} />
+                                    <span className="text-sm font-medium text-ink-700">{entry.name}</span>
+                                  </div>
+                                  <span className="text-sm font-semibold tabular-nums text-forest-900">{fmtCO2Text(entry.value)}</span>
                                 </div>
-                                <span className="text-sm font-bold text-gray-900">{formatCO2(entry.value)}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                  <div className="h-full rounded-full" style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: entry.fill }} />
+                                <div className="flex items-center gap-3">
+                                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ivory-200">
+                                    <div className="h-full rounded-full" style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: entry.fill }} />
+                                  </div>
+                                  <span className="w-12 text-right text-xs font-semibold tabular-nums text-ink-500">{pct.toFixed(1)} %</span>
                                 </div>
-                                <span className="text-xs font-semibold text-gray-500 w-12 text-right">{pct.toFixed(1)}%</span>
                               </div>
-                            </div>
-                          )
-                        })}
+                            )
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 text-gray-400">Aucune donnee</div>
-                  )}
-                </div>
+                    ) : (
+                      <NoData />
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Category bar chart */}
-                <div className="card p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6">Emissions par categorie</h3>
-                  {categoryData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={Math.max(250, categoryData.length * 50)}>
-                      <BarChart data={categoryData} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" />
-                        <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
-                        <Tooltip formatter={(value: number) => formatCO2(value)} />
-                        <Bar dataKey="value" fill="#22c55e" radius={[0, 4, 4, 0]}>
-                          {categoryData.map((_, index) => (
-                            <Cell key={index} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="text-center py-12 text-gray-400">Aucune donnee</div>
-                  )}
-                </div>
+                <Card>
+                  <CardHeader eyebrow="Sources" title="Émissions par catégorie" />
+                  <CardContent>
+                    {categoryData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={Math.max(250, categoryData.length * 50)}>
+                        <BarChart data={categoryData} layout="vertical" margin={{ right: 8 }}>
+                          <CartesianGrid {...GRID_PROPS} horizontal={false} vertical />
+                          <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" {...AXIS_PROPS} />
+                          <YAxis type="category" dataKey="name" width={120} {...AXIS_PROPS} tick={{ ...AXIS_PROPS.tick, fontSize: 12 }} />
+                          <Tooltip {...TOOLTIP_PROPS} formatter={(value: number) => fmtCO2Text(value)} />
+                          <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={28}>
+                            {categoryData.map((_, index) => (
+                              <Cell key={index} fill={UI_SERIES_COLORS[index % UI_SERIES_COLORS.length]} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <NoData />
+                    )}
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Top emitters chart */}
               {topEmittersData.length > 0 && (
-                <div className="card p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Top sources d&apos;emissions</h3>
-                  <p className="text-sm text-gray-500 mb-6">Les {topEmittersData.length} principales sources d&apos;emissions identifiees</p>
-                  <ResponsiveContainer width="100%" height={Math.max(250, topEmittersData.length * 40)}>
-                    <BarChart data={topEmittersData} layout="vertical" margin={{ left: 10 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" />
-                      <YAxis type="category" dataKey="name" width={200} tick={{ fontSize: 10 }} />
-                      <Tooltip content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const d = payload[0].payload
-                          return (
-                            <div className="bg-white p-3 rounded-lg shadow-lg border text-sm">
-                              <p className="font-semibold text-gray-900">{d.fullName}</p>
-                              <p className="text-gray-500">{d.category} - Scope {d.scope}</p>
-                              <p className="font-bold text-brand-700 mt-1">{formatCO2(d.value)}</p>
-                            </div>
-                          )
-                        }
-                        return null
-                      }} />
-                      <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                        {topEmittersData.map((d, i) => (
-                          <Cell key={i} fill={d.scope === 1 ? '#ef4444' : d.scope === 2 ? '#f97316' : '#3b82f6'} fillOpacity={1 - i * 0.05} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                <Card>
+                  <CardHeader eyebrow="Priorités" title="Principales sources d'émissions" />
+                  <CardContent>
+                    <p className="-mt-2 mb-5 text-sm text-ink-500">Les {topEmittersData.length} principales sources d&apos;émissions identifiées</p>
+                    <ResponsiveContainer width="100%" height={Math.max(250, topEmittersData.length * 40)}>
+                      <BarChart data={topEmittersData} layout="vertical" margin={{ left: 10, right: 8 }}>
+                        <CartesianGrid {...GRID_PROPS} horizontal={false} vertical />
+                        <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" {...AXIS_PROPS} />
+                        <YAxis type="category" dataKey="name" width={200} {...AXIS_PROPS} tick={{ ...AXIS_PROPS.tick, fontSize: 10 }} />
+                        <Tooltip cursor={{ fill: '#F4F0E6' }} content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const d = payload[0].payload
+                            return (
+                              <ChartTooltipBox>
+                                <p className="font-semibold text-ink-800">{d.fullName}</p>
+                                <p className="text-ink-500">{d.category} · Scope {d.scope}</p>
+                                <p className="mt-1 font-semibold text-forest-800">{fmtCO2Text(d.value)}</p>
+                              </ChartTooltipBox>
+                            )
+                          }
+                          return null
+                        }} />
+                        <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={26}>
+                          {topEmittersData.map((d, i) => (
+                            <Cell key={i} fill={scopeColor(d.scope)} fillOpacity={1 - i * 0.04} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                    <ScopeLegend />
+                  </CardContent>
+                </Card>
               )}
 
               {/* Subcategory breakdown */}
               {subcategoryData.length > 0 && (
-                <div className="card p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Repartition par sous-categorie</h3>
-                  <p className="text-sm text-gray-500 mb-6">Ventilation detaillee par type de source</p>
-                  <ResponsiveContainer width="100%" height={Math.max(250, subcategoryData.length * 40)}>
-                    <BarChart data={subcategoryData} layout="vertical" margin={{ left: 10 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" />
-                      <YAxis type="category" dataKey="name" width={180} tick={{ fontSize: 10 }} />
-                      <Tooltip content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const d = payload[0].payload
-                          return (
-                            <div className="bg-white p-3 rounded-lg shadow-lg border text-sm">
-                              <p className="font-semibold text-gray-900">{d.fullName}</p>
-                              <p className="text-gray-500">{d.category}</p>
-                              <p className="font-bold text-brand-700 mt-1">{formatCO2(d.value)}</p>
-                            </div>
-                          )
-                        }
-                        return null
-                      }} />
-                      <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                        {subcategoryData.map((_, i) => (
-                          <Cell key={i} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                <Card>
+                  <CardHeader eyebrow="Ventilation" title="Répartition par sous-catégorie" />
+                  <CardContent>
+                    <p className="-mt-2 mb-5 text-sm text-ink-500">Ventilation détaillée par type de source</p>
+                    <ResponsiveContainer width="100%" height={Math.max(250, subcategoryData.length * 40)}>
+                      <BarChart data={subcategoryData} layout="vertical" margin={{ left: 10, right: 8 }}>
+                        <CartesianGrid {...GRID_PROPS} horizontal={false} vertical />
+                        <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" {...AXIS_PROPS} />
+                        <YAxis type="category" dataKey="name" width={180} {...AXIS_PROPS} tick={{ ...AXIS_PROPS.tick, fontSize: 10 }} />
+                        <Tooltip cursor={{ fill: '#F4F0E6' }} content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const d = payload[0].payload
+                            return (
+                              <ChartTooltipBox>
+                                <p className="font-semibold text-ink-800">{d.fullName}</p>
+                                <p className="text-ink-500">{d.category}</p>
+                                <p className="mt-1 font-semibold text-forest-800">{fmtCO2Text(d.value)}</p>
+                              </ChartTooltipBox>
+                            )
+                          }
+                          return null
+                        }} />
+                        <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={26}>
+                          {subcategoryData.map((_, i) => (
+                            <Cell key={i} fill={UI_SERIES_COLORS[i % UI_SERIES_COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Scope x Category — stacked horizontal bar */}
               {scopeByCategoryData.length > 0 && (
-                <div className="card p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Composition par scope et categorie</h3>
-                  <p className="text-sm text-gray-500 mb-6">Decomposition de chaque categorie selon les trois scopes du GHG Protocol</p>
-                  <ResponsiveContainer width="100%" height={Math.max(260, scopeByCategoryData.length * 48)}>
-                    <BarChart data={scopeByCategoryData} layout="vertical" margin={{ left: 10 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" />
-                      <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 11 }} />
-                      <Tooltip formatter={(value: number) => formatCO2(value)} />
-                      <Legend />
-                      <Bar dataKey="scope1" stackId="cat" name="Scope 1" fill="#ef4444" />
-                      <Bar dataKey="scope2" stackId="cat" name="Scope 2" fill="#f97316" />
-                      <Bar dataKey="scope3" stackId="cat" name="Scope 3" fill="#3b82f6" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                <Card>
+                  <CardHeader eyebrow="Croisement" title="Composition par scope et catégorie" />
+                  <CardContent>
+                    <p className="-mt-2 mb-5 text-sm text-ink-500">Décomposition de chaque catégorie selon les trois scopes du GHG Protocol</p>
+                    <ResponsiveContainer width="100%" height={Math.max(260, scopeByCategoryData.length * 48)}>
+                      <BarChart data={scopeByCategoryData} layout="vertical" margin={{ left: 10, right: 8 }}>
+                        <CartesianGrid {...GRID_PROPS} horizontal={false} vertical />
+                        <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" {...AXIS_PROPS} />
+                        <YAxis type="category" dataKey="name" width={140} {...AXIS_PROPS} tick={{ ...AXIS_PROPS.tick, fontSize: 11 }} />
+                        <Tooltip {...TOOLTIP_PROPS} formatter={(value: number) => fmtCO2Text(value)} />
+                        <Legend {...LEGEND_PROPS} />
+                        <Bar dataKey="scope1" stackId="cat" name="Scope 1" fill={UI_SCOPE_COLORS[0]} maxBarSize={28} />
+                        <Bar dataKey="scope2" stackId="cat" name="Scope 2" fill={UI_SCOPE_COLORS[1]} maxBarSize={28} />
+                        <Bar dataKey="scope3" stackId="cat" name="Scope 3" fill={UI_SCOPE_COLORS[2]} radius={[0, 6, 6, 0]} maxBarSize={28} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Cumulative trend in overview when monthly data available */}
               {cumulativeData.length > 0 && cumulativeData.some(c => c.cumulative > 0) && (
-                <div className="card p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Cumul des emissions sur l&apos;annee</h3>
-                  <p className="text-sm text-gray-500 mb-6">Progression cumulee des emissions mois apres mois</p>
-                  <ResponsiveContainer width="100%" height={260}>
-                    <AreaChart data={cumulativeData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="cumGradOverview" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                      <YAxis tickFormatter={smartAxisFormat} />
-                      <Tooltip formatter={(value: number) => formatCO2(value)} />
-                      <Area type="monotone" dataKey="cumulative" name="Cumul" stroke="#10b981" strokeWidth={2.5} fill="url(#cumGradOverview)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+                <Card>
+                  <CardHeader eyebrow="Tendance" title="Cumul des émissions sur l'année" />
+                  <CardContent>
+                    <p className="-mt-2 mb-5 text-sm text-ink-500">Progression cumulée des émissions mois après mois</p>
+                    <ResponsiveContainer width="100%" height={260}>
+                      <AreaChart data={cumulativeData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="cumGradOverview" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#B8935A" stopOpacity={0.35} />
+                            <stop offset="95%" stopColor="#B8935A" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid {...GRID_PROPS} />
+                        <XAxis dataKey="label" {...AXIS_PROPS} />
+                        <YAxis tickFormatter={smartAxisFormat} {...AXIS_PROPS} />
+                        <Tooltip {...TOOLTIP_PROPS} formatter={(value: number) => fmtCO2Text(value)} />
+                        <Area type="monotone" dataKey="cumulative" name="Cumul" stroke="#1A402C" strokeWidth={2.5} fill="url(#cumGradOverview)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Company info card */}
-              <div className="card p-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4">Informations du bilan</h3>
-                <div className="grid grid-cols-3 gap-6 text-sm">
-                  <div>
-                    <p className="text-gray-400 mb-1">Entreprise</p>
-                    <p className="font-medium text-gray-800">{report.assessment.company_name || '-'}</p>
-                    <p className="text-xs text-gray-400">{report.assessment.rccm ? `RCCM: ${report.assessment.rccm}` : ''} {report.assessment.sector ? `| ${report.assessment.sector}` : ''}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 mb-1">Site</p>
-                    <p className="font-medium text-gray-800">{report.assessment.site_name || '-'}</p>
-                    <p className="text-xs text-gray-400">{report.assessment.site_type || ''} {report.assessment.site_address ? `- ${report.assessment.site_address}` : ''}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 mb-1">Nombre de postes saisis</p>
-                    <p className="font-medium text-gray-800">{report.entries?.length || 0} postes d&apos;emission</p>
-                  </div>
-                </div>
-              </div>
+              <Card>
+                <CardHeader eyebrow="Contexte" title="Informations du bilan" />
+                <CardContent>
+                  <dl className="grid grid-cols-1 gap-6 text-sm md:grid-cols-3">
+                    <div className="rounded-xl border border-ivory-300 bg-ivory-50 p-4">
+                      <dt className="mb-1 text-xs text-ink-400">Entreprise</dt>
+                      <dd className="font-semibold text-ink-800">{report.assessment.company_name || '-'}</dd>
+                      <dd className="text-xs text-ink-400">{report.assessment.rccm ? `RCCM : ${report.assessment.rccm}` : ''} {report.assessment.sector ? `· ${report.assessment.sector}` : ''}</dd>
+                    </div>
+                    <div className="rounded-xl border border-ivory-300 bg-ivory-50 p-4">
+                      <dt className="mb-1 text-xs text-ink-400">Site</dt>
+                      <dd className="font-semibold text-ink-800">{report.assessment.site_name || '-'}</dd>
+                      <dd className="text-xs text-ink-400">{report.assessment.site_type || ''} {report.assessment.site_address ? `· ${report.assessment.site_address}` : ''}</dd>
+                    </div>
+                    <div className="rounded-xl border border-ivory-300 bg-ivory-50 p-4">
+                      <dt className="mb-1 text-xs text-ink-400">Postes saisis</dt>
+                      <dd className="font-semibold text-ink-800">{report.entries?.length || 0} postes d&apos;émission</dd>
+                    </div>
+                  </dl>
+                </CardContent>
+              </Card>
             </div>
           )}
 
           {/* ===== MONTHLY TAB ===== */}
           {activeReportTab === 'monthly' && (
             <div className="space-y-6">
-              <div className="card p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <Calendar className="w-5 h-5 text-brand-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Suivi mensuel des emissions</h3>
-                </div>
-                {report.byMonth && report.byMonth.some(m => m.total > 0) ? (
-                  <ResponsiveContainer width="100%" height={400}>
-                    <BarChart data={report.byMonth} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                      <YAxis tickFormatter={smartAxisFormat} />
-                      <Tooltip formatter={(value: number) => formatCO2(value)} />
-                      <Legend />
-                      <Bar dataKey="scope1" stackId="a" name="Scope 1" fill="#ef4444" radius={[0, 0, 0, 0]} />
-                      <Bar dataKey="scope2" stackId="a" name="Scope 2" fill="#f97316" radius={[0, 0, 0, 0]} />
-                      <Bar dataKey="scope3" stackId="a" name="Scope 3" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="text-center py-12 text-gray-400">Aucune donnee mensuelle. Saisissez des donnees mois par mois dans le bilan.</div>
-                )}
-              </div>
+              <Card>
+                <CardHeader eyebrow="Saisonnalité" title={<span className="flex items-center gap-2"><Calendar className="size-4 text-gold-500" /> Suivi mensuel des émissions</span>} />
+                <CardContent>
+                  {report.byMonth && report.byMonth.some(m => m.total > 0) ? (
+                    <ResponsiveContainer width="100%" height={400}>
+                      <BarChart data={report.byMonth} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid {...GRID_PROPS} />
+                        <XAxis dataKey="label" {...AXIS_PROPS} />
+                        <YAxis tickFormatter={smartAxisFormat} {...AXIS_PROPS} />
+                        <Tooltip {...TOOLTIP_PROPS} formatter={(value: number) => fmtCO2Text(value)} />
+                        <Legend {...LEGEND_PROPS} />
+                        <Bar dataKey="scope1" stackId="a" name="Scope 1" fill={UI_SCOPE_COLORS[0]} maxBarSize={44} />
+                        <Bar dataKey="scope2" stackId="a" name="Scope 2" fill={UI_SCOPE_COLORS[1]} maxBarSize={44} />
+                        <Bar dataKey="scope3" stackId="a" name="Scope 3" fill={UI_SCOPE_COLORS[2]} radius={[6, 6, 0, 0]} maxBarSize={44} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <NoData text="Aucune donnée mensuelle. Saisissez des données mois par mois dans le bilan." />
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Cumulative area chart */}
               {cumulativeData.length > 0 && cumulativeData.some(c => c.cumulative > 0) && (
-                <div className="card p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Evolution cumulative</h3>
-                  <p className="text-sm text-gray-500 mb-6">Progression des emissions cumulees sur l&apos;annee</p>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={cumulativeData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="cumGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                      <YAxis tickFormatter={smartAxisFormat} />
-                      <Tooltip formatter={(value: number) => formatCO2(value)} />
-                      <Area type="monotone" dataKey="cumulative" name="Cumul" stroke="#10b981" strokeWidth={2.5} fill="url(#cumGrad)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+                <Card>
+                  <CardHeader eyebrow="Tendance" title="Évolution cumulative" />
+                  <CardContent>
+                    <p className="-mt-2 mb-5 text-sm text-ink-500">Progression des émissions cumulées sur l&apos;année</p>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <AreaChart data={cumulativeData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="cumGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#B8935A" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#B8935A" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid {...GRID_PROPS} />
+                        <XAxis dataKey="label" {...AXIS_PROPS} />
+                        <YAxis tickFormatter={smartAxisFormat} {...AXIS_PROPS} />
+                        <Tooltip {...TOOLTIP_PROPS} formatter={(value: number) => fmtCO2Text(value)} />
+                        <Area type="monotone" dataKey="cumulative" name="Cumul" stroke="#1A402C" strokeWidth={2.5} fill="url(#cumGrad)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Monthly detail table */}
               {report.byMonth && report.byMonth.some(m => m.total > 0) && (
-                <div className="card p-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-4">Detail mensuel (kgCO2eq)</h3>
+                <Card className="overflow-hidden">
+                  <CardHeader eyebrow="Données" title="Détail mensuel" />
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                          <th className="text-left px-4 py-3 font-medium">Mois</th>
-                          <th className="text-right px-4 py-3 font-medium">Scope 1</th>
-                          <th className="text-right px-4 py-3 font-medium">Scope 2</th>
-                          <th className="text-right px-4 py-3 font-medium">Scope 3</th>
-                          <th className="text-right px-4 py-3 font-medium">Total</th>
-                          <th className="text-right px-4 py-3 font-medium">Part (%)</th>
+                        <tr className={THEAD_ROW}>
+                          <th className="px-6 py-3 text-left font-semibold">Mois</th>
+                          <th className="px-4 py-3 text-right font-semibold">Scope 1</th>
+                          <th className="px-4 py-3 text-right font-semibold">Scope 2</th>
+                          <th className="px-4 py-3 text-right font-semibold">Scope 3</th>
+                          <th className="px-4 py-3 text-right font-semibold">Total</th>
+                          <th className="px-6 py-3 text-right font-semibold">Part (%)</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-ivory-200">
                         {report.byMonth.map((m, i) => (
-                          <tr key={i} className={m.total > 0 ? 'hover:bg-gray-50' : 'opacity-40'}>
-                            <td className="px-4 py-2 font-medium text-gray-800">{m.label}</td>
-                            <td className="px-4 py-2 text-right text-red-600">{m.scope1 > 0 ? formatCO2(m.scope1) : '-'}</td>
-                            <td className="px-4 py-2 text-right text-orange-600">{m.scope2 > 0 ? formatCO2(m.scope2) : '-'}</td>
-                            <td className="px-4 py-2 text-right text-blue-600">{m.scope3 > 0 ? formatCO2(m.scope3) : '-'}</td>
-                            <td className="px-4 py-2 text-right font-semibold text-gray-900">{m.total > 0 ? formatCO2(m.total) : '-'}</td>
-                            <td className="px-4 py-2 text-right text-gray-500">
+                          <tr key={i} className={m.total > 0 ? 'transition-colors hover:bg-ivory-50' : 'opacity-40'}>
+                            <td className="px-6 py-2.5 font-medium text-ink-800">{m.label}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums text-ink-600">{m.scope1 > 0 ? fmtCO2Text(m.scope1) : '-'}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums text-ink-600">{m.scope2 > 0 ? fmtCO2Text(m.scope2) : '-'}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums text-ink-600">{m.scope3 > 0 ? fmtCO2Text(m.scope3) : '-'}</td>
+                            <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-forest-900">{m.total > 0 ? fmtCO2Text(m.total) : '-'}</td>
+                            <td className="px-6 py-2.5 text-right tabular-nums text-ink-500">
                               {report.summary.total > 0 && m.total > 0 ? ((m.total / report.summary.total) * 100).toFixed(1) + '%' : '-'}
                             </td>
                           </tr>
                         ))}
                       </tbody>
                       <tfoot>
-                        <tr className="bg-brand-50 font-bold">
-                          <td className="px-4 py-3 text-brand-800">TOTAL ANNUEL</td>
-                          <td className="px-4 py-3 text-right text-red-700">{formatCO2(report.summary.scope1)}</td>
-                          <td className="px-4 py-3 text-right text-orange-700">{formatCO2(report.summary.scope2)}</td>
-                          <td className="px-4 py-3 text-right text-blue-700">{formatCO2(report.summary.scope3)}</td>
-                          <td className="px-4 py-3 text-right text-brand-800">{formatCO2(report.summary.total)}</td>
-                          <td className="px-4 py-3 text-right text-brand-800">100%</td>
+                        <tr className={TFOOT_ROW}>
+                          <td className="px-6 py-3">Total annuel</td>
+                          <td className="px-4 py-3 text-right tabular-nums">{fmtCO2Text(report.summary.scope1)}</td>
+                          <td className="px-4 py-3 text-right tabular-nums">{fmtCO2Text(report.summary.scope2)}</td>
+                          <td className="px-4 py-3 text-right tabular-nums">{fmtCO2Text(report.summary.scope3)}</td>
+                          <td className="px-4 py-3 text-right tabular-nums">{fmtCO2Text(report.summary.total)}</td>
+                          <td className="px-6 py-3 text-right">100%</td>
                         </tr>
                       </tfoot>
                     </table>
                   </div>
-                </div>
+                </Card>
               )}
 
               {/* Yearly comparison */}
               {report.byYear && report.byYear.length > 0 && (
-                <div className="card p-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-4">Comparaison annuelle (kgCO2eq)</h3>
+                <Card className="overflow-hidden">
+                  <CardHeader eyebrow="Historique" title="Comparaison annuelle" />
                   {report.byYear.length > 1 ? (
-                    <div className="mb-6">
+                    <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={report.byYear.map(y => ({ ...y, label: String(y.year) }))} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                          <YAxis tickFormatter={smartAxisFormat} />
-                          <Tooltip formatter={(value: number) => formatCO2(value)} />
-                          <Legend />
-                          <Bar dataKey="scope1" stackId="a" name="Scope 1" fill="#ef4444" />
-                          <Bar dataKey="scope2" stackId="a" name="Scope 2" fill="#f97316" />
-                          <Bar dataKey="scope3" stackId="a" name="Scope 3" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                          <CartesianGrid {...GRID_PROPS} />
+                          <XAxis dataKey="label" {...AXIS_PROPS} />
+                          <YAxis tickFormatter={smartAxisFormat} {...AXIS_PROPS} />
+                          <Tooltip {...TOOLTIP_PROPS} formatter={(value: number) => fmtCO2Text(value)} />
+                          <Legend {...LEGEND_PROPS} />
+                          <Bar dataKey="scope1" stackId="a" name="Scope 1" fill={UI_SCOPE_COLORS[0]} maxBarSize={56} />
+                          <Bar dataKey="scope2" stackId="a" name="Scope 2" fill={UI_SCOPE_COLORS[1]} maxBarSize={56} />
+                          <Bar dataKey="scope3" stackId="a" name="Scope 3" fill={UI_SCOPE_COLORS[2]} radius={[6, 6, 0, 0]} maxBarSize={56} />
                         </BarChart>
                       </ResponsiveContainer>
-                    </div>
+                    </CardContent>
                   ) : null}
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                          <th className="text-left px-4 py-3 font-medium">Annee</th>
-                          <th className="text-right px-4 py-3 font-medium">Scope 1</th>
-                          <th className="text-right px-4 py-3 font-medium">Scope 2</th>
-                          <th className="text-right px-4 py-3 font-medium">Scope 3</th>
-                          <th className="text-right px-4 py-3 font-medium">Total</th>
+                        <tr className={THEAD_ROW}>
+                          <th className="px-6 py-3 text-left font-semibold">Année</th>
+                          <th className="px-4 py-3 text-right font-semibold">Scope 1</th>
+                          <th className="px-4 py-3 text-right font-semibold">Scope 2</th>
+                          <th className="px-4 py-3 text-right font-semibold">Scope 3</th>
+                          <th className="px-6 py-3 text-right font-semibold">Total</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-ivory-200">
                         {report.byYear.map((y, i) => (
-                          <tr key={i} className="hover:bg-gray-50">
-                            <td className="px-4 py-2 font-bold text-gray-900">{y.year}</td>
-                            <td className="px-4 py-2 text-right text-red-600">{y.scope1 > 0 ? formatCO2(y.scope1) : '-'}</td>
-                            <td className="px-4 py-2 text-right text-orange-600">{y.scope2 > 0 ? formatCO2(y.scope2) : '-'}</td>
-                            <td className="px-4 py-2 text-right text-blue-600">{y.scope3 > 0 ? formatCO2(y.scope3) : '-'}</td>
-                            <td className="px-4 py-2 text-right font-semibold text-gray-900">{formatCO2(y.total)}</td>
+                          <tr key={i} className="transition-colors hover:bg-ivory-50">
+                            <td className="px-6 py-2.5 font-display text-base text-forest-900">{y.year}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums text-ink-600">{y.scope1 > 0 ? fmtCO2Text(y.scope1) : '-'}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums text-ink-600">{y.scope2 > 0 ? fmtCO2Text(y.scope2) : '-'}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums text-ink-600">{y.scope3 > 0 ? fmtCO2Text(y.scope3) : '-'}</td>
+                            <td className="px-6 py-2.5 text-right font-semibold tabular-nums text-forest-900">{fmtCO2Text(y.total)}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                </div>
+                </Card>
               )}
             </div>
           )}
@@ -1380,144 +1490,117 @@ export default function ReportsPage() {
           {/* ===== GHG PROTOCOL TAB ===== */}
           {activeReportTab === 'ghg' && (
             <div className="space-y-6">
-              <div className="card p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <FileText className="w-5 h-5 text-brand-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Rapport GHG Protocol - Corporate Standard</h3>
-                </div>
+              <Card>
+                <CardHeader eyebrow="Corporate Standard" title={<span className="flex items-center gap-2"><FileText className="size-4 text-gold-500" /> Rapport GHG Protocol</span>} />
+                <CardContent className="space-y-6">
+                  {[
+                    { scope: 1, prefix: '1-', title: 'Scope 1 — Émissions directes', total: report.summary.scope1, empty: 'Aucune émission Scope 1' },
+                    { scope: 2, prefix: '2-', title: "Scope 2 — Émissions indirectes liées à l'énergie", total: report.summary.scope2, empty: 'Aucune émission Scope 2' },
+                    { scope: 3, prefix: '3-', title: 'Scope 3 — Autres émissions indirectes', total: report.summary.scope3, empty: 'Aucune émission Scope 3' },
+                  ].map(block => {
+                    const items = ghgData.filter(d => d.name.startsWith(block.prefix))
+                    return (
+                      <section key={block.scope} className="rounded-xl border border-ivory-300 bg-ivory-50/60 p-5">
+                        <div className="mb-3 flex items-center gap-3">
+                          <span className="size-2.5 rounded-full" style={{ backgroundColor: scopeColor(block.scope) }} />
+                          <h4 className="text-sm font-semibold text-forest-900">{block.title}</h4>
+                          <span className="ml-auto font-display text-lg tabular-nums text-forest-900">{fmtCO2Text(block.total)}</span>
+                        </div>
+                        <div className="divide-y divide-ivory-300 pl-5">
+                          {items.map((item, i) => (
+                            <div key={i} className="flex justify-between gap-4 py-2 text-sm">
+                              <span className="text-ink-600">{item.name}</span>
+                              <span className="font-semibold tabular-nums text-ink-800">{fmtCO2Text(item.value)}</span>
+                            </div>
+                          ))}
+                          {items.length === 0 && (
+                            <p className="py-1 text-sm italic text-ink-400">{block.empty}</p>
+                          )}
+                        </div>
+                      </section>
+                    )
+                  })}
 
-                {/* Scope 1 */}
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                    <h4 className="font-semibold text-red-700">Scope 1 - Emissions directes</h4>
-                    <span className="ml-auto font-bold text-red-700">{formatCO2(report.summary.scope1)}</span>
+                  {/* Grand total */}
+                  <div className="flex items-center justify-between rounded-xl bg-forest-900 bg-forest-grain px-6 py-5 text-ivory-50">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-300">Total des émissions</span>
+                    <span className="font-display text-2xl tabular-nums">{fmtCO2Text(report.summary.total)}</span>
                   </div>
-                  <div className="pl-5 space-y-1">
-                    {ghgData.filter(d => d.name.startsWith('1-')).map((item, i) => (
-                      <div key={i} className="flex justify-between text-sm py-1.5 border-b border-gray-50">
-                        <span className="text-gray-600">{item.name}</span>
-                        <span className="font-medium text-gray-800">{formatCO2(item.value)}</span>
-                      </div>
-                    ))}
-                    {ghgData.filter(d => d.name.startsWith('1-')).length === 0 && (
-                      <p className="text-sm text-gray-400 italic">Aucune emission Scope 1</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Scope 2 */}
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-3 h-3 rounded-full bg-orange-500" />
-                    <h4 className="font-semibold text-orange-700">Scope 2 - Emissions indirectes liees a l&apos;energie</h4>
-                    <span className="ml-auto font-bold text-orange-700">{formatCO2(report.summary.scope2)}</span>
-                  </div>
-                  <div className="pl-5 space-y-1">
-                    {ghgData.filter(d => d.name.startsWith('2-')).map((item, i) => (
-                      <div key={i} className="flex justify-between text-sm py-1.5 border-b border-gray-50">
-                        <span className="text-gray-600">{item.name}</span>
-                        <span className="font-medium text-gray-800">{formatCO2(item.value)}</span>
-                      </div>
-                    ))}
-                    {ghgData.filter(d => d.name.startsWith('2-')).length === 0 && (
-                      <p className="text-sm text-gray-400 italic">Aucune emission Scope 2</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Scope 3 */}
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-3 h-3 rounded-full bg-blue-500" />
-                    <h4 className="font-semibold text-blue-700">Scope 3 - Autres emissions indirectes</h4>
-                    <span className="ml-auto font-bold text-blue-700">{formatCO2(report.summary.scope3)}</span>
-                  </div>
-                  <div className="pl-5 space-y-1">
-                    {ghgData.filter(d => d.name.startsWith('3-')).map((item, i) => (
-                      <div key={i} className="flex justify-between text-sm py-1.5 border-b border-gray-50">
-                        <span className="text-gray-600">{item.name}</span>
-                        <span className="font-medium text-gray-800">{formatCO2(item.value)}</span>
-                      </div>
-                    ))}
-                    {ghgData.filter(d => d.name.startsWith('3-')).length === 0 && (
-                      <p className="text-sm text-gray-400 italic">Aucune emission Scope 3</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Grand total */}
-                <div className="border-t-2 border-brand-200 pt-4 mt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-lg text-brand-800">TOTAL DES EMISSIONS</span>
-                    <span className="font-bold text-lg text-brand-800">{formatCO2(report.summary.total)}</span>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* GHG bar chart */}
-              <div className="card p-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4">Repartition par categorie GHG</h3>
-                {ghgData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={Math.max(250, ghgData.length * 45)}>
-                    <BarChart data={ghgData} layout="vertical" margin={{ left: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" />
-                      <YAxis type="category" dataKey="name" width={250} tick={{ fontSize: 11 }} />
-                      <Tooltip formatter={(value: number) => formatCO2(value)} />
-                      <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                        {ghgData.map((item, index) => (
-                          <Cell key={index} fill={item.name.startsWith('1-') ? '#ef4444' : item.name.startsWith('2-') ? '#f97316' : '#3b82f6'} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="text-center py-8 text-gray-400">Aucune donnee</div>
-                )}
-              </div>
+              <Card>
+                <CardHeader eyebrow="Visualisation" title="Répartition par catégorie GHG" />
+                <CardContent>
+                  {ghgData.length > 0 ? (
+                    <>
+                      <ResponsiveContainer width="100%" height={Math.max(250, ghgData.length * 45)}>
+                        <BarChart data={ghgData} layout="vertical" margin={{ left: 20, right: 8 }}>
+                          <CartesianGrid {...GRID_PROPS} horizontal={false} vertical />
+                          <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" {...AXIS_PROPS} />
+                          <YAxis type="category" dataKey="name" width={250} {...AXIS_PROPS} tick={{ ...AXIS_PROPS.tick, fontSize: 11 }} />
+                          <Tooltip {...TOOLTIP_PROPS} formatter={(value: number) => fmtCO2Text(value)} />
+                          <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={26}>
+                            {ghgData.map((item, index) => (
+                              <Cell key={index} fill={scopeColor(item.name.startsWith('1-') ? 1 : item.name.startsWith('2-') ? 2 : 3)} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                      <ScopeLegend />
+                    </>
+                  ) : (
+                    <NoData />
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Scope 3 detail breakdown */}
               {ghgData.filter(d => d.name.startsWith('3-')).length > 1 && (
-                <div className="card p-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Focus Scope 3 - Detail</h3>
-                  <p className="text-xs text-gray-400 mb-4">Le Scope 3 represente generalement la majorite des emissions</p>
-                  {(() => {
-                    const scope3Items = ghgData.filter(d => d.name.startsWith('3-'))
-                    const scope3Colors = ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#2563eb', '#1d4ed8', '#1e40af', '#dbeafe']
-                    return (
-                      <div>
-                        <ResponsiveContainer width="100%" height={240}>
-                          <PieChart>
-                            <Pie
-                              data={scope3Items}
-                              cx="50%" cy="50%" outerRadius={90} innerRadius={40}
-                              dataKey="value"
-                              paddingAngle={2}
-                              minAngle={10}
-                              label={({ name, percent }) => `${name.split(' - ').pop()?.slice(0, 12)}: ${(percent * 100).toFixed(0)}%`}
-                              labelLine={true}
-                            >
-                              {scope3Items.map((_, i) => (
-                                <Cell key={i} fill={scope3Colors[i % scope3Colors.length]} />
-                              ))}
-                            </Pie>
-                            <Tooltip formatter={(value: number) => formatCO2(value)} />
-                          </PieChart>
-                        </ResponsiveContainer>
-                        <div className="flex flex-wrap justify-center gap-3 mt-3">
-                          {scope3Items.map((item, i) => (
-                            <div key={i} className="flex items-center gap-1.5">
-                              <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: scope3Colors[i % scope3Colors.length] }} />
-                              <span className="text-xs text-gray-600 truncate max-w-[140px]">{item.name.split(' - ').pop()}</span>
-                              <span className="text-xs font-semibold text-gray-800">{formatCO2(item.value)}</span>
-                            </div>
-                          ))}
+                <Card>
+                  <CardHeader eyebrow="Focus" title="Scope 3 — détail" />
+                  <CardContent>
+                    <p className="-mt-2 mb-4 text-sm text-ink-500">Le Scope 3 représente généralement la majorité des émissions</p>
+                    {(() => {
+                      const scope3Items = ghgData.filter(d => d.name.startsWith('3-'))
+                      return (
+                        <div>
+                          <ResponsiveContainer width="100%" height={260}>
+                            <PieChart>
+                              <Pie
+                                data={scope3Items}
+                                cx="50%" cy="50%" outerRadius={95} innerRadius={55}
+                                dataKey="value"
+                                paddingAngle={2}
+                                minAngle={10}
+                                strokeWidth={0}
+                                cornerRadius={3}
+                                label={({ name, percent }) => `${name.split(' - ').pop()?.slice(0, 12)}: ${(percent * 100).toFixed(0)}%`}
+                                labelLine={{ stroke: '#DBD3C0' }}
+                                style={{ fontSize: 11, fill: '#6B7069' }}
+                              >
+                                {scope3Items.map((_, i) => (
+                                  <Cell key={i} fill={SCOPE3_SHADES[i % SCOPE3_SHADES.length]} />
+                                ))}
+                              </Pie>
+                              <Tooltip {...TOOLTIP_PROPS} formatter={(value: number) => fmtCO2Text(value)} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2">
+                            {scope3Items.map((item, i) => (
+                              <div key={i} className="flex items-center gap-1.5">
+                                <span className="size-2.5 flex-shrink-0 rounded-full" style={{ backgroundColor: SCOPE3_SHADES[i % SCOPE3_SHADES.length] }} />
+                                <span className="max-w-[160px] truncate text-xs text-ink-600">{item.name.split(' - ').pop()}</span>
+                                <span className="text-xs font-semibold tabular-nums text-ink-800">{fmtCO2Text(item.value)}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })()}
-                </div>
+                      )
+                    })()}
+                  </CardContent>
+                </Card>
               )}
             </div>
           )}
@@ -1525,202 +1608,225 @@ export default function ReportsPage() {
           {/* ===== ISO 14064/14069 TAB ===== */}
           {activeReportTab === 'iso' && (
             <div className="space-y-6">
-              <div className="card p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <Shield className="w-5 h-5 text-brand-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Rapport ISO 14064-1 / ISO 14069</h3>
-                </div>
-
+              <Card className="overflow-hidden">
+                <CardHeader eyebrow="Normes internationales" title={<span className="flex items-center gap-2"><Shield className="size-4 text-gold-500" /> Rapport ISO 14064-1 / ISO 14069</span>} />
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                        <th className="text-left px-4 py-3 font-medium">Poste ISO 14069</th>
-                        <th className="text-center px-4 py-3 font-medium">Scope</th>
-                        <th className="text-right px-4 py-3 font-medium">Nb postes</th>
-                        <th className="text-right px-4 py-3 font-medium">Emissions (kgCO2eq)</th>
-                        <th className="text-right px-4 py-3 font-medium">Part (%)</th>
+                      <tr className={THEAD_ROW}>
+                        <th className="px-6 py-3 text-left font-semibold">Poste ISO 14069</th>
+                        <th className="px-4 py-3 text-center font-semibold">Scope</th>
+                        <th className="px-4 py-3 text-right font-semibold">Nb postes</th>
+                        <th className="px-4 py-3 text-right font-semibold">Émissions</th>
+                        <th className="px-6 py-3 text-right font-semibold">Part (%)</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-ivory-200">
                       {isoData.map((item, i) => (
-                        <tr key={i} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${
-                              item.scope === 1 ? 'bg-red-100 text-red-700' :
-                              item.scope === 2 ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
-                            }`}>Scope {item.scope}</span>
-                          </td>
-                          <td className="px-4 py-3 text-right text-gray-500">{item.count}</td>
-                          <td className="px-4 py-3 text-right font-medium text-gray-800">{formatCO2(item.total)}</td>
-                          <td className="px-4 py-3 text-right text-gray-500">
+                        <tr key={i} className="transition-colors hover:bg-ivory-50">
+                          <td className="px-6 py-3 font-medium text-ink-800">{item.name}</td>
+                          <td className="px-4 py-3 text-center"><ScopeChip scope={item.scope} /></td>
+                          <td className="px-4 py-3 text-right tabular-nums text-ink-500">{item.count}</td>
+                          <td className="px-4 py-3 text-right font-semibold tabular-nums text-ink-800">{fmtCO2Text(item.total)}</td>
+                          <td className="px-6 py-3 text-right tabular-nums text-ink-500">
                             {report.summary.total > 0 ? ((item.total / report.summary.total) * 100).toFixed(1) : '0'}%
                           </td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
-                      <tr className="bg-brand-50 font-bold">
-                        <td className="px-4 py-3 text-brand-800">TOTAL</td>
+                      <tr className={TFOOT_ROW}>
+                        <td className="px-6 py-3">Total</td>
                         <td className="px-4 py-3" />
-                        <td className="px-4 py-3 text-right text-brand-800">{report.entries?.length || 0}</td>
-                        <td className="px-4 py-3 text-right text-brand-800">{formatCO2(report.summary.total)}</td>
-                        <td className="px-4 py-3 text-right text-brand-800">100%</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{report.entries?.length || 0}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{fmtCO2Text(report.summary.total)}</td>
+                        <td className="px-6 py-3 text-right">100%</td>
                       </tr>
                     </tfoot>
                   </table>
                 </div>
-              </div>
+              </Card>
 
               {/* ISO bar chart */}
               {isoData.length > 0 && (
-                <div className="card p-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-4">Repartition visuelle ISO 14069</h3>
-                  <ResponsiveContainer width="100%" height={Math.max(250, isoData.length * 45)}>
-                    <BarChart data={isoData.map(d => ({ ...d, value: Math.round(d.total) }))} layout="vertical" margin={{ left: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" />
-                      <YAxis type="category" dataKey="name" width={200} tick={{ fontSize: 10 }} />
-                      <Tooltip formatter={(value: number) => formatCO2(value)} />
-                      <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                        {isoData.map((d, i) => (
-                          <Cell key={i} fill={d.scope === 1 ? '#ef4444' : d.scope === 2 ? '#f97316' : '#3b82f6'} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                <Card>
+                  <CardHeader eyebrow="Visualisation" title="Répartition visuelle ISO 14069" />
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={Math.max(250, isoData.length * 45)}>
+                      <BarChart data={isoData.map(d => ({ ...d, value: Math.round(d.total) }))} layout="vertical" margin={{ left: 20, right: 8 }}>
+                        <CartesianGrid {...GRID_PROPS} horizontal={false} vertical />
+                        <XAxis type="number" tickFormatter={smartAxisFormat} scale="auto" {...AXIS_PROPS} />
+                        <YAxis type="category" dataKey="name" width={200} {...AXIS_PROPS} tick={{ ...AXIS_PROPS.tick, fontSize: 10 }} />
+                        <Tooltip {...TOOLTIP_PROPS} formatter={(value: number) => fmtCO2Text(value)} />
+                        <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={26}>
+                          {isoData.map((d, i) => (
+                            <Cell key={i} fill={scopeColor(d.scope)} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                    <ScopeLegend />
+                  </CardContent>
+                </Card>
               )}
 
               {/* Standards reference */}
-              <div className="card p-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4">Cadre normatif</h3>
-                <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="font-bold text-gray-700 mb-2">ISO 14064-1:2018</p>
-                    <p>Specification et lignes directrices, au niveau des organismes, pour la quantification et la declaration des emissions et des suppressions des gaz a effet de serre.</p>
+              <Card>
+                <CardHeader eyebrow="Référentiel" title="Cadre normatif" />
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 text-sm text-ink-500 md:grid-cols-2">
+                    <div className="rounded-xl border border-ivory-300 bg-ivory-50 p-5">
+                      <p className="mb-2 font-display text-base text-forest-900">ISO 14064-1:2018</p>
+                      <p className="leading-relaxed">Spécification et lignes directrices, au niveau des organismes, pour la quantification et la déclaration des émissions et des suppressions des gaz à effet de serre.</p>
+                    </div>
+                    <div className="rounded-xl border border-ivory-300 bg-ivory-50 p-5">
+                      <p className="mb-2 font-display text-base text-forest-900">ISO 14069:2013</p>
+                      <p className="leading-relaxed">Guide d&apos;application de l&apos;ISO 14064-1 pour la quantification et la déclaration des émissions de GES. Définit les catégories 1-1 à 6-2.</p>
+                    </div>
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="font-bold text-gray-700 mb-2">ISO 14069:2013</p>
-                    <p>Guide d&apos;application de l&apos;ISO 14064-1 pour la quantification et la declaration des emissions de GES. Definit les categories 1-1 a 6-2.</p>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 
           {/* ===== DETAIL TAB ===== */}
           {activeReportTab === 'detail' && (
-            <div className="card p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Detail de tous les postes d&apos;emission</h3>
+            <Card className="overflow-hidden">
+              <CardHeader eyebrow="Inventaire" title="Détail de tous les postes d'émission" />
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                      <th className="text-left px-4 py-3 font-medium">Source</th>
-                      <th className="text-left px-4 py-3 font-medium">Categorie</th>
-                      <th className="text-center px-4 py-3 font-medium">Scope</th>
-                      <th className="text-right px-4 py-3 font-medium">Quantite</th>
-                      <th className="text-left px-4 py-3 font-medium">Unite</th>
-                      <th className="text-right px-4 py-3 font-medium">FE</th>
-                      <th className="text-right px-4 py-3 font-medium">Total (kgCO2eq)</th>
+                    <tr className={THEAD_ROW}>
+                      <th className="px-6 py-3 text-left font-semibold">Source</th>
+                      <th className="px-4 py-3 text-left font-semibold">Catégorie</th>
+                      <th className="px-4 py-3 text-center font-semibold">Scope</th>
+                      <th className="px-4 py-3 text-right font-semibold">Quantité</th>
+                      <th className="px-4 py-3 text-left font-semibold">Unité</th>
+                      <th className="px-4 py-3 text-right font-semibold">FE</th>
+                      <th className="px-6 py-3 text-right font-semibold">Total</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-ivory-200">
                     {(report.entries || []).map((entry, i) => (
-                      <tr key={i} className="hover:bg-gray-50">
-                        <td className="px-4 py-2">
-                          <p className="font-medium text-gray-800 text-sm">{entry.factor_name}</p>
-                          <p className="text-xs text-gray-400">{entry.source_characterization}</p>
+                      <tr key={i} className="transition-colors hover:bg-ivory-50">
+                        <td className="px-6 py-2.5">
+                          <p className="text-sm font-medium text-ink-800">{entry.factor_name}</p>
+                          <p className="text-xs text-ink-400">{entry.source_characterization}</p>
                         </td>
-                        <td className="px-4 py-2 text-xs text-gray-500">{entry.ghg_category}</td>
-                        <td className="px-4 py-2 text-center">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            entry.scope === 1 ? 'bg-red-100 text-red-700' :
-                            entry.scope === 2 ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
-                          }`}>{entry.scope}</span>
-                        </td>
-                        <td className="px-4 py-2 text-right text-gray-700">{Number(entry.quantity).toLocaleString('fr-FR')}</td>
-                        <td className="px-4 py-2 text-xs text-gray-500">{entry.unit?.replace('kgCO2eq/', '') || ''}</td>
-                        <td className="px-4 py-2 text-right text-xs text-gray-400">{entry.factor_value}</td>
-                        <td className="px-4 py-2 text-right font-semibold text-gray-900">{formatCO2(parseFloat(String(entry.total_co2eq)) || 0)}</td>
+                        <td className="px-4 py-2.5 text-xs text-ink-500">{entry.ghg_category}</td>
+                        <td className="px-4 py-2.5 text-center"><ScopeChip scope={entry.scope} short /></td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-ink-700">{Number(entry.quantity).toLocaleString('fr-FR')}</td>
+                        <td className="px-4 py-2.5 text-xs text-ink-500">{entry.unit?.replace('kgCO2eq/', '') || ''}</td>
+                        <td className="px-4 py-2.5 text-right text-xs tabular-nums text-ink-400">{entry.factor_value}</td>
+                        <td className="px-6 py-2.5 text-right font-semibold tabular-nums text-forest-900">{fmtCO2Text(parseFloat(String(entry.total_co2eq)) || 0)}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="bg-brand-50 font-bold">
-                      <td colSpan={6} className="px-4 py-3 text-brand-800">TOTAL</td>
-                      <td className="px-4 py-3 text-right text-brand-800">{formatCO2(report.summary.total)}</td>
+                    <tr className={TFOOT_ROW}>
+                      <td colSpan={6} className="px-6 py-3">Total</td>
+                      <td className="px-6 py-3 text-right tabular-nums">{fmtCO2Text(report.summary.total)}</td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
               {(!report.entries || report.entries.length === 0) && (
-                <div className="text-center py-12 text-gray-400">Aucun poste d&apos;emission saisi. Allez dans le bilan pour saisir vos donnees.</div>
+                <div className="p-6">
+                  <EmptyState
+                    icon={FileText}
+                    title="Aucun poste d'émission saisi"
+                    description="Ouvrez le bilan pour saisir vos données."
+                  />
+                </div>
               )}
-            </div>
+            </Card>
           )}
         </div>
       )}
 
       {/* ===== PDF DOWNLOAD MODAL ===== */}
       {pdfModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative">
-            <button onClick={() => setPdfModal(false)} className="absolute top-4 right-4 p-1 rounded-lg hover:bg-gray-100">
-              <X className="w-5 h-5 text-gray-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-forest-950/50 p-4 backdrop-blur-sm animate-in fade-in-0">
+          <div className="relative w-full max-w-md rounded-3xl border border-ivory-300 bg-ivory-50 p-8 font-sans shadow-lifted animate-in zoom-in-95">
+            <button
+              onClick={() => setPdfModal(false)}
+              className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ivory-200 hover:text-ink-700"
+              aria-label="Fermer"
+            >
+              <X className="size-4" />
             </button>
-            <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-4">
-                <Download className="w-7 h-7 text-brand-600" />
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-forest-900 ring-4 ring-gold-100">
+                <Download className="size-6 text-gold-300" strokeWidth={1.8} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Telecharger le rapport PDF</h3>
-              <p className="text-sm text-gray-500 mt-2">Choisissez le type de rapport a generer</p>
+              <h3 className="font-display text-2xl text-forest-900">Télécharger le rapport PDF</h3>
+              <p className="mt-2 text-sm text-ink-500">Choisissez le type de rapport à générer</p>
             </div>
             <div className="space-y-3">
-              <button
-                onClick={() => generatePDF('yearly')}
-                disabled={pdfGenerating}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-brand-400 hover:bg-brand-50 transition-all text-left disabled:opacity-50"
-              >
-                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <BarChart3 className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Rapport Annuel</p>
-                  <p className="text-xs text-gray-500">Synthese globale avec repartition par scope, categorie, GHG et ISO</p>
-                </div>
-              </button>
-              <button
-                onClick={() => generatePDF('monthly')}
-                disabled={pdfGenerating}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-brand-400 hover:bg-brand-50 transition-all text-left disabled:opacity-50"
-              >
-                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <Calendar className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Rapport Mensuel Detaille</p>
-                  <p className="text-xs text-gray-500">Inclut le suivi mensuel complet en plus de la synthese annuelle</p>
-                </div>
-              </button>
+              {[
+                { mode: 'yearly' as const, icon: BarChart3, title: 'Rapport annuel', text: 'Synthèse globale avec répartition par scope, catégorie, GHG et ISO' },
+                { mode: 'monthly' as const, icon: Calendar, title: 'Rapport mensuel détaillé', text: 'Inclut le suivi mensuel complet en plus de la synthèse annuelle' },
+              ].map(opt => (
+                <button
+                  key={opt.mode}
+                  onClick={() => generatePDF(opt.mode)}
+                  disabled={pdfGenerating}
+                  className="group flex w-full items-center gap-4 rounded-2xl border border-ivory-300 bg-white p-4 text-left transition-all hover:border-gold-300 hover:shadow-soft disabled:opacity-50"
+                >
+                  <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-forest-50 text-forest-700 transition-colors group-hover:bg-gold-50 group-hover:text-gold-600">
+                    <opt.icon className="size-5" strokeWidth={1.8} />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-semibold text-ink-800">{opt.title}</span>
+                    <span className="block text-xs text-ink-500">{opt.text}</span>
+                  </span>
+                </button>
+              ))}
             </div>
             {pdfGenerating && (
-              <div className="mt-4 text-center">
-                <div className="inline-flex items-center gap-2 text-sm text-brand-600">
-                  <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
-                  Generation du PDF en cours...
-                </div>
+              <div className="mt-5 flex items-center justify-center gap-2 text-sm font-medium text-forest-700">
+                <Loader2 className="size-4 animate-spin" />
+                Génération du PDF en cours…
               </div>
             )}
-            <div className="mt-5 flex items-center gap-2 text-xs text-gray-400">
-              <QrCode className="w-3.5 h-3.5" />
-              <span>Chaque rapport inclut un QR code pour acces rapide en ligne</span>
+            <div className="mt-6 flex items-center gap-2 border-t border-ivory-300 pt-4 text-xs text-ink-400">
+              <QrCode className="size-3.5" />
+              <span>Chaque rapport inclut un QR code pour un accès rapide en ligne</span>
             </div>
           </div>
         </div>
       )}
+    </Stagger>
+  )
+}
+
+// ===== On-screen presentation helpers =====
+
+function scopeColor(scope: number) {
+  return UI_SCOPE_COLORS[(scope === 1 ? 1 : scope === 2 ? 2 : 3) - 1]
+}
+
+function ChartTooltipBox({ children }: { children: React.ReactNode }) {
+  return <div className="rounded-xl border border-ivory-300 bg-white px-3.5 py-2.5 text-sm shadow-lifted">{children}</div>
+}
+
+function NoData({ text = 'Aucune donnée' }: { text?: string }) {
+  return <p className="rounded-xl border border-dashed border-ivory-400 bg-ivory-50 py-12 text-center text-sm text-ink-400">{text}</p>
+}
+
+function ScopeLegend() {
+  return (
+    <div className="mt-4 flex flex-wrap justify-center gap-5 text-xs text-ink-500">
+      {[1, 2, 3].map(s => (
+        <span key={s} className="flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full" style={{ backgroundColor: scopeColor(s) }} /> Scope {s}
+        </span>
+      ))}
     </div>
   )
+}
+
+function ScopeChip({ scope, short }: { scope: number; short?: boolean }) {
+  const tone = scope === 1 ? 'forest' : scope === 2 ? 'gold' : 'neutral'
+  return <Badge tone={tone}>{short ? scope : `Scope ${scope}`}</Badge>
 }
