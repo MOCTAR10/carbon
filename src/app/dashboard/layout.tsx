@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
   Leaf, LayoutDashboard, Building2, ClipboardList, BarChart3,
-  LogOut, Menu, X, ChevronRight, User, Award, CreditCard, Bot,
+  LogOut, Menu, X, ChevronRight, User, Award, Bot,
 } from 'lucide-react'
 import LoadingScreen from '@/components/LoadingScreen'
 import NotificationBell from '@/components/NotificationBell'
@@ -18,7 +18,6 @@ interface UserData {
   phone: string
   company: { id: number; name: string; logoUrl: string | null }
   role: string
-  subscription: { id: number; plan: string; status: string; expiresAt: string } | null
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -40,10 +39,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           return
         }
         setUser(data)
-        if (!data.subscription) {
-          router.push('/subscription')
-          return
-        }
         setLoading(false)
       })
       .catch(() => {
@@ -63,7 +58,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: '/dashboard/reports',          label: 'Rapports & Graphiques', icon: BarChart3 },
     { href: '/dashboard/certifications',   label: 'Bilans Certifiés',    icon: Award },
     { href: '/dashboard/assistant',        label: 'Assistant IA',        icon: Bot },
-    { href: '/dashboard/abonnement',       label: 'Abonnement',          icon: CreditCard },
   ]
 
   if (loading) return <LoadingScreen theme="light" label="Chargement du tableau de bord" />

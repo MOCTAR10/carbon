@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FileCheck, Clock, Award, ChevronRight, Loader2 } from 'lucide-react'
+import QRCodeImage from '@/components/QRCodeImage'
 
 interface CncCertification {
   id: number
@@ -127,6 +128,11 @@ export default function CncCertificationsPage() {
                 }`}>
                   {cert.status === 'submitted_to_cnc' ? 'En attente' : 'Certificat émis'}
                 </span>
+                {cert.status === 'certificate_generated' && cert.certificateNumber && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <QRCodeImage certNumber={cert.certificateNumber} size={48} />
+                  </div>
+                )}
                 <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-emerald-500 transition-colors" />
               </div>
             </button>

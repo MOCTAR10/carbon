@@ -4,7 +4,7 @@ import Link from 'next/link'
 import {
   Leaf, BarChart3, Building2, Shield, ArrowRight, FileCheck,
   BadgeCheck, Bot, FileText, CheckCircle2, ChevronRight,
-  Users, Globe2, ClipboardList, UserCheck, Phone, Smartphone,
+  Users, Globe2, ClipboardList, UserCheck, Smartphone,
 } from 'lucide-react'
 
 export default function HomePage() {
@@ -19,6 +19,11 @@ export default function HomePage() {
               <Leaf className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900">CarbonTrack</span>
+            <svg className="w-5 h-5 rounded-sm shadow-sm ml-0.5" viewBox="0 0 3 2" aria-label="Gabon">
+              <rect width="3" height="0.67" fill="#009E60" />
+              <rect y="0.66" width="3" height="0.67" fill="#FCD116" />
+              <rect y="1.33" width="3" height="0.67" fill="#3A75C4" />
+            </svg>
           </div>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
@@ -26,7 +31,6 @@ export default function HomePage() {
             <a href="#workflow" className="hover:text-brand-600 transition-colors">Comment ça marche</a>
             <a href="#mobile" className="hover:text-brand-600 transition-colors">Application</a>
             <a href="#assistant" className="hover:text-brand-600 transition-colors">Assistant IA</a>
-            <a href="#pricing" className="hover:text-brand-600 transition-colors">Tarifs</a>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -384,117 +388,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Pricing ─────────────────────────────────────────────────────────── */}
-      <section className="py-16 px-6 bg-white" id="pricing">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Tarification claire et transparente</h2>
-            <p className="text-gray-500 text-sm max-w-xl mx-auto">
-              L&apos;accès à la plateforme et la certification nationale sont deux services distincts.
-            </p>
-          </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-
-            {/* ── Card 1: Platform access ── */}
-            <div className="card p-0 overflow-hidden border-2 border-brand-200 shadow-xl">
-              <div className="bg-brand-600 px-6 py-5 text-center text-white">
-                <p className="text-brand-100 text-xs font-medium mb-1 uppercase tracking-wider">Accès Plateforme</p>
-                <div className="flex items-baseline justify-center gap-2">
-                  <span className="text-4xl font-bold">3 000 000</span>
-                  <span className="text-brand-200">FCFA</span>
-                </div>
-                <p className="text-brand-200 text-sm mt-0.5">par an · par entreprise</p>
-              </div>
-
-              <div className="p-6">
-                <p className="text-xs text-gray-500 mb-4 leading-relaxed">
-                  Accès complet à toutes les fonctionnalités de la plateforme pour réaliser
-                  et gérer vos bilans GES, générer vos rapports PDF et suivre vos certifications.
-                </p>
-                <div className="grid grid-cols-2 gap-2 mb-6">
-                  {[
-                    'Bilan GES Scope 1, 2 & 3',
-                    'Soumission de dossier',
-                    'Application mobile',
-                    'Rapports PDF professionnels',
-                    'Grille d\'audit 6 sections',
-                    'Portail expert dédié',
-                    'Assistant IA carbone',
-                    'Sites illimités',
-                    'Historique multi-années',
-                    'Support technique inclus',
-                  ].map((item) => (
-                    <div key={item} className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-brand-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Shield className="w-2.5 h-2.5 text-brand-600" />
-                      </div>
-                      <span className="text-xs text-gray-700">{item}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <Link href="/register" className="btn-primary w-full flex items-center justify-center gap-2 py-2.5">
-                  Commencer maintenant <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-
-            {/* ── Card 2: National certification ── */}
-            <div className="card p-0 overflow-hidden border-2 border-gray-200 shadow-sm">
-              <div className="bg-gray-800 px-6 py-5 text-center text-white">
-                <p className="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wider">Certification Nationale</p>
-                <div className="flex items-baseline justify-center gap-2">
-                  <span className="text-3xl font-bold">Sur devis</span>
-                </div>
-                <p className="text-gray-400 text-sm mt-0.5">Tarif selon la taille et le secteur</p>
-              </div>
-
-              <div className="p-6">
-                <p className="text-xs text-gray-500 mb-4 leading-relaxed">
-                  La certification officielle GreenLeaves inclut l&apos;audit terrain par un expert agréé,
-                  la revue complète du dossier et l&apos;émission du certificat avec numéro CT-GL.
-                  Ce service est distinct de l&apos;abonnement plateforme.
-                </p>
-                <div className="space-y-2.5 mb-6">
-                  {[
-                    { label: 'Audit terrain par expert GreenLeaves', included: true },
-                    { label: 'Revue et validation du dossier GES',   included: true },
-                    { label: 'Certificat officiel numéroté CT-GL',   included: true },
-                    { label: 'Rapport d\'audit expert PDF',           included: true },
-                    { label: 'Tarif variable selon secteur',          included: null },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        item.included === true ? 'bg-brand-100' : 'bg-gray-100'
-                      }`}>
-                        {item.included === true
-                          ? <Shield className="w-2.5 h-2.5 text-brand-600" />
-                          : <span className="text-gray-400 text-[8px] font-bold">i</span>
-                        }
-                      </div>
-                      <span className="text-xs text-gray-700">{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <a
-                  href="mailto:contact@carbontrack.ga"
-                  className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-gray-300 hover:border-brand-400 hover:text-brand-600 text-gray-700 font-semibold rounded-xl transition-colors text-sm"
-                >
-                  <Phone className="w-4 h-4" />
-                  Contacter l&apos;équipe technique
-                </a>
-
-                <p className="text-center text-xs text-gray-400 mt-3">
-                  Accessible depuis votre tableau de bord après abonnement
-                </p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
 
       {/* ── CTA ─────────────────────────────────────────────────────────────── */}
       <section className="py-14 px-6 bg-gray-950">

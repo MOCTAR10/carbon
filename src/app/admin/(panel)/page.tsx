@@ -3,26 +3,24 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import {
-  Building2, Users, CreditCard, Award, TrendingUp,
-  AlertCircle, Leaf, BarChart3, FileCheck, RefreshCw,
-  UserCheck, Clock, CheckCircle2, XCircle, Activity,
-  ArrowRight, Globe2,
+  Building2, Users, Award,
+  AlertCircle, BarChart3, RefreshCw,
+  UserCheck, CheckCircle2, XCircle, Activity,
+  ArrowRight, Globe2, Send,
 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 interface Stats {
   companies: number
   users: number
-  activeSubscriptions: number
-  totalRevenue: number
   assessments: number
   totalEmissions: number
   certifications: number
+  glCertifications: number
   experts: number
   certByStatus: Record<string, number>
   recentCompanies: {
     id: number; name: string; sector: string; createdAt: string
-    userCount: number; assessmentCount: number; hasActiveSub: boolean
+    userCount: number; assessmentCount: number
   }[]
   recentCerts: {
     id: number; status: string; requestedAt: string; updatedAt: string
@@ -30,9 +28,8 @@ interface Stats {
     assessmentName: string; assessmentYear: number
     companyName: string; companySector: string
   }[]
-  expiringSoon: { name: string; expiresAt: string; daysLeft: number }[]
-  monthlyRevenue: { month: string; revenue: number; count: number }[]
   expertWorkload: { expert_name: string; total: number; active: number }[]
+  cncStats: { pending: number; completed: number; total: number }
 }
 
 const SECTORS: Record<string, string> = {
@@ -48,24 +45,18 @@ const SECTORS: Record<string, string> = {
 }
 
 const CERT_STATUS: Record<string, { label: string; dot: string; badge: string }> = {
-  pending:    { label: 'En attente',    dot: 'bg-yellow-400', badge: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30' },
-  assigned:   { label: 'Assigné',       dot: 'bg-blue-400',   badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
-  in_progress:{ label: 'En cours',      dot: 'bg-violet-400', badge: 'bg-violet-500/15 text-violet-300 border-violet-500/30' },
-  audit_done: { label: 'Audit terminé', dot: 'bg-purple-400', badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30' },
-  certified:  { label: 'Certifié ✓',   dot: 'bg-green-400',  badge: 'bg-green-500/15 text-green-300 border-green-500/30' },
-  rejected:   { label: 'Rejeté',        dot: 'bg-red-400',    badge: 'bg-red-500/15 text-red-300 border-red-500/30' },
+  pending:    { label: 'En attente',       dot: 'bg-yellow-400', badge: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30' },
+  assigned:   { label: 'Assigné',          dot: 'bg-blue-400',   badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
+  in_progress:{ label: 'En cours',         dot: 'bg-violet-400', badge: 'bg-violet-500/15 text-violet-300 border-violet-500/30' },
+  audit_done: { label: 'Audit terminé',    dot: 'bg-purple-400', badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30' },
+  certified:  { label: 'Certifié ✓',      dot: 'bg-green-400',  badge: 'bg-green-500/15 text-green-300 border-green-500/30' },
+  submitted_to_cnc:    { label: 'Transmis au CNC',    dot: 'bg-amber-400', badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
+  certificate_generated:{ label: 'Certificat CNC émis', dot: 'bg-emerald-400', badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
+  rejected:   { label: 'Rejeté',          dot: 'bg-red-400',    badge: 'bg-red-500/15 text-red-300 border-red-500/30' },
 }
 
-function fmtFCFA(n: number) {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M FCFA`
-  if (n >= 1_000)     return `${(n / 1_000).toFixed(0)}K FCFA`
-  return `${n.toLocaleString()} FCFA`
-}
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-function fmtMonth(m: string) {
-  return new Date(m).toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' })
 }
 function fmtTons(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M tCO₂e`
@@ -107,8 +98,6 @@ export default function AdminDashboard() {
         const data = await res.json()
         data.recentCompanies ??= []
         data.recentCerts     ??= []
-        data.expiringSoon    ??= []
-        data.monthlyRevenue  ??= []
         data.expertWorkload  ??= []
         data.certByStatus    ??= {}
         setStats(data)
@@ -145,12 +134,6 @@ export default function AdminDashboard() {
   const certifiedCount = stats.certByStatus['certified']   || 0
   const rejectedCount  = stats.certByStatus['rejected']    || 0
 
-  const revenueChartData = stats.monthlyRevenue.map(r => ({
-    month: fmtMonth(r.month),
-    revenue: +(r.revenue / 1_000_000).toFixed(2),
-    count: r.count,
-  }))
-
   const pipelineSteps = [
     { label: 'En attente',  value: pendingCerts,   color: '#eab308' },
     { label: 'En cours',    value: assignedCerts,  color: '#8b5cf6' },
@@ -161,6 +144,9 @@ export default function AdminDashboard() {
   const certRate = stats.certifications > 0
     ? Math.round((certifiedCount / stats.certifications) * 100)
     : 0
+
+  const cncPending  = stats.cncStats?.pending ?? 0
+  const cncComplete = stats.cncStats?.completed ?? 0
 
   return (
     <div className="space-y-6">
@@ -186,47 +172,65 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* ── Expiry alerts ── */}
-      {stats.expiringSoon.length > 0 && (
-        <div className="bg-amber-900/20 border border-amber-700/40 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-4 h-4 text-amber-400" />
-            <span className="text-sm font-semibold text-amber-300">{stats.expiringSoon.length} abonnement{stats.expiringSoon.length > 1 ? 's' : ''} expire bientôt</span>
+      {/* ── Row 1: Platform KPIs ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <KPI label="Entreprises"        value={stats.companies}           icon={Building2}  color="bg-blue-600"
+             sub={`${stats.companies} inscrites`} />
+        <KPI label="Utilisateurs"       value={stats.users}               icon={Users}      color="bg-indigo-600"
+             sub={`${stats.experts} experts`} />
+        <KPI label="Bilans carbone"     value={stats.assessments}         icon={BarChart3}  color="bg-orange-600"
+             sub={`${fmtTons(stats.totalEmissions)}`} />
+        <KPI label="Certifications"     value={stats.certifications}      icon={Award}      color="bg-yellow-600"
+             sub={`${certRate}% succès · ${rejectedCount} rejeté${rejectedCount > 1 ? 's' : ''}`} />
+        <KPI label="Certifications GreenLeaves" value={stats.glCertifications} icon={CheckCircle2} color="bg-emerald-600"
+             sub={`${stats.certifications > 0 ? Math.round((stats.glCertifications / stats.certifications) * 100) : 0}% des demandes`} />
+      </div>
+
+      {/* ── Row 2: Key status indicators + CNC pipeline ── */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 bg-brand-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Globe2 className="w-5 h-5 text-brand-400" />
           </div>
-          <div className="flex flex-wrap gap-2">
-            {stats.expiringSoon.map(e => (
-              <div key={e.name} className="flex items-center gap-2 bg-gray-800 border border-amber-700/30 rounded-lg px-3 py-1.5">
-                <span className="text-sm text-white">{e.name}</span>
-                <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${e.daysLeft <= 7 ? 'bg-red-500/20 text-red-300' : 'bg-amber-500/20 text-amber-300'}`}>
-                  {e.daysLeft}j
-                </span>
-              </div>
-            ))}
+          <div>
+            <p className="text-xs text-gray-400">Émissions comptabilisées</p>
+            <p className="text-lg font-bold text-white">{fmtTons(stats.totalEmissions)}</p>
           </div>
         </div>
-      )}
-
-      {/* ── Top KPIs ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <KPI label="Entreprises"       value={stats.companies}           icon={Building2}  color="bg-blue-600" />
-        <KPI label="Abonnements actifs" value={stats.activeSubscriptions}  icon={CreditCard} color="bg-brand-600"
-             sub={`${stats.companies - stats.activeSubscriptions} inactif${stats.companies - stats.activeSubscriptions > 1 ? 's' : ''}`} />
-        <KPI label="Revenu total"      value={fmtFCFA(stats.totalRevenue)} icon={TrendingUp}  color="bg-emerald-600" />
-        <KPI label="Experts GreenLeaves" value={stats.experts}            icon={UserCheck}  color="bg-violet-600" />
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 bg-green-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <CheckCircle2 className="w-5 h-5 text-green-400" />
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Taux de certification</p>
+            <p className="text-lg font-bold text-white">{certRate}%</p>
+            <p className="text-xs text-gray-500">{certifiedCount} certifiés / {stats.certifications} total</p>
+          </div>
+        </div>
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 bg-red-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <XCircle className="w-5 h-5 text-red-400" />
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">En attente d&apos;assignation</p>
+            <p className="text-lg font-bold text-white">{pendingCerts}</p>
+            <Link href="/admin/certifications" className="text-xs text-brand-400 hover:text-brand-300">Traiter →</Link>
+          </div>
+        </div>
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 bg-amber-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Send className="w-5 h-5 text-amber-400" />
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Transmis au CNC</p>
+            <p className="text-lg font-bold text-white">{cncPending}</p>
+            <span className="text-xs text-gray-500">{cncComplete} certif. émis</span>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <KPI label="Utilisateurs"       value={stats.users}              icon={Users}       color="bg-indigo-600" />
-        <KPI label="Bilans carbone"     value={stats.assessments}        icon={BarChart3}   color="bg-orange-600" />
-        <KPI label="Certifications"     value={stats.certifications}     icon={Award}       color="bg-yellow-600"
-             sub={`${certRate}% de succès`} />
-        <KPI label="Émissions totales"  value={fmtTons(stats.totalEmissions)} icon={Leaf}   color="bg-teal-600" />
-      </div>
-
-      {/* ── Certification pipeline + pending action ── */}
+      {/* ── Row 3: Certification pipeline + Expert workload ── */}
       <div className="grid lg:grid-cols-3 gap-4">
-
-        {/* Pipeline bar */}
         <div className="lg:col-span-2 bg-gray-800 border border-gray-700 rounded-xl p-5">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
@@ -262,8 +266,6 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
-
-        {/* Expert workload */}
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-4">
             <UserCheck className="w-4 h-4 text-violet-400" />
@@ -293,82 +295,53 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Charts row ── */}
-      <div className="grid lg:grid-cols-2 gap-4">
-
-        {/* Monthly revenue */}
+      {/* ── Row 4: CNC stats ── */}
+      <div className="grid lg:grid-cols-1 gap-4">
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
-              <h2 className="text-sm font-semibold text-white">Revenus — 6 derniers mois (M FCFA)</h2>
+              <Send className="w-4 h-4 text-emerald-400" />
+              <h2 className="text-sm font-semibold text-white">Flux CNC</h2>
             </div>
-          </div>
-          {revenueChartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={revenueChartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
-                <XAxis dataKey="month" tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: 8, fontSize: 12 }}
-                  labelStyle={{ color: '#f9fafb', fontWeight: 600 }}
-                  formatter={(v: number) => [`${v.toFixed(2)}M FCFA`, 'Revenu']}
-                />
-                <Bar dataKey="revenue" radius={[4, 4, 0, 0]}>
-                  {revenueChartData.map((_, i) => (
-                    <Cell key={i} fill={i === revenueChartData.length - 1 ? '#22c55e' : '#16a34a'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[200px] flex items-center justify-center text-gray-600 text-sm">
-              Pas encore de données
-            </div>
-          )}
-        </div>
-
-        {/* Recent companies */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-blue-400" />
-              <h2 className="text-sm font-semibold text-white">Dernières entreprises</h2>
-            </div>
-            <Link href="/admin/companies" className="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1">
-              Voir tout <ArrowRight className="w-3 h-3" />
+            <Link href="/admin/certifications?status=submitted_to_cnc" className="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1">
+              Voir <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="space-y-2.5">
-            {stats.recentCompanies.length === 0 && (
-              <p className="text-gray-500 text-sm">Aucune entreprise.</p>
-            )}
-            {stats.recentCompanies.map(c => (
-              <div key={c.id} className="flex items-center justify-between py-1.5">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-7 h-7 bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-3.5 h-3.5 text-gray-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{c.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {SECTORS[c.sector] || c.sector || '—'} · {c.assessmentCount} bilan{c.assessmentCount > 1 ? 's' : ''}
-                    </p>
-                  </div>
-                </div>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border flex-shrink-0 ml-2 ${
-                  c.hasActiveSub ? 'bg-green-500/15 text-green-300 border-green-500/30' : 'bg-red-500/15 text-red-400 border-red-500/30'
-                }`}>
-                  {c.hasActiveSub ? 'Actif' : 'Inactif'}
-                </span>
+          <div className="flex items-center gap-6 py-6">
+            <div className="text-center flex-1">
+              <div className="text-3xl font-bold text-white">{cncPending}</div>
+              <div className="flex items-center justify-center gap-1.5 mt-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span className="text-xs text-gray-400">En attente</span>
               </div>
-            ))}
+              <div className="mt-2 h-1.5 rounded-full bg-gray-700 overflow-hidden">
+                <div className={`h-full rounded-full bg-amber-500 transition-all`}
+                  style={{ width: stats.cncStats && stats.cncStats.total > 0 ? `${(cncPending / stats.cncStats.total) * 100}%` : '0%' }} />
+              </div>
+            </div>
+            <div className="text-gray-600 text-2xl font-light">→</div>
+            <div className="text-center flex-1">
+              <div className="text-3xl font-bold text-white">{cncComplete}</div>
+              <div className="flex items-center justify-center gap-1.5 mt-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span className="text-xs text-gray-400">Certificats émis</span>
+              </div>
+              <div className="mt-2 h-1.5 rounded-full bg-gray-700 overflow-hidden">
+                <div className={`h-full rounded-full bg-emerald-500 transition-all`}
+                  style={{ width: stats.cncStats && stats.cncStats.total > 0 ? `${(cncComplete / stats.cncStats.total) * 100}%` : '0%' }} />
+              </div>
+            </div>
           </div>
+          {stats.cncStats && stats.cncStats.total > 0 && (
+            <p className="text-center text-xs text-gray-500">{stats.cncStats.total} dossier{stats.cncStats.total > 1 ? 's' : ''} passé{stats.cncStats.total > 1 ? 's' : ''} par le CNC</p>
+          )}
+          {(!stats.cncStats || stats.cncStats.total === 0) && (
+            <p className="text-center text-xs text-gray-500 py-4">Aucun dossier transmis au CNC pour le moment</p>
+          )}
         </div>
       </div>
 
-      {/* ── Recent certifications ── */}
+      {/* ── Row 5: Recent certifications ── */}
       <div className="bg-gray-800 border border-gray-700 rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -423,39 +396,6 @@ export default function AdminDashboard() {
             </table>
           </div>
         )}
-      </div>
-
-      {/* ── Bottom indicators ── */}
-      <div className="grid sm:grid-cols-3 gap-4">
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 bg-brand-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Globe2 className="w-5 h-5 text-brand-400" />
-          </div>
-          <div>
-            <p className="text-xs text-gray-400">Émissions comptabilisées</p>
-            <p className="text-lg font-bold text-white">{fmtTons(stats.totalEmissions)}</p>
-          </div>
-        </div>
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
-            <CheckCircle2 className="w-5 h-5 text-green-400" />
-          </div>
-          <div>
-            <p className="text-xs text-gray-400">Taux de certification</p>
-            <p className="text-lg font-bold text-white">{certRate}%</p>
-            <p className="text-xs text-gray-500">{certifiedCount} certifiés / {stats.certifications} total</p>
-          </div>
-        </div>
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 bg-red-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
-            <XCircle className="w-5 h-5 text-red-400" />
-          </div>
-          <div>
-            <p className="text-xs text-gray-400">En attente d'assignation</p>
-            <p className="text-lg font-bold text-white">{pendingCerts}</p>
-            <Link href="/admin/certifications" className="text-xs text-brand-400 hover:text-brand-300">Traiter →</Link>
-          </div>
-        </div>
       </div>
 
     </div>

@@ -47,20 +47,45 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 1. Full-text search in rag_chunks ──────────────────────────────────────
-  // Use plainto_tsquery which handles natural language (no operators needed)
 
+  const FRENCH_STOP = new Set([
+    'le','la','les','un','une','des','du','de','ce','cet','cette','ces',
+    'mon','ma','mes','ton','ta','tes','son','sa','ses',
+    'notre','nos','votre','vos','leur','leurs',
+    'je','tu','il','elle','nous','vous','ils','elles',
+    'me','te','se','lui','y','en',
+    'ce','cet','cette','ces',
+    'et','mais','ou','donc','car','ni','or',
+    'sur','sous','dans','avec','pour','par','en','vers','chez','entre',
+    'est','sont','a','ai','avons','avez','ont','etaient','seront',
+    'fait','faire','peut','peuvent','doit','doivent','veut','veulent',
+    'qui','que','quoi','dont','ou',
+    'au','aux','auxquels','auquel',
+    'quel','quelle','quels','quelles',
+    'plus','moins','tres','bien','mal','pas',
+    'si','non','oui',
+  ])
+
+  // Normalise accents and extract significant (non-stop) words
+  const normalise = (s: string) =>
+    s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9\s-]/g, ' ')
+
+  const cleaned = normalise(question)
+  const words = cleaned.split(/\s+/).filter(w => w.length >= 3 && !FRENCH_STOP.has(w.toLowerCase()))
+
+  // Try FTS with accent-normalised tsquery
   let searchSql = `
     SELECT
       rc.content,
       rc.methodology_code,
       rd.title as document_title,
       rc.chunk_index,
-      ts_rank(rc.search_vector, plainto_tsquery('english', $1)) as rank
+      ts_rank(rc.search_vector, plainto_tsquery('french', $1)) as rank
     FROM rag_chunks rc
     JOIN rag_documents rd ON rd.id = rc.document_id
-    WHERE rc.search_vector @@ plainto_tsquery('english', $1)`
+    WHERE rc.search_vector @@ plainto_tsquery('french', $1)`
 
-  const vals: (string | null)[] = [question]
+  const vals: (string | null)[] = [cleaned]
 
   if (methodologyFilter) {
     searchSql += ` AND rc.methodology_code = $2`
@@ -69,21 +94,38 @@ export async function POST(req: NextRequest) {
 
   searchSql += ` ORDER BY rank DESC LIMIT 6`
 
-  const chunkRes = await query(searchSql, vals)
+  let chunkRes = await query(searchSql, vals)
 
-  // If FTS finds nothing, fall back to ILIKE keyword search
+  // FTS with explicit significant words (unaccent FTS on both sides)
   let chunks = chunkRes.rows
-  if (chunks.length === 0) {
-    const words = question.split(/\s+/).slice(0, 4).join(' | ')
-    const fallback = await query(
+
+  if (chunks.length === 0 && words.length > 0) {
+    const explicitQuery = words.map(w => `"${w}"`).join(' & ')
+    chunkRes = await query(
+      `SELECT rc.content, rc.methodology_code, rd.title as document_title, rc.chunk_index,
+              ts_rank(rc.search_vector, to_tsquery('french', $1)) as rank
+       FROM rag_chunks rc
+       JOIN rag_documents rd ON rd.id = rc.document_id
+       WHERE rc.search_vector @@ to_tsquery('french', $1)
+       ORDER BY rank DESC LIMIT 6`,
+      [explicitQuery]
+    )
+    chunks = chunkRes.rows
+  }
+
+  // If still nothing, fall back to ILIKE on the first two significant words
+  if (chunks.length === 0 && words.length > 0) {
+    const topWords = words.slice(0, 2)
+    const likes = topWords.map((_, i) => `rc.content ILIKE '%' || $${i + 1} || '%'`).join(' OR ')
+    chunkRes = await query(
       `SELECT rc.content, rc.methodology_code, rd.title as document_title, rc.chunk_index, 0 as rank
        FROM rag_chunks rc
        JOIN rag_documents rd ON rd.id = rc.document_id
-       WHERE rc.content ILIKE $1
-       LIMIT 4`,
-      [`%${words.split(' | ')[0]}%`]
+       WHERE ${likes}
+       LIMIT 6`,
+      topWords
     )
-    chunks = fallback.rows
+    chunks = chunkRes.rows
   }
 
   // ── 2. Build context string ────────────────────────────────────────────────

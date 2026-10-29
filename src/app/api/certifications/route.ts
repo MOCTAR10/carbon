@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { getSession } from '@/lib/auth'
-import { notifyAllAdmins } from '@/lib/notifications'
+import { notifyAllAdmins, notifyAllCnc } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -147,12 +147,18 @@ export async function POST(request: NextRequest) {
     const newCertId = result.rows[0].id
     const assessmentName = assessment.rows[0].name
 
-    // Notify all admins about the new request
+    // Notify all admins and CNC about the new request
     await notifyAllAdmins(
       'cert_request',
       'Nouvelle demande de certification',
       `${assessmentName} — demande soumise par l'entreprise`,
       `/admin/certifications/${newCertId}`
+    )
+    await notifyAllCnc(
+      'cert_request',
+      'Nouveau dossier à certifier',
+      `${assessmentName} — nouvelle demande soumise par l'entreprise`,
+      `/cnc/certifications/${newCertId}`
     )
 
     return NextResponse.json({

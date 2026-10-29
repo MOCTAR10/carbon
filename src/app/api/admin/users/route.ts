@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     const countResult = await query(
-      `SELECT COUNT(*) as count FROM users u JOIN companies c ON u.company_id = c.id ${whereClause}`,
+      `SELECT COUNT(*) as count FROM users u LEFT JOIN companies c ON u.company_id = c.id ${whereClause}`,
       params
     )
 
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       `SELECT u.id, u.email, u.first_name, u.last_name, u.phone, u.role, u.created_at,
               c.id as company_id, c.name as company_name
        FROM users u
-       JOIN companies c ON u.company_id = c.id
+       LEFT JOIN companies c ON u.company_id = c.id
        ${whereClause}
        ORDER BY u.created_at DESC
        LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         phone: u.phone,
         role: u.role,
         createdAt: u.created_at,
-        company: { id: u.company_id, name: u.company_name },
+        company: u.company_id ? { id: u.company_id, name: u.company_name } : null,
       })),
       total: parseInt(countResult.rows[0].count),
       page,
@@ -81,8 +81,11 @@ export async function POST(request: NextRequest) {
 
     const { firstName, lastName, email, password, phone, companyId, role } = await request.json()
 
-    if (!firstName || !lastName || !email || !password || !companyId) {
+    if (!firstName || !lastName || !email || !password) {
       return NextResponse.json({ error: 'Tous les champs obligatoires doivent Ãªtre remplis' }, { status: 400 })
+    }
+    if (role === 'user' && !companyId) {
+      return NextResponse.json({ error: 'L\'entreprise est requise pour ce rÃ´le' }, { status: 400 })
     }
 
     if (!['user', 'admin', 'expert', 'cnc'].includes(role)) {
@@ -95,10 +98,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Un compte avec cet email existe dÃ©jÃ ' }, { status: 409 })
     }
 
-    // Verify company exists
-    const company = await query('SELECT id FROM companies WHERE id = $1', [companyId])
-    if (company.rows.length === 0) {
-      return NextResponse.json({ error: 'Entreprise introuvable' }, { status: 404 })
+    // Verify company exists (skip for system roles — expert, cnc, admin)
+    if (companyId) {
+      const company = await query('SELECT id FROM companies WHERE id = $1', [companyId])
+      if (company.rows.length === 0) {
+        return NextResponse.json({ error: 'Entreprise introuvable' }, { status: 404 })
+      }
     }
 
     const passwordHash = await hashPassword(password)
@@ -107,7 +112,7 @@ export async function POST(request: NextRequest) {
       `INSERT INTO users (first_name, last_name, email, password_hash, phone, company_id, role)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id, email, first_name, last_name, role, created_at`,
-      [firstName, lastName, email, passwordHash, phone || null, companyId, role]
+      [firstName, lastName, email, passwordHash, phone || null, companyId || null, role]
     )
 
     const u = result.rows[0]

@@ -102,48 +102,6 @@ export default function CncDashboardPage() {
         </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4">Actions rapides</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button
-            onClick={() => router.push('/cnc/certifications?filter=pending')}
-            className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors text-left"
-          >
-            <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
-              <Clock className="w-5 h-5 text-amber-500" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Dossiers en attente</p>
-              <p className="text-xs text-gray-500">Traiter les nouveaux dossiers</p>
-            </div>
-          </button>
-          <button
-            onClick={() => router.push('/cnc/certifications')}
-            className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors text-left"
-          >
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
-              <FileCheck className="w-5 h-5 text-emerald-500" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Tous les dossiers</p>
-              <p className="text-xs text-gray-500">Consulter l&apos;historique complet</p>
-            </div>
-          </button>
-          <button
-            onClick={() => router.push('/cnc/certificats')}
-            className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors text-left"
-          >
-            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-              <Award className="w-5 h-5 text-blue-500" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Certificats émis</p>
-              <p className="text-xs text-gray-500">Voir les certificats générés</p>
-            </div>
-          </button>
-        </div>
-      </div>
 
       {/* Pending certifications */}
       {pending.length > 0 && (

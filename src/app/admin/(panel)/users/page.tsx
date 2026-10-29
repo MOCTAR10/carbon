@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Search, ChevronLeft, ChevronRight,
-  ShieldCheck, User, UserPlus, X, Eye, EyeOff, AlertCircle, CheckCircle, UserCheck
+  ShieldCheck, User, UserPlus, X, Eye, EyeOff, AlertCircle, CheckCircle, UserCheck, Send
 } from 'lucide-react'
 
 interface UserRow {
@@ -31,23 +31,27 @@ const ROLE_STYLE: Record<string, string> = {
   admin:  'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
   user:   'bg-gray-700 text-gray-400 border-gray-600',
   expert: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  cnc:    'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
 }
 
 function RoleIcon({ role }: { role: string }) {
   if (role === 'admin') return <ShieldCheck className="w-4 h-4 text-yellow-400" />
   if (role === 'expert') return <UserCheck className="w-4 h-4 text-blue-400" />
+  if (role === 'cnc') return <Send className="w-4 h-4 text-emerald-400" />
   return <User className="w-4 h-4 text-gray-400" />
 }
 
 function RoleAvatarBg(role: string) {
   if (role === 'admin') return 'bg-yellow-500/20'
   if (role === 'expert') return 'bg-blue-500/20'
+  if (role === 'cnc') return 'bg-emerald-500/20'
   return 'bg-gray-700'
 }
 
 function RoleLabel(role: string) {
   if (role === 'admin') return 'Administrateur'
   if (role === 'expert') return 'Expert'
+  if (role === 'cnc') return 'CNC'
   return 'Utilisateur'
 }
 
@@ -100,7 +104,11 @@ export default function AdminUsers() {
     const res = await fetch('/api/admin/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, companyId: parseInt(form.companyId), role: 'user' }),
+      body: JSON.stringify({
+        ...form,
+        companyId: form.companyId ? parseInt(form.companyId) : null,
+        role: form.role || 'user',
+      }),
     })
     const data = await res.json()
     if (!res.ok) {
@@ -163,6 +171,7 @@ export default function AdminUsers() {
           <option value="user">Utilisateur</option>
           <option value="admin">Administrateur</option>
           <option value="expert">Expert</option>
+          <option value="cnc">CNC</option>
         </select>
         <button
           onClick={() => loadUsers(1)}
@@ -205,7 +214,7 @@ export default function AdminUsers() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-300 hidden md:table-cell">{u.company.name}</td>
+                  <td className="px-4 py-3 text-gray-300 hidden md:table-cell">{u.company?.name || '—'}</td>
                   <td className="px-4 py-3 text-gray-400 text-xs hidden lg:table-cell">{u.phone || '—'}</td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border font-medium ${ROLE_STYLE[u.role] || ROLE_STYLE.user}`}>
@@ -301,20 +310,34 @@ export default function AdminUsers() {
                   </button>
                 </div>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">Téléphone</label>
-                <input type="tel" placeholder="+242 06 000 0000"
-                  value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-600 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Téléphone</label>
+                  <input type="tel" placeholder="+242 06 000 0000"
+                    value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                    className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-600 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-500" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Rôle *</label>
+                  <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
+                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-500">
+                    <option value="user">Utilisateur (entreprise)</option>
+                    <option value="expert">Expert GreenLeaves</option>
+                    <option value="cnc">Membre CNC</option>
+                    <option value="admin">Administrateur</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">Entreprise *</label>
-                <select required value={form.companyId} onChange={e => setForm(f => ({ ...f, companyId: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-500">
-                  <option value="">Sélectionner...</option>
-                  {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
+              {form.role === 'user' && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Entreprise *</label>
+                  <select required value={form.companyId} onChange={e => setForm(f => ({ ...f, companyId: e.target.value }))}
+                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-500">
+                    <option value="">Sélectionner...</option>
+                    {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              )}
 
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={resetForm}

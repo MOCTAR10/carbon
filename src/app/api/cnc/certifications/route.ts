@@ -13,7 +13,7 @@ export async function GET() {
 
     const result = await query(`
       SELECT cr.id, cr.status, cr.certificate_number, cr.certified_at,
-             cr.submitted_to_cnc_at, cr.cnc_reviewed_at, cr.cnc_certificate_generated_at,
+             cr.submitted_to_ogec_at, cr.cnc_reviewed_at, cr.cnc_certificate_generated_at,
              cr.cnc_notes,
              a.name as assessment_name, a.year as assessment_year,
              a.total_co2eq,
@@ -25,7 +25,7 @@ export async function GET() {
       JOIN companies c ON cr.company_id = c.id
       WHERE cr.cnc_user_id = $1
         AND cr.status IN ('submitted_to_cnc', 'certificate_generated')
-      ORDER BY cr.submitted_to_cnc_at DESC NULLS LAST
+      ORDER BY cr.submitted_to_ogec_at DESC NULLS LAST
     `, [session.userId])
 
     const certifications = result.rows.map(r => ({
@@ -33,7 +33,7 @@ export async function GET() {
       status: r.status,
       certificateNumber: r.certificate_number,
       certifiedAt: r.certified_at,
-      submittedToCncAt: r.submitted_to_cnc_at,
+      submittedToCncAt: r.submitted_to_ogec_at,
       cncReviewedAt: r.cnc_reviewed_at,
       cncCertificateGeneratedAt: r.cnc_certificate_generated_at,
       cncNotes: r.cnc_notes,

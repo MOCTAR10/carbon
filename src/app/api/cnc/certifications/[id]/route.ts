@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
-import { createNotification, notifyCompanyUsers } from '@/lib/notifications'
+import { createNotification, notifyCompanyUsers, notifyAllAdmins } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
          cr.certified_at, cr.certificate_number, cr.certificate_number as gl_certificate_number,
          cr.company_message, cr.admin_notes,
          cr.expert_name, cr.expert_email, cr.expert_user_id,
-         cr.cnc_user_id, cr.submitted_to_cnc_at, cr.cnc_reviewed_at, cr.cnc_notes,
+         cr.cnc_user_id, cr.submitted_to_ogec_at, cr.cnc_reviewed_at, cr.cnc_notes,
          cr.cnc_certificate_pdf_url, cr.cnc_certificate_generated_at, cr.cnc_certificate_number,
          a.id as assessment_id, a.name as assessment_name, a.year as assessment_year,
          a.total_co2eq, a.scope1_co2eq, a.scope2_co2eq, a.scope3_co2eq,
@@ -103,6 +103,20 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       [certId]
     )
 
+    const auditDocsResult = await query(
+      `SELECT ad.id, ad.emission_factor_id, ad.original_name, ad.filename, ad.file_size, ad.mime_type, ad.created_at,
+              ee.factor_name, ee.category, ee.scope
+       FROM audit_documents ad
+       LEFT JOIN (
+         SELECT DISTINCT ON (emission_factor_id) emission_factor_id, factor_name, category, scope
+         FROM emission_entries
+         WHERE assessment_id = $1
+       ) ee ON ee.emission_factor_id = ad.emission_factor_id
+       WHERE ad.assessment_id = $1
+       ORDER BY ad.created_at DESC`,
+      [r.assessment_id]
+    )
+
     return NextResponse.json({
       id: r.id, status: r.status, requestedAt: r.requested_at, updatedAt: r.updated_at,
       inspectionDate: r.inspection_date, inspectionNotes: r.inspection_notes,
@@ -128,7 +142,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       adminNotes: r.admin_notes,
       expertName: r.expert_name, expertEmail: r.expert_email, expertUserId: r.expert_user_id,
       cncUserId: r.cnc_user_id,
-      submittedToCncAt: r.submitted_to_cnc_at,
+      submittedToCncAt: r.submitted_to_ogec_at,
       cncReviewedAt: r.cnc_reviewed_at,
       cncNotes: r.cnc_notes,
       cncCertificatePdfUrl: r.cnc_certificate_pdf_url,
@@ -144,6 +158,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       documents: docsResult.rows.map(d => ({
         id: d.id, docType: d.doc_type, originalName: d.original_name,
         fileSize: d.file_size, createdAt: d.created_at,
+      })),
+      auditDocuments: auditDocsResult.rows.map(d => ({
+        id: d.id, scope: d.scope, category: d.category,
+        factorName: d.factor_name, originalName: d.original_name,
+        fileSize: d.file_size, mimeType: d.mime_type, createdAt: d.created_at,
       })),
     })
   } catch (error) {
@@ -173,6 +192,30 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
          WHERE id = $2 AND cnc_user_id = $3`,
         [cncNotes || null, certId, session.userId]
       )
+
+      const revInfo = await query(
+        `SELECT cr.company_id, a.name as assessment_name, c.name as company_name
+         FROM certification_requests cr
+         JOIN assessments a ON a.id = cr.assessment_id
+         JOIN companies c ON c.id = cr.company_id
+         WHERE cr.id = $1`, [certId]
+      )
+      if (revInfo.rows.length > 0) {
+        const { company_id, assessment_name, company_name } = revInfo.rows[0]
+        await notifyCompanyUsers(
+          company_id,
+          'cert_comment',
+          'Avis CNC enregistré',
+          `Le CNC a enregistré son avis pour "${assessment_name}".`,
+          `/dashboard/certifications`
+        )
+        await notifyAllAdmins(
+          'cert_comment',
+          'Avis CNC enregistré',
+          `Le CNC a enregistré son avis pour "${assessment_name}" (${company_name}).`,
+          `/admin/certifications/${certId}`
+        )
+      }
     } else {
       return NextResponse.json({ error: 'Action invalide' }, { status: 400 })
     }

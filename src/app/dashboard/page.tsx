@@ -13,10 +13,6 @@ interface DashboardData {
     id: number; name: string; sector: string | null
     rccm: string | null; logoUrl: string | null
   }
-  subscription: {
-    id: number; plan: string; amount: number
-    status: string; expiresAt: string
-  } | null
   totals: { totalCo2eq: number; totalScope1: number; totalScope2: number; totalScope3: number }
   byCountry: Record<string, number>
   sites: Array<{ id: number; name: string; type: string; country: string | null; assessment_count: number }>
@@ -93,9 +89,8 @@ export default function DashboardPage() {
 
   if (!data) return null
 
-  const { company, subscription, totals, byCountry, sites, assessments, certifications, certCounts } = data
+  const { company, totals, byCountry, sites, assessments, certifications, certCounts } = data
   const countryStats = Object.entries(byCountry).sort((a, b) => b[1] - a[1])
-  const daysLeft = subscription ? Math.ceil((new Date(subscription.expiresAt).getTime() - Date.now()) / 86_400_000) : 0
 
   return (
     <div className="space-y-6">
@@ -135,21 +130,6 @@ export default function DashboardPage() {
           </Link>
         </div>
       </div>
-
-      {/* ── Subscription banner ── */}
-      {subscription && daysLeft <= 30 && (
-        <div className={`flex items-center gap-3 px-5 py-3 rounded-xl border text-sm ${
-          daysLeft <= 7
-            ? 'bg-red-50 border-red-200 text-red-800'
-            : 'bg-amber-50 border-amber-200 text-amber-800'
-        }`}>
-          <Clock className="w-4 h-4 flex-shrink-0" />
-          <span>
-            Votre abonnement expire {daysLeft <= 0 ? 'aujourd\'hui' : `dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`}.{' '}
-            <Link href="/subscription" className="underline font-semibold">Renouveler</Link>
-          </span>
-        </div>
-      )}
 
       {/* ── Emissions KPIs ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

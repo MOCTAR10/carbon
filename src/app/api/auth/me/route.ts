@@ -27,18 +27,6 @@ export async function GET(request: NextRequest) {
 
     const user = userResult.rows[0]
 
-    // Only fetch subscription for company users (admins/experts have no subscription)
-    let subscription = null
-    if (user.company_id) {
-      const subResult = await query(
-        `SELECT id, plan, status, expires_at, payment_method FROM subscriptions
-         WHERE company_id = $1 AND status = 'active' AND expires_at > NOW()
-         ORDER BY expires_at DESC LIMIT 1`,
-        [user.company_id]
-      )
-      subscription = subResult.rows.length > 0 ? subResult.rows[0] : null
-    }
-
     return NextResponse.json({
       id: user.id,
       email: user.email,
@@ -52,13 +40,6 @@ export async function GET(request: NextRequest) {
         rccm: user.rccm,
         sector: user.sector,
         logoUrl: user.logo_url || null,
-      } : null,
-      subscription: subscription ? {
-        id: subscription.id,
-        plan: subscription.plan,
-        status: subscription.status,
-        expiresAt: subscription.expires_at,
-        paymentMethod: subscription.payment_method,
       } : null,
     })
   } catch (error) {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Building2, Search, ChevronLeft, ChevronRight, X, Users, ClipboardList, CheckCircle, XCircle, Eye } from 'lucide-react'
+import { Building2, Search, ChevronLeft, ChevronRight, X, Users, ClipboardList, Eye } from 'lucide-react'
 
 interface Company {
   id: number
@@ -12,13 +12,11 @@ interface Company {
   userCount: number
   siteCount: number
   assessmentCount: number
-  subscription: { status: string; plan: string; expiresAt: string; amount: number } | null
 }
 
 interface CompanyDetail {
   company: { id: number; name: string; rccm: string; sector: string; createdAt: string }
   users: { id: number; email: string; firstName: string; lastName: string; phone: string; role: string; createdAt: string }[]
-  subscriptions: { id: number; plan: string; amount: number; currency: string; paymentMethod: string; status: string; startsAt: string; expiresAt: string; createdAt: string }[]
   sites: { id: number; name: string; type: string; address: string; assessmentCount: number }[]
 }
 
@@ -31,10 +29,6 @@ const SECTORS: Record<string, string> = {
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-function formatFCFA(n: number) {
-  return n.toLocaleString('fr-FR') + ' FCFA'
 }
 
 export default function AdminCompanies() {
@@ -121,17 +115,16 @@ export default function AdminCompanies() {
                 <th className="text-left text-gray-400 font-medium px-4 py-3 hidden md:table-cell">Secteur</th>
                 <th className="text-center text-gray-400 font-medium px-4 py-3 hidden lg:table-cell">Utilisateurs</th>
                 <th className="text-center text-gray-400 font-medium px-4 py-3 hidden lg:table-cell">Bilans</th>
-                <th className="text-left text-gray-400 font-medium px-4 py-3">Abonnement</th>
                 <th className="text-left text-gray-400 font-medium px-4 py-3 hidden md:table-cell">Inscrit</th>
                 <th className="text-right text-gray-400 font-medium px-4 py-3">Action</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={7} className="text-center py-10 text-gray-500">Chargement...</td></tr>
+                <tr><td colSpan={6} className="text-center py-10 text-gray-500">Chargement...</td></tr>
               )}
               {!loading && companies.length === 0 && (
-                <tr><td colSpan={7} className="text-center py-10 text-gray-500">Aucune entreprise trouvée.</td></tr>
+                <tr><td colSpan={6} className="text-center py-10 text-gray-500">Aucune entreprise trouvée.</td></tr>
               )}
               {companies.map(c => (
                 <tr key={c.id} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
@@ -156,17 +149,6 @@ export default function AdminCompanies() {
                     <span className="inline-flex items-center gap-1 text-gray-300">
                       <ClipboardList className="w-3.5 h-3.5" />{c.assessmentCount}
                     </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {c.subscription ? (
-                      <span className="inline-flex items-center gap-1 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
-                        <CheckCircle className="w-3 h-3" /> Actif
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full">
-                        <XCircle className="w-3 h-3" /> Inactif
-                      </span>
-                    )}
                   </td>
                   <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{formatDate(c.createdAt)}</td>
                   <td className="px-4 py-3 text-right">
@@ -259,27 +241,6 @@ export default function AdminCompanies() {
                         <span className={`text-xs px-2 py-0.5 rounded-full ${u.role === 'admin' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-700 text-gray-400'}`}>
                           {u.role}
                         </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Subscriptions */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-300 mb-2">Abonnements ({detail.subscriptions.length})</h3>
-                  {detail.subscriptions.length === 0 && <p className="text-sm text-gray-500">Aucun abonnement.</p>}
-                  <div className="space-y-2">
-                    {detail.subscriptions.map(s => (
-                      <div key={s.id} className="bg-gray-800 rounded-lg px-3 py-2.5">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-white">{formatFCFA(s.amount)}</p>
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-400'}`}>
-                            {s.status}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {s.paymentMethod} · expire {formatDate(s.expiresAt)}
-                        </p>
                       </div>
                     ))}
                   </div>

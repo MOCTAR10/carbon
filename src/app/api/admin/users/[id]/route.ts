@@ -18,7 +18,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const userId = parseInt(params.id)
     const { role } = await request.json()
 
-    if (!['user', 'admin', 'expert'].includes(role)) {
+    if (!['user', 'admin', 'expert', 'cnc'].includes(role)) {
       return NextResponse.json({ error: 'RÃ´le invalide' }, { status: 400 })
     }
 

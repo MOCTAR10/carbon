@@ -418,6 +418,20 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         )
       }
 
+      // Auto-generate expert audit report PDF
+      try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`
+        await fetch(`${appUrl}/api/admin/certifications/${certId}/generate-pdf`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-internal-key': process.env.INTERNAL_API_KEY || 'carbontrack-internal',
+          },
+        })
+      } catch (pdfErr) {
+        console.error('Auto PDF generation failed (non-fatal):', pdfErr)
+      }
+
     } else if (action === 'send_to_cnc') {
       const { cncUserId, adminNotes } = body
       if (!cncUserId) {

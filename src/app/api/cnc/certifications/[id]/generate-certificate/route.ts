@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { query } from '@/lib/db'
-import { notifyCompanyUsers, notifyAllAdmins } from '@/lib/notifications'
+import { notifyCompanyUsers, notifyAllAdmins, notifyAllCnc } from '@/lib/notifications'
 import { generateCNCCertificatPDF, CNCCertificatData } from '@/lib/documents/CNCCertificatPDF'
 import { readFile } from 'fs/promises'
 import path from 'path'
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       [certificateNumber, pdfUrl, certId]
     )
 
-    // Notify company and admins
+    // Notify company, admins, and other CNC members
     await notifyCompanyUsers(
       r.company_id,
       'cert_validated',
@@ -126,6 +126,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       'Certificat CNC généré',
       `Le CNC a généré le certificat officiel N° ${certificateNumber} pour ${r.company_name} — "${r.assessment_name}".`,
       `/admin/certifications/${certId}`
+    )
+    await notifyAllCnc(
+      'cert_comment',
+      'Certificat CNC émis',
+      `Le certificat officiel N° ${certificateNumber} a été émis pour ${r.company_name}.`,
+      `/cnc/certifications/${certId}`
     )
 
     return new NextResponse(new Uint8Array(pdfBuffer), {

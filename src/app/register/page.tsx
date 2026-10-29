@@ -12,6 +12,7 @@ export default function RegisterPage() {
     lastName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     companyName: '',
     phone: '',
     rccm: '',
@@ -99,6 +100,10 @@ export default function RegisterPage() {
     e.preventDefault()
     if (!acceptedTerms) {
       setError('Vous devez accepter la Politique de confidentialité et les CGU pour continuer.')
+      return
+    }
+    if (form.password !== form.confirmPassword) {
+      setError('Les mots de passe ne correspondent pas.')
       return
     }
     setError('')
@@ -199,6 +204,19 @@ export default function RegisterPage() {
                 <input type="password" value={form.password} onChange={e => updateField('password', e.target.value)}
                   className="input-field pl-11" placeholder="Min. 8 caractères" minLength={8} required />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirmer le mot de passe</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input type="password" value={form.confirmPassword} onChange={e => updateField('confirmPassword', e.target.value)}
+                  className={`input-field pl-11 ${form.confirmPassword && form.password !== form.confirmPassword ? 'border-red-400 focus:border-red-500' : ''}`}
+                  placeholder="Ressaisir le mot de passe" minLength={8} required />
+              </div>
+              {form.confirmPassword && form.password !== form.confirmPassword && (
+                <p className="text-xs text-red-500 mt-1">Les mots de passe ne correspondent pas.</p>
+              )}
             </div>
 
             <hr className="border-gray-100" />

@@ -15,7 +15,7 @@ interface Notification {
 }
 
 interface Props {
-  portal?: 'user' | 'admin' | 'expert'
+  portal?: 'user' | 'admin' | 'expert' | 'cnc'
   theme?: 'light' | 'dark'
 }
 

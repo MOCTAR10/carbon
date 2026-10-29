@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
+import QRCodeImage from '@/components/QRCodeImage'
 
 interface CertRow {
   id: number
@@ -117,6 +118,9 @@ export default function ExpertCertificationsPage() {
                   <div className="text-right">
                     <p className="text-sm font-bold text-brand-400">{fmt(c.totalCo2eq)}</p>
                   </div>
+                  {c.status === 'certified' && c.certificateNumber && (
+                    <QRCodeImage certNumber={c.certificateNumber} size={48} />
+                  )}
                   <ChevronRight className="w-4 h-4 text-gray-600" />
                 </div>
               </div>

@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
   LayoutDashboard, Award, LogOut, Menu, X, ChevronRight,
-  User, FileCheck, BarChart3, Settings, ScrollText,
+  User, FileCheck, BarChart3, Settings, ScrollText, Building2,
 } from 'lucide-react'
 import LoadingScreen from '@/components/LoadingScreen'
 import NotificationBell from '@/components/NotificationBell'
@@ -53,11 +53,12 @@ export default function CncShell({ children }: { children: React.ReactNode }) {
     { href: '/cnc', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '/cnc/certifications', label: 'Certifications', icon: FileCheck },
     { href: '/cnc/certificats', label: 'Certificats émis', icon: Award },
+    { href: '/cnc/entreprises', label: 'Entreprises', icon: Building2 },
     { href: '/cnc/statistiques', label: 'Statistiques', icon: BarChart3 },
     { href: '/cnc/parametres', label: 'Paramètres', icon: Settings },
   ]
 
-  if (loading) return <LoadingScreen theme="light" label="Espace CNC" />
+  if (loading) return <LoadingScreen theme="light" label="Espace CNC" logoUrl="/cnc-logo.png" brand="CNC" />
 
   return (
     <div className="h-screen overflow-hidden bg-gray-50 flex">
@@ -72,7 +73,7 @@ export default function CncShell({ children }: { children: React.ReactNode }) {
             {sidebarOpen && (
               <div className="min-w-0">
                 <p className="text-sm font-bold text-emerald-700 leading-tight">CNC</p>
-                <p className="text-[10px] text-gray-400 leading-tight">Conseil National du Climat</p>
+                <p className="text-[10px] text-emerald-700 font-semibold leading-tight">Conseil National du Climat</p>
               </div>
             )}
           </Link>
@@ -133,7 +134,15 @@ export default function CncShell({ children }: { children: React.ReactNode }) {
 
       {/* ── Main ── */}
       <main className="flex-1 overflow-y-auto bg-gray-50 flex flex-col">
-        <div className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-gray-200 px-6 py-2 flex items-center justify-end flex-shrink-0">
+        <div className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-gray-200 px-6 py-2 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 rounded-sm shadow-sm" viewBox="0 0 3 2" aria-label="Gabon">
+              <rect width="3" height="0.67" fill="#009E60" />
+              <rect y="0.66" width="3" height="0.67" fill="#FCD116" />
+              <rect y="1.33" width="3" height="0.67" fill="#3A75C4" />
+            </svg>
+            <span className="text-xs text-gray-400 hidden sm:inline">République Gabonaise</span>
+          </div>
           <NotificationBell portal="cnc" theme="light" />
         </div>
         <div className="p-6 flex-1">

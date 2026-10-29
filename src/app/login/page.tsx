@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Leaf, Mail, Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
+import { Leaf, Mail, Lock, ArrowRight, AlertCircle, Loader2, X } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -41,37 +41,40 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center">
-              <Leaf className="w-6 h-6 text-white" />
+    <div className="h-screen overflow-hidden bg-gray-50 flex items-center justify-center p-6">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-5">
+          <Link href="/" className="inline-flex items-center gap-2 mb-4">
+            <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
+              <Leaf className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">CarbonTrack</span>
+            <span className="text-lg font-bold text-gray-900">CarbonTrack</span>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Connexion</h1>
-          <p className="text-gray-500 mt-2">Accédez à votre tableau de bord</p>
+          <h1 className="text-xl font-bold text-gray-900">Connexion</h1>
+          <p className="text-gray-500 text-sm mt-1">Accédez à votre tableau de bord</p>
         </div>
 
-        <div className="card p-8">
+        <div className="card p-6">
           {error && (
-            <div className="flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 px-4 py-3 rounded-xl mb-6 text-sm">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              {error}
+            <div className="flex items-start gap-2 bg-red-50 text-red-700 border border-red-200 px-3.5 py-2.5 rounded-xl mb-4 text-sm">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span className="flex-1">{error}</span>
+              <button onClick={() => setError('')} className="text-red-400/70 hover:text-red-400 flex-shrink-0 p-0.5">
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="input-field pl-11"
+                  onChange={e => { setEmail(e.target.value); setError('') }}
+                  className="input-field pl-10 py-2.5 text-sm"
                   placeholder="votre@email.com"
                   required
                   disabled={loading}
@@ -80,14 +83,14 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Mot de passe</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="password"
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="input-field pl-11"
+                  onChange={e => { setPassword(e.target.value); setError('') }}
+                  className="input-field pl-10 py-2.5 text-sm"
                   placeholder="Votre mot de passe"
                   required
                   disabled={loading}
@@ -108,12 +111,22 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Pas encore de compte ?{' '}
-          <Link href="/register" className="text-brand-600 hover:text-brand-700 font-medium">
-            Créer un compte
-          </Link>
-        </p>
+        <div className="text-center mt-4 space-y-3">
+          <p className="text-sm text-gray-500">
+            Pas encore de compte ?{' '}
+            <Link href="/register" className="text-brand-600 hover:text-brand-700 font-medium">
+              Créer un compte
+            </Link>
+          </p>
+          <div className="inline-flex items-center gap-1.5 text-[10px] text-gray-400">
+            <svg className="w-3 h-3 rounded-sm" viewBox="0 0 3 2">
+              <rect width="3" height="0.67" fill="#009E60" />
+              <rect y="0.66" width="3" height="0.67" fill="#FCD116" />
+              <rect y="1.33" width="3" height="0.67" fill="#3A75C4" />
+            </svg>
+            <span>République Gabonaise &copy; 2026</span>
+          </div>
+        </div>
       </div>
     </div>
   )

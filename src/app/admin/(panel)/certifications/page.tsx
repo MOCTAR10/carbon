@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Award, X, CheckCircle, XCircle, Clock, User, AlertCircle, FileText, Eye } from 'lucide-react'
+import { Award, X, CheckCircle, XCircle, Clock, User, AlertCircle, FileText, Eye, Send, ShieldCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import QRCodeImage from '@/components/QRCodeImage'
 
 interface Certification {
   id: number
@@ -30,11 +31,13 @@ interface Certification {
 }
 
 const STATUS_LABELS: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
-  pending: { label: 'En attente', cls: 'bg-yellow-500/20 text-yellow-400', icon: <Clock className="w-3 h-3" /> },
-  assigned: { label: 'Expert assigné', cls: 'bg-blue-500/20 text-blue-400', icon: <User className="w-3 h-3" /> },
-  in_progress: { label: 'En cours', cls: 'bg-violet-500/20 text-violet-400', icon: <AlertCircle className="w-3 h-3" /> },
-  certified: { label: 'Certifié', cls: 'bg-green-500/20 text-green-400', icon: <CheckCircle className="w-3 h-3" /> },
-  rejected: { label: 'Rejeté', cls: 'bg-red-500/20 text-red-400', icon: <XCircle className="w-3 h-3" /> },
+  pending:    { label: 'En attente',       cls: 'bg-yellow-500/20 text-yellow-400', icon: <Clock className="w-3 h-3" /> },
+  assigned:   { label: 'Expert assigné',  cls: 'bg-blue-500/20 text-blue-400',   icon: <User className="w-3 h-3" /> },
+  in_progress:{ label: 'En cours',        cls: 'bg-violet-500/20 text-violet-400', icon: <AlertCircle className="w-3 h-3" /> },
+  certified:  { label: 'Certifié',        cls: 'bg-green-500/20 text-green-400', icon: <CheckCircle className="w-3 h-3" /> },
+  rejected:   { label: 'Rejeté',          cls: 'bg-red-500/20 text-red-400',    icon: <XCircle className="w-3 h-3" /> },
+  submitted_to_cnc:    { label: 'Transmis au CNC', cls: 'bg-amber-500/20 text-amber-400', icon: <Send className="w-3 h-3" /> },
+  certificate_generated:{ label: 'Certificat CNC émis', cls: 'bg-emerald-500/20 text-emerald-400', icon: <ShieldCheck className="w-3 h-3" /> },
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -144,6 +147,8 @@ export default function AdminCertifications() {
     in_progress: certs.filter(c => c.status === 'in_progress').length,
     certified: certs.filter(c => c.status === 'certified').length,
     rejected: certs.filter(c => c.status === 'rejected').length,
+    submitted_to_cnc: certs.filter(c => c.status === 'submitted_to_cnc').length,
+    certificate_generated: certs.filter(c => c.status === 'certificate_generated').length,
   }
 
   return (
@@ -163,6 +168,8 @@ export default function AdminCertifications() {
           { key: 'assigned', label: `Assignées (${counts.assigned})` },
           { key: 'in_progress', label: `En cours (${counts.in_progress})` },
           { key: 'certified', label: `Certifiées (${counts.certified})` },
+          { key: 'submitted_to_cnc', label: `Transmises au CNC (${counts.submitted_to_cnc})` },
+          { key: 'certificate_generated', label: `Certificats CNC (${counts.certificate_generated})` },
           { key: 'rejected', label: `Rejetées (${counts.rejected})` },
         ].map(tab => (
           <button
@@ -238,6 +245,9 @@ export default function AdminCertifications() {
                 >
                   <Eye className="w-3.5 h-3.5" />Voir détail
                 </button>
+                {(cert.status === 'certified' || cert.status === 'certificate_generated') && cert.certificateNumber && (
+                  <QRCodeImage certNumber={cert.certificateNumber} size={56} />
+                )}
                 {cert.status === 'pending' && (
                   <>
                     <button

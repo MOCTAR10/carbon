@@ -62,12 +62,13 @@ export async function POST(
 
     const r = certResult.rows[0]
 
-    // ── Access control ──────────────────────────────────────────────────────
+    // ── Access control (allow internal key for auto-generation) ──────────────
+    const isInternal = request.headers.get('x-internal-key') === (process.env.INTERNAL_API_KEY || 'carbontrack-internal')
     const isAdmin   = session.role === 'admin'
     const isExpert  = session.role === 'expert' && r.expert_user_id === session.userId
     const isCompany = session.role === 'user' && r.company_id === session.companyId
 
-    if (!isAdmin && !isExpert && !isCompany) {
+    if (!isInternal && !isAdmin && !isExpert && !isCompany) {
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
     }
 

@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
-  LayoutDashboard, Building2, Users, CreditCard,
-  Award, LogOut, Menu, X, ChevronRight, ShieldCheck, User, UserCheck, Settings, CalendarDays
+  LayoutDashboard, Building2, Users,
+  Award, LogOut, Menu, X, ChevronRight, Leaf, User, UserCheck, CalendarDays
 } from 'lucide-react'
 import LoadingScreen from '@/components/LoadingScreen'
 import NotificationBell from '@/components/NotificationBell'
@@ -53,11 +53,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     { href: '/admin', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '/admin/companies', label: 'Entreprises', icon: Building2 },
     { href: '/admin/users', label: 'Utilisateurs', icon: Users },
-    { href: '/admin/subscriptions', label: 'Abonnements', icon: CreditCard },
     { href: '/admin/certifications', label: 'Certifications', icon: Award },
     { href: '/admin/inspections',   label: 'Inspections',    icon: CalendarDays },
     { href: '/admin/experts', label: 'Experts', icon: UserCheck },
-    { href: '/admin/settings', label: 'Paramètres', icon: Settings },
   ]
 
   if (loading) return <LoadingScreen theme="dark" label="Espace Administration" />
@@ -71,11 +69,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <div className="px-3 py-3 border-b border-gray-800 flex items-center justify-between flex-shrink-0">
           <Link href="/admin" className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center flex-shrink-0">
-              <ShieldCheck className="w-5 h-5 text-white" />
+              <Leaf className="w-5 h-5 text-white" />
             </div>
             {sidebarOpen && (
               <div className="min-w-0">
-                <p className="text-sm font-bold text-white leading-tight">CarbonTrack</p>
+                <p className="text-sm font-bold text-emerald-400 leading-tight">CarbonTrack</p>
                 <p className="text-[11px] text-gray-500 leading-tight">Administration</p>
               </div>
             )}
@@ -136,7 +134,15 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       {/* Main content — scroll here, never in sidebar */}
       <main className="flex-1 overflow-y-auto bg-gray-950 flex flex-col">
         {/* Top bar */}
-        <div className="sticky top-0 z-10 bg-gray-950/80 backdrop-blur border-b border-gray-800 px-6 py-2 flex items-center justify-end flex-shrink-0">
+        <div className="sticky top-0 z-10 bg-gray-950/80 backdrop-blur border-b border-gray-800 px-6 py-2 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 rounded-sm shadow-sm" viewBox="0 0 3 2" aria-label="Gabon">
+              <rect width="3" height="0.67" fill="#009E60" />
+              <rect y="0.66" width="3" height="0.67" fill="#FCD116" />
+              <rect y="1.33" width="3" height="0.67" fill="#3A75C4" />
+            </svg>
+            <span className="text-xs text-gray-500 hidden sm:inline">République Gabonaise</span>
+          </div>
           <NotificationBell portal="admin" theme="dark" />
         </div>
         <div className="p-6 flex-1">

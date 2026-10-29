@@ -129,7 +129,15 @@ export default function ExpertShell({ children }: { children: React.ReactNode })
       {/* Main content — scroll here, never in sidebar */}
       <main className="flex-1 overflow-y-auto bg-gray-950 flex flex-col">
         {/* Top bar */}
-        <div className="sticky top-0 z-10 bg-gray-950/80 backdrop-blur border-b border-gray-800 px-6 py-2 flex items-center justify-end flex-shrink-0">
+        <div className="sticky top-0 z-10 bg-gray-950/80 backdrop-blur border-b border-gray-800 px-6 py-2 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 rounded-sm shadow-sm" viewBox="0 0 3 2" aria-label="Gabon">
+              <rect width="3" height="0.67" fill="#009E60" />
+              <rect y="0.66" width="3" height="0.67" fill="#FCD116" />
+              <rect y="1.33" width="3" height="0.67" fill="#3A75C4" />
+            </svg>
+            <span className="text-xs text-gray-500 hidden sm:inline">République Gabonaise</span>
+          </div>
           <NotificationBell portal="expert" theme="dark" />
         </div>
         <div className="p-6 flex-1">
