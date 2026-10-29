@@ -19,7 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Stagger, Reveal } from '@/components/ui/motion'
 import { CertJourney } from '@/components/ui/cert-journey'
 
-type YearRow = { year: number; total: number; scope1: number; scope2: number; scope3: number; assessments: number }
+type YearRow = { year: number; total: number; scope1: number; scope2: number; scope3: number; assessments: number; siteIds?: number[] }
 type Assessment = {
   id: number; name: string; year: number; status: string; created_at: string
   total_co2eq: number | string; scope1_co2eq: number | string; scope2_co2eq: number | string; scope3_co2eq: number | string
@@ -450,7 +450,10 @@ function FootprintHero({ byYear, latest }: { byYear: YearRow[]; latest: YearRow 
   const prev = byYear.find(y => y.year < latest.year && y.total > 0)
   const unit = co2UnitFor(latest.total)
   const total = fmtCO2(latest.total, unit)
-  const delta = prev ? (latest.total - prev.total) / prev.total : null
+  // A % change is only honest for a closed year on the same sites; otherwise say why there is none
+  const running = latest.year >= new Date().getFullYear()
+  const samePerimeter = !!prev && [...(latest.siteIds ?? [])].sort().join() === [...(prev.siteIds ?? [])].sort().join()
+  const delta = prev && !running && samePerimeter ? (latest.total - prev.total) / prev.total : null
   const trend = byYear.filter(y => y.total > 0).slice(0, 6).reverse()
   const trendMax = Math.max(...trend.map(y => y.total))
   const trendUnit = co2UnitFor(trendMax)
@@ -473,7 +476,9 @@ function FootprintHero({ byYear, latest }: { byYear: YearRow[]; latest: YearRow 
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
             {delta === null || !prev ? (
-              <span className="rounded-full border border-white/15 px-2.5 py-0.5 text-xs font-semibold text-forest-100/80">Premier exercice</span>
+              <span className="rounded-full border border-white/15 px-2.5 py-0.5 text-xs font-semibold text-forest-100/80">
+                {running ? 'Exercice en cours' : prev ? `Périmètre différent de ${prev.year}` : 'Premier exercice'}
+              </span>
             ) : (
               <span className={cn(
                 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums',
@@ -484,7 +489,7 @@ function FootprintHero({ byYear, latest }: { byYear: YearRow[]; latest: YearRow 
               </span>
             )}
             <span className="text-forest-100/60">
-              {prev ? `vs ${prev.year} · ` : ''}{plural(latest.assessments, 'bilan')} sur l’exercice
+              {delta !== null && prev ? `vs ${prev.year} · ` : ''}{plural(latest.assessments, 'bilan')} sur l’exercice
             </span>
           </div>
         </div>

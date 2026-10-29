@@ -247,7 +247,8 @@ function AssessmentRow({ a, certStatus }: { a: Assessment; certStatus?: string }
   // One unit per row, chosen from the row total, so the total and its scopes compare at a glance
   const unit = co2UnitFor(total)
   const scopes = SCOPES.map(s => ({ ...s, value: num(a[`scope${s.scope}_co2eq` as 'scope1_co2eq']) }))
-  const st = ASSESSMENT_STATUS[a.status]
+  // Under certification the request's stage is what matters; "Brouillon" next to "Audit terrain" read as a contradiction
+  const st = certStatus && certStatus !== 'rejected' ? undefined : ASSESSMENT_STATUS[a.status]
   const partial = a.start_month && a.end_month && !(a.start_month === 1 && a.end_month === 12)
   const t = fmtCO2(total, unit)
 

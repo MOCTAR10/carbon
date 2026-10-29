@@ -68,7 +68,7 @@ export function CertJourney({
               states[i] === 'done' ? 'text-ink-700' : states[i] === 'active' ? 'font-semibold text-forest-900' : states[i] === 'refused' ? 'font-semibold text-red-700' : 'text-ink-400')}>
               {states[i] === 'refused' ? 'Demande refusée' : step.label}
             </span>
-            {dates?.[step.status] && <span className="mt-0.5 block text-xs text-ink-400">{dates[step.status]}</span>}
+            {states[i] !== 'todo' && dates?.[step.status] && <span className="mt-0.5 block text-xs text-ink-400">{dates[step.status]}</span>}
           </span>
         </li>
       ))}
@@ -89,7 +89,7 @@ export function CertJourney({
             <span className={cn('pr-2 text-xs leading-tight',
               states[i] === 'done' ? 'text-ink-600' : states[i] === 'active' ? 'font-semibold text-forest-900' : states[i] === 'refused' ? 'font-semibold text-red-700' : 'text-ink-400')}>
               {states[i] === 'refused' ? 'Refusée' : step.label}
-              {dates?.[step.status] && <span className="mt-0.5 block font-normal text-ink-400">{dates[step.status]}</span>}
+              {states[i] !== 'todo' && dates?.[step.status] && <span className="mt-0.5 block font-normal text-ink-400">{dates[step.status]}</span>}
             </span>
           </li>
         ))}
