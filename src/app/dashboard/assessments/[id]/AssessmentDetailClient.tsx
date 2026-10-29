@@ -1,163 +1,99 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { createPortal } from 'react-dom'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ArrowLeft, ArrowRight, Save, Flame, Package, Truck, Users, Trash2, Building, Factory, ChevronDown, BarChart3, X, Calendar, Paperclip, Upload, FileText, Eye, Trash, Shield, Award, Loader2 } from 'lucide-react'
-import { cn, fmtCO2 } from '@/lib/utils'
-import { Button, buttonVariants } from '@/components/ui/button'
+import {
+  AlertTriangle, ArrowLeft, ArrowRight, Award, BarChart3, Calendar, Check, FileSearch, Info, Loader2,
+  Lock, Paperclip, Plus, RotateCcw, Save, Shield, Upload, X,
+} from 'lucide-react'
+import {
+  cn, co2UnitFor, fmtCO2, fmtNum, fmtPct, plural, scopeStyle, SCOPES, MONTHS_FR, MONTHS_SHORT_FR, type CO2Unit,
+} from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Badge, CertStatusBadge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Stagger, Reveal } from '@/components/ui/motion'
-import {
-  ENERGY_FUELS_STATIONARY, ENERGY_FUELS_ORGANIC, ENERGY_FUELS_MOBILE,
-  ELECTRICITY_FACTORS, STEAM_COOLING_FACTORS, REFRIGERANT_FACTORS,
-  INPUTS_METALS, INPUTS_PLASTICS, INPUTS_OTHER,
-  FREIGHT_FACTORS, TRANSPORT_PEOPLE_FACTORS, WASTE_FACTORS, CAPITAL_GOODS_FACTORS,
-  ALL_EMISSION_FACTORS,
-  SCOPE_MAPPING,
-  type EmissionFactor
-} from '@/lib/emission-factors'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/field'
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ALL_EMISSION_FACTORS, SCOPE_MAPPING, type EmissionFactor } from '@/lib/emission-factors'
+import { TABS, TAB_SECTIONS, unitLabel, type SubSection } from './sections'
+import { DocumentsSheet, type AuditDoc } from './DocumentsSheet'
+import { FactorPicker } from './FactorPicker'
+import { DetailSkeleton } from './DetailSkeleton'
 
 /* ============================================================
-   TYPES
+   TYPES & HELPERS
    ============================================================ */
-interface EntryRow {
-  id: string
-  emissionFactorId: string
-  factorName: string
-  category: string
-  subcategory: string
-  quantity: number
-  unit: string
-  factorUpstream: number
-  factorCombustion: number
-  factorValue: number
-  totalCo2eq: number
-  scope: number
-  ghgCategory: string
-  isoCategory: string
-  description: string
-  sourceCharacterization: string
-  month: number
-  year: number
-}
-
-interface AuditDoc {
+interface Assessment {
   id: number
-  assessment_id: number
-  emission_factor_id: string
+  name: string
   year: number
-  month: number
-  filename: string
-  original_name: string
-  file_size: number
-  mime_type: string
-  created_at: string
+  site_name: string
+  status: string
+  start_month: number | null
+  end_month: number | null
+  certification_lock: string | null
 }
 
-const MONTHS = [
-  { id: 0, label: 'Annuel', short: 'An' },
-  { id: 1, label: 'Janvier', short: 'Jan' },
-  { id: 2, label: 'Février', short: 'Fév' },
-  { id: 3, label: 'Mars', short: 'Mar' },
-  { id: 4, label: 'Avril', short: 'Avr' },
-  { id: 5, label: 'Mai', short: 'Mai' },
-  { id: 6, label: 'Juin', short: 'Jun' },
-  { id: 7, label: 'Juillet', short: 'Jul' },
-  { id: 8, label: 'Août', short: 'Aoû' },
-  { id: 9, label: 'Septembre', short: 'Sep' },
-  { id: 10, label: 'Octobre', short: 'Oct' },
-  { id: 11, label: 'Novembre', short: 'Nov' },
-  { id: 12, label: 'Décembre', short: 'Déc' },
-]
+/** factorId → month (1-12) → quantity, for the bilan's single year */
+type Quantities = Record<string, Record<number, number>>
 
-/* ============================================================
-   TAB DEFINITIONS  (7 main tabs matching Excel sheets)
-   ============================================================ */
-const TABS = [
-  { id: 'energy',        label: 'Énergie',              icon: Flame,   color: 'red' },
-  { id: 'non_energy',    label: 'Hors énergie',         icon: Factory, color: 'red' },
-  { id: 'inputs',        label: 'Intrants',             icon: Package, color: 'blue' },
-  { id: 'freight',       label: 'Fret',                 icon: Truck,   color: 'blue' },
-  { id: 'transport',     label: 'Transport',            icon: Users,   color: 'blue' },
-  { id: 'waste',         label: 'Déchets',              icon: Trash2,  color: 'blue' },
-  { id: 'capital',       label: 'Immobilisations',      icon: Building,color: 'blue' },
-]
+const FACTORS = new Map<string, EmissionFactor>(ALL_EMISSION_FACTORS.map(f => [f.id, f]))
+const TAB_OF = new Map<string, string>()
+Object.entries(TAB_SECTIONS).forEach(([tab, sections]) => sections.forEach(s => s.factors.forEach(f => TAB_OF.set(f.id, tab))))
 
-/* Each tab has sub-sections with their emission factors */
-interface SubSection {
-  id: string
-  label: string
-  scopeLabel: string
-  scope: number
-  factors: EmissionFactor[]
-  description?: string
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+
+/** Drops zero quantities so two maps with the same data compare equal */
+function clean(q: Quantities): Quantities {
+  const out: Quantities = {}
+  for (const [fid, byMonth] of Object.entries(q)) {
+    for (const [m, v] of Object.entries(byMonth)) {
+      if (v > 0) (out[fid] ??= {})[Number(m)] = v
+    }
+  }
+  return out
 }
 
-const TAB_SECTIONS: Record<string, SubSection[]> = {
-  energy: [
-    { id: 'fuels_stationary', label: '1 - Combustibles fossiles (sources fixes)', scopeLabel: 'Scope 1', scope: 1, factors: ENERGY_FUELS_STATIONARY, description: 'Butane, Propane, Gaz naturel, Diesel, Charbon, Coke - Consommation directe sur site' },
-    { id: 'fuels_organic', label: '2 - Combustibles d\'origine organique', scopeLabel: 'Scope 1', scope: 1, factors: ENERGY_FUELS_ORGANIC, description: 'Biodiesel, Biométhane, Bois, Granules - Sources renouvelables' },
-    { id: 'fuels_mobile', label: '3 - Combustibles (sources mobiles)', scopeLabel: 'Scope 1', scope: 1, factors: ENERGY_FUELS_MOBILE, description: 'Essence, Diesel, GPL, GNL, Kérosène - Véhicules et engins' },
-    { id: 'steam', label: '4 - Achat de vapeur et froid', scopeLabel: 'Scope 2', scope: 2, factors: STEAM_COOLING_FACTORS, description: 'Réseaux de chaleur, réseaux de froid' },
-    { id: 'electricity', label: '5 - Achat d’électricité', scopeLabel: 'Scope 2', scope: 2, factors: ELECTRICITY_FACTORS, description: 'Électricité par pays/région et par usage (chauffage, industrie, transport...)' },
-  ],
-  non_energy: [
-    { id: 'refrigerants', label: '1 - Fluides frigorigènes (HFC)', scopeLabel: 'Scope 1', scope: 1, factors: REFRIGERANT_FACTORS.filter(f => f.subcategory === 'refrigerants'), description: 'Fuites de climatisation, réfrigération' },
-    { id: 'process', label: '2 - Émissions de procédés', scopeLabel: 'Scope 1', scope: 1, factors: REFRIGERANT_FACTORS.filter(f => f.subcategory === 'process'), description: 'CO2, N2O, CH4 - Émissions directes hors combustion' },
-  ],
-  inputs: [
-    { id: 'metals', label: '1 - Métaux', scopeLabel: 'Scope 3', scope: 3, factors: INPUTS_METALS, description: 'Acier, Aluminium, Cuivre, Nickel - neufs et recyclés' },
-    { id: 'plastics', label: '2 - Plastiques', scopeLabel: 'Scope 3', scope: 3, factors: INPUTS_PLASTICS, description: 'PET, PEHD, PVC, Nylon, Plastique moyen' },
-    { id: 'other_inputs', label: '3 - Verre, Papier, Construction, Eau', scopeLabel: 'Scope 3', scope: 3, factors: INPUTS_OTHER, description: 'Verre, Papier/Carton, Béton, Ciment, Eau potable' },
-  ],
-  freight: [
-    { id: 'road', label: '1 - Fret routier', scopeLabel: 'Scope 3', scope: 3, factors: FREIGHT_FACTORS.filter(f => f.subcategory === 'road'), description: 'Camions articulés, rigides, utilitaires' },
-    { id: 'air_freight', label: '2 - Fret aérien', scopeLabel: 'Scope 3', scope: 3, factors: FREIGHT_FACTORS.filter(f => f.subcategory === 'air'), description: 'Transport aérien de marchandises' },
-    { id: 'rail_freight', label: '3 - Fret ferroviaire', scopeLabel: 'Scope 3', scope: 3, factors: FREIGHT_FACTORS.filter(f => f.subcategory === 'rail'), description: 'Transport ferroviaire de marchandises' },
-    { id: 'maritime_freight', label: '4 - Fret maritime et fluvial', scopeLabel: 'Scope 3', scope: 3, factors: FREIGHT_FACTORS.filter(f => f.subcategory === 'maritime' || f.subcategory === 'river'), description: 'Container maritime, fret fluvial' },
-  ],
-  transport: [
-    { id: 'car', label: '1 - Voitures', scopeLabel: 'Scope 3', scope: 3, factors: TRANSPORT_PEOPLE_FACTORS.filter(f => f.subcategory === 'car'), description: 'Essence, Diesel, Électrique, Hybride' },
-    { id: 'public', label: '2 - Transports en commun', scopeLabel: 'Scope 3', scope: 3, factors: TRANSPORT_PEOPLE_FACTORS.filter(f => ['bus', 'train', 'metro'].includes(f.subcategory)), description: 'Bus, TGV, TER, Métro' },
-    { id: 'plane', label: '3 - Avion', scopeLabel: 'Scope 3', scope: 3, factors: TRANSPORT_PEOPLE_FACTORS.filter(f => f.subcategory === 'plane'), description: 'Court, moyen et long courrier' },
-  ],
-  waste: [
-    { id: 'building_waste', label: '1 - Déchets du bâtiment', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'building'), description: 'Béton, Bois, Déchets inertes, Plâtre' },
-    { id: 'mineral_waste', label: '2 - Déchets minéraux', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'mineral'), description: 'Incinération, Enfouissement' },
-    { id: 'organic_waste', label: '3 - Déchets organiques', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'organic'), description: 'Compost, Papier, Carton' },
-    { id: 'plastic_waste', label: '4 - Déchets plastiques', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'plastic'), description: 'Plastique moyen, PE, PVC' },
-    { id: 'household_waste', label: '5 - Ordures ménagères', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'household'), description: 'Déchets ménagers courants' },
-    { id: 'dangerous_waste', label: '6 - Déchets dangereux', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'dangerous'), description: 'Déchets industriels spéciaux' },
-    { id: 'wastewater', label: '7 - Eaux usées', scopeLabel: 'Scope 3', scope: 3, factors: WASTE_FACTORS.filter(f => f.subcategory === 'water'), description: 'Traitement des eaux usées' },
-  ],
-  capital: [
-    { id: 'buildings', label: '1 - Bâtiments (méthode surface)', scopeLabel: 'Scope 3', scope: 3, factors: CAPITAL_GOODS_FACTORS.filter(f => f.subcategory === 'buildings'), description: 'Bureau, Entrepôt, Industriel - kgCO2eq/m2 amorti' },
-    { id: 'vehicles', label: '2 - Véhicules', scopeLabel: 'Scope 3', scope: 3, factors: CAPITAL_GOODS_FACTORS.filter(f => f.subcategory === 'vehicles'), description: 'Véhicules de société, camions' },
-    { id: 'it', label: '3 - Informatique', scopeLabel: 'Scope 3', scope: 3, factors: CAPITAL_GOODS_FACTORS.filter(f => f.subcategory === 'it'), description: 'Ordinateurs, serveurs, smartphones' },
-    { id: 'furniture', label: '4 - Mobilier', scopeLabel: 'Scope 3', scope: 3, factors: CAPITAL_GOODS_FACTORS.filter(f => f.subcategory === 'furniture'), description: 'Bureaux, chaises' },
-  ],
+const signature = (q: Quantities) =>
+  Object.entries(clean(q))
+    .flatMap(([fid, byMonth]) => Object.entries(byMonth).map(([m, v]) => `${fid}:${m}:${v}`))
+    .sort()
+    .join('|')
+
+const sumMonths = (byMonth: Record<number, number> | undefined) =>
+  byMonth ? Object.values(byMonth).reduce((s, v) => s + (v || 0), 0) : 0
+
+function totalsOf(q: Quantities) {
+  const t = { total: 0, scopes: [0, 0, 0] }
+  for (const [fid, byMonth] of Object.entries(q)) {
+    const f = FACTORS.get(fid)
+    if (!f) continue
+    const kg = sumMonths(byMonth) * f.factorTotal
+    t.total += kg
+    const scope = SCOPE_MAPPING[f.subcategory]?.scope ?? 3
+    t.scopes[scope - 1] += kg
+  }
+  return t
 }
 
-/* ============================================================
-   HELPER: format CO2
-   ============================================================ */
-// Values are in kgCO2e; keeps one decimal below 1 t so small entries stay visible
-function formatCO2(v: number): string {
-  const fr = (n: number, d: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d })
-  if (Math.abs(v) >= 1000000) return `${fr(v / 1000000, 2)} ktCO₂e`
-  if (Math.abs(v) >= 1000) return `${fr(v / 1000, 2)} tCO₂e`
-  return `${fr(v, 1)} kgCO₂e`
+/** "12,4 tCO₂e" in a shared unit; tiny non-zero values show "< 0,01 t" instead of "0" */
+function co2(kg: number, unit: CO2Unit) {
+  if (!kg) return '–'
+  const { value, unit: u } = fmtCO2(kg, unit)
+  if (value === '0' || value === '-0') return `< ${unit === 'kg' ? '0,1' : '0,01'} ${u}`
+  return `${value} ${u}`
 }
 
-function formatNum(v: number): string {
-  return v.toLocaleString('fr-FR', { maximumFractionDigits: 2 })
-}
+const toInput = (v: number) => (v > 0 ? String(v).replace('.', ',') : '')
+
+const OPEN_STATUSES = ['pending', 'assigned', 'in_progress', 'audit_done', 'submitted_to_cnc']
 
 /* ============================================================
    MAIN COMPONENT
@@ -166,85 +102,35 @@ export default function AssessmentDetailClient() {
   const params = useParams()
   const assessmentId = params.id as string
 
-  const [assessment, setAssessment] = useState<{ name: string; year: number; site_name: string; status: string } | null>(null)
-  const [activeTab, setActiveTab] = useState('energy')
-  const [activeYear, setActiveYear] = useState(new Date().getFullYear())
-  const [activeMonth, setActiveMonth] = useState(1) // 0 = Annuel (read-only), 1-12 = months
-  // entries: factorId -> { 'year-month': qty } e.g. { 'elec_fr': { '2025-1': 100, '2025-2': 120, '2024-6': 50 } }
-  const [entries, setEntries] = useState<Record<string, Record<string, number>>>({})
-  const [availableYears, setAvailableYears] = useState<number[]>([])
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
-  const [saving, setSaving] = useState(false)
-  const [showSummary, setShowSummary] = useState(false)
-  // Raw string values for decimal-safe inputs (factorId_year_month → raw string)
-  const [rawValues, setRawValues] = useState<Record<string, string>>({})
-  // Save feedback (global sonner toaster)
-  const showToast = (type: 'success' | 'error', message: string) => {
-    if (type === 'success') toast.success('Bilan sauvegardé', { description: message })
-    else toast.error('Erreur de sauvegarde', { description: message })
-  }
-
-  // Document upload state
+  const [status, setStatus] = useState<'loading' | 'ready' | 'notfound' | 'error'>('loading')
+  const [assessment, setAssessment] = useState<Assessment | null>(null)
+  const [certStatus, setCertStatus] = useState<string | null>(null)
+  const [qty, setQty] = useState<Quantities>({})
+  const [saved, setSaved] = useState<Quantities>({})
+  /** Legacy rows outside the bilan's year/period: not editable, dropped by the next save */
+  const [outOfPeriod, setOutOfPeriod] = useState(0)
+  const [raw, setRaw] = useState<Record<string, string>>({})
   const [docs, setDocs] = useState<AuditDoc[]>([])
-  const [docPanel, setDocPanel] = useState<{ factorId: string; factorName: string } | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Certification state
-  const [certStatus, setCertStatus] = useState<string | null>(null) // null | pending | assigned | in_progress | certified | rejected
-  const [certLoading, setCertLoading] = useState(false)
-  const [showCertModal, setShowCertModal] = useState(false)
+  const [activeTab, setActiveTab] = useState('energy')
+  const [activeMonth, setActiveMonth] = useState(1) // 0 = cumul annuel (lecture seule)
+  const [pinned, setPinned] = useState<Set<string>>(new Set())
+  const [showAll, setShowAll] = useState(false)
+  const [showSummary, setShowSummary] = useState(false)
+  const [focusId, setFocusId] = useState<string | null>(null)
+
+  const [saving, setSaving] = useState(false)
+  const [savedAt, setSavedAt] = useState<Date | null>(null)
+
+  const [docFactor, setDocFactor] = useState<{ id: string; name: string } | null>(null)
+  const [docOpen, setDocOpen] = useState(false)
+  const [pickerSection, setPickerSection] = useState<SubSection | null>(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [certOpen, setCertOpen] = useState(false)
   const [certMessage, setCertMessage] = useState('')
   const [certSubmitting, setCertSubmitting] = useState(false)
 
-  /* ---- Load data ---- */
-  const loadData = useCallback(async () => {
-    try {
-      const [aRes, eRes] = await Promise.all([
-        fetch('/api/assessments').then(r => r.json()),
-        fetch(`/api/emissions?assessmentId=${assessmentId}`).then(r => r.json())
-      ])
-      const found = aRes.find((a: { id: number }) => String(a.id) === assessmentId)
-      if (found) {
-        setAssessment(found)
-        setActiveYear(found.year || new Date().getFullYear())
-      }
-
-      // Build map: factorId -> { 'year-month': quantity }
-      const map: Record<string, Record<string, number>> = {}
-      const yearsSet = new Set<number>()
-      if (Array.isArray(eRes)) {
-        for (const e of eRes) {
-          const fid = e.emission_factor_id
-          const m = parseInt(e.month) || 0
-          const y = parseInt(e.year) || 0
-          if (!map[fid]) map[fid] = {}
-          // Legacy entries with month=0 or year=0: default to assessment year + month 1
-          const targetMonth = m === 0 ? 1 : m
-          const targetYear = y === 0 ? (found?.year || new Date().getFullYear()) : y
-          const key = `${targetYear}-${targetMonth}`
-          map[fid][key] = (map[fid][key] || 0) + (parseFloat(e.quantity) || 0)
-          yearsSet.add(targetYear)
-        }
-      }
-      // Ensure at least the assessment year is available
-      const baseYear = found?.year || new Date().getFullYear()
-      yearsSet.add(baseYear)
-      setAvailableYears(Array.from(yearsSet).sort())
-      setEntries(map)
-
-      // Auto-open first section of each tab
-      const autoOpen: Record<string, boolean> = {}
-      Object.values(TAB_SECTIONS).forEach(sections => {
-        if (sections.length > 0) autoOpen[sections[0].id] = true
-      })
-      setOpenSections(autoOpen)
-    } catch { /* ignore */ }
-  }, [assessmentId])
-
-  useEffect(() => { loadData() }, [loadData])
-
-  /* ---- Load documents ---- */
+  /* ---- Load ---- */
   const loadDocuments = useCallback(async () => {
     try {
       const res = await fetch(`/api/documents?assessmentId=${assessmentId}`)
@@ -252,20 +138,229 @@ export default function AssessmentDetailClient() {
         const data = await res.json()
         setDocs(Array.isArray(data) ? data : [])
       }
-    } catch { /* ignore */ }
+    } catch { /* keep the current list */ }
   }, [assessmentId])
 
-  useEffect(() => { loadDocuments() }, [loadDocuments])
+  const load = useCallback(async () => {
+    try {
+      const aRes = await fetch(`/api/assessments/${assessmentId}`)
+      if (aRes.status === 404 || aRes.status === 400) { setStatus('notfound'); return }
+      if (!aRes.ok) throw new Error('assessment')
+      const a: Assessment = await aRes.json()
 
-  /* ---- Load certification status ---- */
+      const [eRes, cRes] = await Promise.all([
+        fetch(`/api/emissions?assessmentId=${assessmentId}`),
+        fetch(`/api/certifications/${assessmentId}`).catch(() => null),
+      ])
+      // Never open the editor on partial data: saving would replace the stored entries
+      if (!eRes.ok) throw new Error('emissions')
+      const rows = await eRes.json()
+      const cert = cRes?.ok ? await cRes.json().catch(() => null) : null
+
+      const start = a.start_month || 1
+      const end = a.end_month || 12
+      const map: Quantities = {}
+      let ignored = 0
+      for (const e of Array.isArray(rows) ? rows : []) {
+        const fid = String(e.emission_factor_id)
+        const m = Number(e.month) || start // legacy rows stored month 0
+        const y = Number(e.year) || a.year
+        const q = Number(e.quantity) || 0
+        if (!FACTORS.has(fid) || y !== a.year || m < start || m > end) { ignored++; continue }
+        ;(map[fid] ??= {})[m] = (map[fid][m] || 0) + q
+      }
+
+      setAssessment(a)
+      setCertStatus(cert?.certification?.status ?? null)
+      setQty(map)
+      setSaved(clean(map))
+      setOutOfPeriod(ignored)
+      setRaw({})
+      setActiveMonth(prev => (prev >= start && prev <= end) || prev === 0 ? prev : start)
+      setStatus('ready')
+    } catch {
+      setStatus('error')
+    }
+  }, [assessmentId])
+
+  useEffect(() => { load(); loadDocuments() }, [load, loadDocuments])
+
+  /* ---- Derived ---- */
+  const locked = !!assessment?.certification_lock
+  const year = assessment?.year ?? new Date().getFullYear()
+  const startMonth = assessment?.start_month || 1
+  const endMonth = assessment?.end_month || 12
+  const months = useMemo(
+    () => Array.from({ length: endMonth - startMonth + 1 }, (_, i) => startMonth + i),
+    [startMonth, endMonth],
+  )
+  const fullYear = startMonth === 1 && endMonth === 12
+  const periodLabel = fullYear
+    ? `Année ${year}`
+    : `${cap(MONTHS_FR[startMonth - 1])} – ${MONTHS_FR[endMonth - 1]} ${year}`
+
+  const dirty = useMemo(() => signature(qty) !== signature(saved), [qty, saved])
+  const totals = useMemo(() => totalsOf(qty), [qty])
+  const savedTotal = useMemo(() => totalsOf(saved).total, [saved])
+  const unit = co2UnitFor(totals.total)
+
+  const monthsWithData = useMemo(() => {
+    const s = new Set<number>()
+    Object.values(qty).forEach(byMonth => Object.entries(byMonth).forEach(([m, v]) => { if (v > 0) s.add(Number(m)) }))
+    return s
+  }, [qty])
+
+  const hasData = useCallback((fid: string) => sumMonths(qty[fid]) > 0, [qty])
+  const viewQty = (fid: string) => (activeMonth === 0 ? sumMonths(qty[fid]) : qty[fid]?.[activeMonth] ?? 0)
+  const rowKg = (f: EmissionFactor) => viewQty(f.id) * f.factorTotal
+  const sectionKg = (s: SubSection) => s.factors.reduce((sum, f) => sum + rowKg(f), 0)
+
+  const tabStats = useMemo(() => {
+    const stats: Record<string, number> = {}
+    for (const fid of Object.keys(qty)) {
+      if (!hasData(fid)) continue
+      const tab = TAB_OF.get(fid)
+      if (tab) stats[tab] = (stats[tab] || 0) + 1
+    }
+    return stats
+  }, [qty, hasData])
+  const filledSources = Object.values(tabStats).reduce((s, n) => s + n, 0)
+
+  const visibleFactors = (s: SubSection) =>
+    showAll && !locked ? s.factors : s.factors.filter(f => hasData(f.id) || pinned.has(f.id))
+
+  const docsFor = (fid: string) =>
+    docs.filter(d => d.emission_factor_id === fid && d.year === year && (activeMonth === 0 || d.month === activeMonth))
+
+  const ghgBreakdown = useMemo(() => {
+    const map: Record<string, number> = {}
+    const iso: Record<string, number> = {}
+    for (const [fid, byMonth] of Object.entries(qty)) {
+      const f = FACTORS.get(fid)
+      const si = f && SCOPE_MAPPING[f.subcategory]
+      if (!f || !si) continue
+      const kg = sumMonths(byMonth) * f.factorTotal
+      if (!kg) continue
+      map[si.ghgCategory] = (map[si.ghgCategory] || 0) + kg
+      const isoKey = `${si.isoCategory} — ${si.ghgCategory.split(' ').slice(1).join(' ')}`
+      iso[isoKey] = (iso[isoKey] || 0) + kg
+    }
+    return {
+      ghg: Object.entries(map).sort((a, b) => b[1] - a[1]),
+      iso: Object.entries(iso).sort((a, b) => a[0].localeCompare(b[0])),
+    }
+  }, [qty])
+
+  /* ---- Editing ---- */
+  const setQuantity = (fid: string, month: number, value: number) =>
+    setQty(prev => ({ ...prev, [fid]: { ...prev[fid], [month]: value } }))
+
+  const onInput = (fid: string, value: string) => {
+    if (value !== '' && !/^\d*[.,]?\d*$/.test(value)) return
+    const key = `${fid}_${activeMonth}`
+    setRaw(prev => ({ ...prev, [key]: value }))
+    const parsed = parseFloat(value.replace(',', '.'))
+    setQuantity(fid, activeMonth, Number.isFinite(parsed) ? parsed : 0)
+  }
+
+  const onBlurInput = (fid: string) => {
+    const key = `${fid}_${activeMonth}`
+    setRaw(prev => { const next = { ...prev }; delete next[key]; return next })
+  }
+
+  const addFactor = (f: EmissionFactor) => {
+    setPinned(prev => new Set(prev).add(f.id))
+    if (activeMonth === 0) setActiveMonth(startMonth)
+    setFocusId(f.id)
+  }
+
+  const unpin = (fid: string) => setPinned(prev => { const next = new Set(prev); next.delete(fid); return next })
+
   useEffect(() => {
-    fetch(`/api/certifications/${assessmentId}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (data?.certification) setCertStatus(data.certification.status)
+    if (!focusId) return
+    const t = setTimeout(() => {
+      const el = document.getElementById(`qty-${focusId}`) as HTMLInputElement | null
+      el?.focus()
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      setFocusId(null)
+    }, 80)
+    return () => clearTimeout(t)
+  }, [focusId])
+
+  const discard = () => { setQty(saved); setRaw({}) }
+
+  /* ---- Save ---- */
+  const save = useCallback(async () => {
+    if (!assessment || locked || saving) return
+    setSaving(true)
+    const snapshot = clean(qty)
+    const entries = Object.entries(snapshot).flatMap(([fid, byMonth]) =>
+      Object.entries(byMonth).map(([m, v]) => ({ emissionFactorId: fid, quantity: v, month: Number(m), year: assessment.year })),
+    )
+    try {
+      const res = await fetch('/api/emissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assessmentId: assessment.id, entries }),
       })
-      .catch(() => {})
-  }, [assessmentId])
+      if (res.ok) {
+        setQty(snapshot)
+        setSaved(snapshot)
+        setRaw({})
+        setOutOfPeriod(0)
+        setSavedAt(new Date())
+        toast.success('Bilan enregistré', { description: `${plural(entries.length, 'saisie')} sur ${periodLabel.toLowerCase()}.` })
+      } else {
+        const data = await res.json().catch(() => null)
+        toast.error(res.status === 409 ? 'Bilan verrouillé' : 'Enregistrement impossible', {
+          description: data?.error || 'Réessayez dans un instant.',
+        })
+        if (res.status === 409) load()
+      }
+    } catch {
+      toast.error('Erreur de connexion au serveur.', { description: 'Vos saisies sont conservées sur cette page.' })
+    } finally {
+      setSaving(false)
+    }
+  }, [assessment, locked, saving, qty, periodLabel, load])
+
+  /* ---- Unsaved-changes guards: tab close, in-app links, Ctrl/⌘+S ---- */
+  useEffect(() => {
+    if (!dirty) return
+    const onBeforeUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement | null)?.closest?.('a[href]') as HTMLAnchorElement | null
+      if (!a || a.target === '_blank' || e.metaKey || e.ctrlKey || a.origin !== window.location.origin) return
+      if (a.pathname === window.location.pathname) return
+      if (!window.confirm('Vous avez des modifications non enregistrées. Quitter la page sans enregistrer ?')) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    document.addEventListener('click', onClick, true)
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload)
+      document.removeEventListener('click', onClick, true)
+    }
+  }, [dirty])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        if (dirty) save()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [dirty, save])
+
+  /* ---- Certification request ---- */
+  const canRequest = !locked && !dirty && savedTotal > 0
+  const requestBlocker = savedTotal <= 0
+    ? 'Saisissez et enregistrez au moins une donnée d’activité pour demander la certification.'
+    : dirty ? 'Enregistrez vos modifications avant de demander la certification.' : null
 
   const handleCertRequest = async () => {
     setCertSubmitting(true)
@@ -273,16 +368,16 @@ export default function AssessmentDetailClient() {
       const res = await fetch('/api/certifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assessmentId: parseInt(assessmentId), message: certMessage }),
+        body: JSON.stringify({ assessmentId: Number(assessmentId), message: certMessage }),
       })
       if (res.ok) {
-        setCertStatus('pending')
-        setShowCertModal(false)
+        setCertOpen(false)
         setCertMessage('')
         toast.success('Demande de certification envoyée', { description: 'Un expert accrédité va être assigné à votre bilan.' })
+        await load()
       } else {
         const data = await res.json().catch(() => null)
-        toast.error(data?.error || 'Impossible d’envoyer la demande.')
+        toast.error('Demande impossible', { description: data?.error || 'Réessayez dans un instant.' })
       }
     } catch {
       toast.error('Erreur de connexion au serveur.')
@@ -290,256 +385,40 @@ export default function AssessmentDetailClient() {
     setCertSubmitting(false)
   }
 
-  // Get docs for a specific factor + year + month (or all months if month=0)
-  const getDocsForFactor = (factorId: string): AuditDoc[] => {
-    if (activeMonth === 0) {
-      return docs.filter(d => d.emission_factor_id === factorId && d.year === activeYear)
-    }
-    return docs.filter(d => d.emission_factor_id === factorId && d.year === activeYear && d.month === activeMonth)
-  }
+  /* ============================================================
+     STATES
+     ============================================================ */
+  if (status === 'loading') return <DetailSkeleton />
 
-  // Count total docs for a factor across all years/months
-  const getDocCount = (factorId: string): number => {
-    return docs.filter(d => d.emission_factor_id === factorId).length
-  }
-
-  // Upload handler
-  const handleUpload = async (file: File) => {
-    if (!docPanel || activeMonth === 0) return
-    setUploading(true)
-    try {
-      const fd = new FormData()
-      fd.append('file', file)
-      fd.append('assessmentId', assessmentId)
-      fd.append('factorId', docPanel.factorId)
-      fd.append('year', String(activeYear))
-      fd.append('month', String(activeMonth))
-      const res = await fetch('/api/documents', { method: 'POST', body: fd })
-      if (res.ok) {
-        await loadDocuments()
-      }
-    } catch { /* ignore */ }
-    setUploading(false)
-  }
-
-  // Delete handler
-  const handleDeleteDoc = async (docId: number) => {
-    try {
-      const res = await fetch('/api/documents', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: docId, assessmentId }),
-      })
-      if (res.ok) {
-        await loadDocuments()
-      }
-    } catch { /* ignore */ }
-  }
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} o`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`
-  }
-
-  /* ---- Quantity helpers (year + month aware) ---- */
-  const setQuantity = (factorId: string, year: number, month: number, value: number) => {
-    const key = `${year}-${month}`
-    setEntries(prev => ({
-      ...prev,
-      [factorId]: { ...prev[factorId], [key]: value }
-    }))
-  }
-
-  // Get quantity for a specific year+month, or sum of all months for a year if month=0
-  const getQuantity = (factorId: string, year?: number, month?: number): number => {
-    const y = year ?? activeYear
-    const m = month ?? activeMonth
-    const data = entries[factorId]
-    if (!data) return 0
-    if (m === 0) {
-      // Annual = sum of months 1-12 for the given year
-      let sum = 0
-      for (let i = 1; i <= 12; i++) sum += data[`${y}-${i}`] || 0
-      return sum
-    }
-    return data[`${y}-${m}`] || 0
-  }
-
-  // Get grand total (sum ALL years, ALL months) for a factor — used for scope cards
-  const getGrandTotalQty = (factorId: string): number => {
-    const data = entries[factorId]
-    if (!data) return 0
-    return Object.values(data).reduce((sum, v) => sum + (v || 0), 0)
-  }
-
-  // Get annual total for a specific year
-  const getYearQty = (factorId: string, year: number): number => {
-    const data = entries[factorId]
-    if (!data) return 0
-    let sum = 0
-    for (let i = 1; i <= 12; i++) sum += data[`${year}-${i}`] || 0
-    return sum
-  }
-
-  const calcTotal = (factor: EmissionFactor): number => {
-    return getQuantity(factor.id) * factor.factorTotal
-  }
-
-  const calcGrandTotal = (factor: EmissionFactor): number => {
-    return getGrandTotalQty(factor.id) * factor.factorTotal
-  }
-
-  const calcUpstream = (factor: EmissionFactor): number => {
-    return getQuantity(factor.id) * factor.factorUpstream
-  }
-
-  const calcCombustion = (factor: EmissionFactor): number => {
-    return getQuantity(factor.id) * factor.factorCombustion
-  }
-
-  /* ---- Totals ---- */
-  const allFactors = useMemo(() => ALL_EMISSION_FACTORS, [])
-
-  // Scope totals always use GRAND total (all years, all months) for the top cards
-  const grandTotal = useMemo(() => allFactors.reduce((s, f) => s + calcGrandTotal(f), 0), [entries, allFactors])
-  const scope1Total = useMemo(() => {
-    return allFactors.filter(f => {
-      const si = SCOPE_MAPPING[f.subcategory]
-      return si && si.scope === 1
-    }).reduce((s, f) => s + calcGrandTotal(f), 0)
-  }, [entries, allFactors])
-  const scope2Total = useMemo(() => {
-    return allFactors.filter(f => {
-      const si = SCOPE_MAPPING[f.subcategory]
-      return si && si.scope === 2
-    }).reduce((s, f) => s + calcGrandTotal(f), 0)
-  }, [entries, allFactors])
-  const scope3Total = useMemo(() => {
-    return allFactors.filter(f => {
-      const si = SCOPE_MAPPING[f.subcategory]
-      return si && si.scope === 3
-    }).reduce((s, f) => s + calcGrandTotal(f), 0)
-  }, [entries, allFactors])
-
-  const calcSectionTotal = (factors: EmissionFactor[]): number =>
-    factors.reduce((sum, f) => sum + calcTotal(f), 0)
-
-  const calcTabTotal = (tabId: string): number => {
-    const sections = TAB_SECTIONS[tabId] || []
-    return sections.reduce((sum, sec) => sum + calcSectionTotal(sec.factors), 0)
-  }
-
-  /* ---- GHG Protocol breakdown (grand total all years) ---- */
-  const ghgBreakdown = useMemo(() => {
-    const map: Record<string, { total: number; upstream: number; combustion: number }> = {}
-    for (const f of allFactors) {
-      const si = SCOPE_MAPPING[f.subcategory]
-      if (!si) continue
-      const key = si.ghgCategory
-      const qty = getGrandTotalQty(f.id)
-      if (!map[key]) map[key] = { total: 0, upstream: 0, combustion: 0 }
-      map[key].total += qty * f.factorTotal
-      map[key].upstream += qty * f.factorUpstream
-      map[key].combustion += qty * f.factorCombustion
-    }
-    return Object.entries(map).filter(([, v]) => v.total > 0).sort((a, b) => b[1].total - a[1].total)
-  }, [entries, allFactors])
-
-  /* ---- ISO 14069 breakdown (grand total all years) ---- */
-  const isoBreakdown = useMemo(() => {
-    const map: Record<string, number> = {}
-    for (const f of allFactors) {
-      const si = SCOPE_MAPPING[f.subcategory]
-      if (!si) continue
-      const key = `${si.isoCategory} - ${si.ghgCategory.split(' ').slice(1).join(' ')}`
-      if (!map[key]) map[key] = 0
-      map[key] += getGrandTotalQty(f.id) * f.factorTotal
-    }
-    return Object.entries(map).filter(([, v]) => v > 0).sort((a, b) => a[0].localeCompare(b[0]))
-  }, [entries, allFactors])
-
-  /* ---- Save (all years x 12 months) ---- */
-  const handleSave = async () => {
-    setSaving(true)
-    try {
-      const allEntries: Omit<EntryRow, 'id'>[] = []
-      // Collect all years that have data
-      const yearsWithData = new Set<number>()
-      for (const data of Object.values(entries)) {
-        for (const key of Object.keys(data)) {
-          const y = parseInt(key.split('-')[0])
-          if (y > 0) yearsWithData.add(y)
-        }
-      }
-      const years = Array.from(yearsWithData).sort()
-
-      for (const [, sections] of Object.entries(TAB_SECTIONS)) {
-        for (const sec of sections) {
-          for (const factor of sec.factors) {
-            for (const yr of years) {
-              for (let m = 1; m <= 12; m++) {
-                const qty = getQuantity(factor.id, yr, m)
-                if (qty > 0) {
-                  const scopeInfo = SCOPE_MAPPING[factor.subcategory] || { scope: 3, ghgCategory: 'Autre', isoCategory: '' }
-                  allEntries.push({
-                    emissionFactorId: factor.id,
-                    factorName: factor.nameFr,
-                    category: factor.category,
-                    subcategory: factor.subcategory,
-                    quantity: qty,
-                    unit: factor.unit,
-                    factorUpstream: factor.factorUpstream,
-                    factorCombustion: factor.factorCombustion,
-                    factorValue: factor.factorTotal,
-                    totalCo2eq: qty * factor.factorTotal,
-                    scope: scopeInfo.scope,
-                    ghgCategory: scopeInfo.ghgCategory,
-                    isoCategory: scopeInfo.isoCategory,
-                    description: `${factor.nameFr} - ${factor.source}`,
-                    sourceCharacterization: factor.region,
-                    month: m,
-                    year: yr,
-                  })
-                }
-              }
-            }
+  if (status === 'notfound' || status === 'error') {
+    return (
+      <div className="mx-auto max-w-lg py-16">
+        <EmptyState
+          icon={status === 'notfound' ? FileSearch : AlertTriangle}
+          title={status === 'notfound' ? 'Bilan introuvable' : 'Impossible de charger le bilan'}
+          description={status === 'notfound'
+            ? 'Ce bilan n’existe pas ou n’appartient pas à votre entreprise.'
+            : 'Vérifiez votre connexion puis réessayez.'}
+          action={
+            <div className="flex flex-wrap justify-center gap-2">
+              {status === 'error' && (
+                <Button onClick={() => { setStatus('loading'); load(); loadDocuments() }}><RotateCcw /> Réessayer</Button>
+              )}
+              <Button asChild variant="outline"><Link href="/dashboard/assessments"><ArrowLeft /> Bilans carbone</Link></Button>
+            </div>
           }
-        }
-      }
-
-      const res = await fetch('/api/emissions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assessmentId, entries: allEntries }),
-      })
-
-      if (res.ok) {
-        showToast('success', `${allEntries.length} entrée(s) sauvegardée(s) avec succès.`)
-        setRawValues({}) // clear raw inputs after successful save
-      } else {
-        showToast('error', 'Erreur lors de la sauvegarde. Réessayez.')
-      }
-    } catch {
-      showToast('error', 'Erreur de connexion au serveur.')
-    } finally {
-      setSaving(false)
-    }
+        />
+      </div>
+    )
   }
 
-  const toggleSection = (id: string) => {
-    setOpenSections(prev => ({ ...prev, [id]: !prev[id] }))
-  }
-
-  /* ---- Scope color helpers (light surfaces: S1 forest, S2 gold, S3 sage) ---- */
-  const scopeColor = (scope: number) => {
-    if (scope === 1) return { square: 'bg-forest-700 text-ivory-50', chip: 'forest' as const, bar: 'bg-forest-700' }
-    if (scope === 2) return { square: 'bg-gold-500 text-forest-950', chip: 'gold' as const, bar: 'bg-gold-500' }
-    return { square: 'bg-forest-300 text-forest-950', chip: 'neutral' as const, bar: 'bg-forest-300' }
-  }
-
-  const certInProgress = !!certStatus && ['pending', 'assigned', 'in_progress', 'audit_done', 'submitted_to_cnc'].includes(certStatus)
-  const grand = fmtCO2(grandTotal)
+  const a = assessment!
+  const total = fmtCO2(totals.total, unit)
+  const tabSections = TAB_SECTIONS[activeTab] || []
+  const tabMeta = TABS.find(t => t.id === activeTab)!
+  const tabKg = tabSections.reduce((s, sec) => s + sectionKg(sec), 0)
+  const viewLabel = activeMonth === 0 ? `cumul ${fullYear ? year : 'de la période'}` : `${MONTHS_FR[activeMonth - 1]} ${year}`
+  const readOnlyCells = locked || activeMonth === 0
 
   /* ============================================================
      RENDER
@@ -550,624 +429,369 @@ export default function AssessmentDetailClient() {
       <Reveal>
         <Link
           href="/dashboard/assessments"
-          className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-ink-500 transition-colors hover:text-forest-800"
+          className="mb-4 inline-flex min-h-10 items-center gap-1.5 text-xs font-semibold text-ink-500 transition-colors hover:text-forest-800"
         >
           <ArrowLeft className="size-3.5" /> Bilans carbone
         </Link>
         <PageHeader
           eyebrow="Bilan carbone"
-          title={<span className="[text-wrap:balance]">{assessment?.name || 'Chargement…'}</span>}
-          description={assessment ? <>{assessment.site_name} · Année {assessment.year}</> : undefined}
+          title={<span className="[text-wrap:balance]">{a.name}</span>}
+          description={<>{a.site_name} · {periodLabel}</>}
           actions={
-            <>
-              <Button
-                variant={showSummary ? 'primary' : 'outline'}
-                onClick={() => setShowSummary(!showSummary)}
-                aria-pressed={showSummary}
-              >
+            <div className="flex flex-wrap items-center gap-2">
+              {!locked && (
+                <span className="mr-1 hidden items-center gap-1.5 text-xs text-ink-500 sm:inline-flex" aria-live="polite">
+                  {dirty ? (
+                    <><span className="size-1.5 rounded-full bg-amber-500" /> Modifications non enregistrées</>
+                  ) : savedAt ? (
+                    <><Check className="size-3.5 text-forest-600" /> Enregistré à {savedAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</>
+                  ) : null}
+                </span>
+              )}
+              <Button variant={showSummary ? 'primary' : 'outline'} onClick={() => setShowSummary(v => !v)} aria-pressed={showSummary}>
                 <BarChart3 /> Synthèse
               </Button>
-              <Button variant="gold" onClick={handleSave} disabled={saving}>
-                {saving ? <Loader2 className="animate-spin" /> : <Save />}
-                {saving ? 'Sauvegarde…' : 'Sauvegarder'}
-              </Button>
-            </>
+              {!locked && (
+                <Button variant="gold" onClick={save} disabled={!dirty || saving}>
+                  {saving ? <Loader2 className="animate-spin" /> : <Save />}
+                  {saving ? 'Enregistrement…' : 'Enregistrer'}
+                </Button>
+              )}
+            </div>
           }
         />
       </Reveal>
 
-      {/* ---- Certification status bar ---- */}
+      {/* ---- CERTIFICATION / LOCK BANNER ---- */}
       <Reveal>
-        {certStatus === 'certified' ? (
-          <Card className="flex items-center gap-4 border-gold-200 bg-gradient-to-r from-gold-50 to-white px-6 py-4">
-            <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-forest-900 text-gold-300">
-              <Award className="size-5" strokeWidth={1.8} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="font-display text-lg text-forest-900">Bilan certifié</p>
-              <p className="text-xs text-ink-500">Ce bilan a été audité par un expert accrédité et certifié par le CNC.</p>
+        {a.certification_lock === 'certified' ? (
+          <Card className="flex flex-col gap-4 border-gold-200 bg-gradient-to-r from-gold-50 to-white px-5 py-4 sm:flex-row sm:items-center sm:px-6">
+            <div className="flex min-w-0 flex-1 items-start gap-4 sm:items-center">
+              <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-forest-900 text-gold-300">
+                <Award className="size-5" strokeWidth={1.8} />
+              </span>
+              <div className="min-w-0">
+                <p className="font-display text-lg text-forest-900">Bilan certifié</p>
+                <p className="text-xs text-ink-500">Audité par un expert accrédité et certifié par le CNC. Ses données sont figées.</p>
+              </div>
             </div>
-            <CertStatusBadge status="certified" />
+            <div className="flex items-center gap-3">
+              <CertStatusBadge status="certified" />
+              <Button asChild variant="outline" size="sm" className="h-10 sm:h-8">
+                <Link href="/dashboard/certifications">Voir le certificat <ArrowRight /></Link>
+              </Button>
+            </div>
           </Card>
-        ) : certInProgress ? (
-          <Card className="flex items-center gap-4 px-6 py-4">
-            <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-gold-50 text-gold-600 ring-1 ring-gold-200">
-              <Shield className="size-5" strokeWidth={1.8} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="font-display text-lg text-forest-900">Certification en cours</p>
-              <p className="text-xs text-ink-500">Votre demande est suivie par un expert accrédité GreenLeaves jusqu’au dépôt au CNC.</p>
+        ) : locked ? (
+          <Card className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
+            <div className="flex min-w-0 flex-1 items-start gap-4 sm:items-center">
+              <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-ivory-100 text-gold-600 ring-1 ring-ivory-300">
+                <Lock className="size-5" strokeWidth={1.8} />
+              </span>
+              <div className="min-w-0">
+                <p className="font-display text-lg text-forest-900">Données verrouillées pendant la certification</p>
+                <p className="text-xs text-ink-500">L’expert audite exactement ce qui a été soumis. Vous pouvez consulter vos saisies et vos justificatifs.</p>
+              </div>
             </div>
-            <CertStatusBadge status={certStatus!} />
-            <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-              <Link href="/dashboard/certifications">Suivre <ArrowRight /></Link>
+            <div className="flex items-center gap-3">
+              <CertStatusBadge status={a.certification_lock!} />
+              <Button asChild variant="outline" size="sm" className="h-10 sm:h-8">
+                <Link href="/dashboard/certifications">Suivre <ArrowRight /></Link>
+              </Button>
+            </div>
+          </Card>
+        ) : (
+          <Card
+            className={cn(
+              'flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:px-6',
+              certStatus === 'rejected' ? 'border-red-200' : 'border-transparent bg-forest-900 bg-forest-grain text-ivory-50 shadow-lifted',
+            )}
+          >
+            <div className="flex min-w-0 flex-1 items-start gap-4 sm:items-center">
+              <span className={cn(
+                'flex size-11 flex-shrink-0 items-center justify-center rounded-xl',
+                certStatus === 'rejected' ? 'bg-red-50 text-red-600 ring-1 ring-red-100' : 'bg-gold-500/15 text-gold-300 ring-1 ring-gold-400/40',
+              )}>
+                <Shield className="size-5" strokeWidth={1.8} />
+              </span>
+              <div className="min-w-0">
+                <p className={cn('font-display text-lg', certStatus === 'rejected' ? 'text-forest-900' : 'text-ivory-50')}>
+                  {certStatus === 'rejected' ? 'Certification refusée' : 'Faire certifier ce bilan carbone'}
+                </p>
+                <p className={cn('text-xs', certStatus === 'rejected' ? 'text-ink-500' : 'text-forest-100/75')}>
+                  {requestBlocker ?? (certStatus === 'rejected'
+                    ? 'Corrigez vos données et vos justificatifs, puis soumettez une nouvelle demande.'
+                    : 'Audit terrain par un expert accrédité, puis dépôt de votre dossier au CNC.')}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant={certStatus === 'rejected' ? 'primary' : 'gold'}
+              onClick={() => setCertOpen(true)}
+              disabled={!canRequest}
+              className="h-11 sm:h-10"
+            >
+              {certStatus === 'rejected' ? 'Nouvelle demande' : 'Demander la certification'} <ArrowRight />
             </Button>
           </Card>
-        ) : certStatus === 'rejected' ? (
-          <button
-            onClick={() => setShowCertModal(true)}
-            className="group flex w-full items-center gap-4 rounded-2xl border border-red-200 bg-white px-6 py-4 text-left shadow-soft transition-all hover:border-red-300 hover:shadow-lifted"
-          >
-            <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600 ring-1 ring-red-100">
-              <Shield className="size-5" strokeWidth={1.8} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-lg text-forest-900">Certification refusée</span>
-              <span className="block text-xs text-ink-500">Corrigez vos données puis soumettez une nouvelle demande.</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-700">
-              Nouvelle demande <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-            </span>
-          </button>
-        ) : (
-          <button
-            onClick={() => setShowCertModal(true)}
-            className="group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl bg-forest-900 bg-forest-grain px-6 py-5 text-left text-ivory-50 shadow-lifted transition-transform hover:-translate-y-0.5"
-          >
-            <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-gold-500/15 text-gold-300 ring-1 ring-gold-400/40">
-              <Shield className="size-5" strokeWidth={1.8} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-lg">Faire certifier ce bilan carbone</span>
-              <span className="block text-xs text-forest-100/70">Audit terrain par un expert accrédité, puis dépôt de votre dossier au CNC.</span>
-            </span>
-            <span className={cn(buttonVariants({ variant: 'gold', size: 'sm' }), 'pointer-events-none')}>
-              Demander <ArrowRight />
-            </span>
-          </button>
         )}
       </Reveal>
 
-      {/* Certification Request Modal */}
-      {showCertModal && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-forest-950/40 p-4 font-sans backdrop-blur-sm animate-in fade-in-0">
-          <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-2xl bg-white shadow-lifted animate-in zoom-in-95">
-
-            {/* Header */}
-            <div className="flex flex-shrink-0 items-start justify-between gap-4 border-b border-ivory-300 px-6 py-5">
-              <div className="flex items-center gap-3">
-                <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-forest-900 text-gold-300">
-                  <Shield className="size-5" strokeWidth={1.8} />
-                </span>
-                <div>
-                  <h3 className="font-display text-xl leading-tight text-forest-900">Certifier ce bilan carbone</h3>
-                  <p className="mt-0.5 text-xs text-ink-500">Demande d’audit par un expert accrédité</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowCertModal(false)}
-                className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ivory-100 hover:text-ink-700"
-                aria-label="Fermer"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
-
-              {/* Steps */}
-              <div className="rounded-xl border border-ivory-300 bg-ivory-50 p-5">
-                <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-600">Processus de certification</p>
-                <ol className="space-y-3">
-                  {[
-                    'Votre demande est transmise à l’équipe GreenLeaves',
-                    'Un expert accrédité est assigné et fixe la date d’audit',
-                    'Audit terrain et vérification de vos données',
-                    'Dépôt du dossier au CNC, puis remise du certificat',
-                  ].map((step, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm text-ink-700">
-                      <span className="mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded-full bg-forest-900 text-[10px] font-bold text-gold-200">
-                        {i + 1}
-                      </span>
-                      {step}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
-              {/* Message */}
-              <div>
-                <label htmlFor="cert-message" className="mb-1.5 block text-[13px] font-semibold text-ink-700">
-                  Message pour l’expert <span className="font-normal text-ink-400">(optionnel)</span>
-                </label>
-                <textarea
-                  id="cert-message"
-                  value={certMessage}
-                  onChange={(e) => setCertMessage(e.target.value)}
-                  rows={4}
-                  className="w-full resize-none rounded-xl border border-ivory-400 bg-white px-4 py-3 text-sm text-ink-800 outline-none transition placeholder:text-ink-400 focus:border-forest-500 focus:ring-4 focus:ring-forest-100"
-                  placeholder="Précisions sur votre bilan, contraintes particulières, questions…"
-                />
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex flex-shrink-0 items-center justify-end gap-2 rounded-b-2xl border-t border-ivory-300 bg-ivory-50 px-6 py-4">
-              <Button variant="ghost" onClick={() => setShowCertModal(false)}>Annuler</Button>
-              <Button onClick={handleCertRequest} disabled={certSubmitting}>
-                {certSubmitting ? <Loader2 className="animate-spin" /> : <Shield />}
-                {certSubmitting ? 'Envoi en cours…' : 'Envoyer la demande'}
-              </Button>
-            </div>
-
-          </div>
-        </div>
-      , document.body)}
-
-      {/* ---- SCOPE SUMMARY CARDS ---- */}
-      <Reveal className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="relative overflow-hidden rounded-2xl bg-forest-900 bg-forest-grain p-5 text-ivory-50 shadow-lifted">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-300/90">Total général</p>
-          <p className="mt-2 flex items-baseline gap-2">
-            <span className="font-display text-4xl font-light tabular-nums">{grand.value}</span>
-            <span className="text-sm text-forest-100/70">{grand.unit}</span>
+      {outOfPeriod > 0 && !locked && (
+        <Reveal>
+          <p className="flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-xs leading-relaxed text-amber-800">
+            <AlertTriangle className="mt-0.5 size-4 flex-shrink-0" />
+            <span>
+              {plural(outOfPeriod, 'saisie ancienne', 'saisies anciennes')} hors de la période du bilan ({periodLabel.toLowerCase()})
+              {outOfPeriod > 1 ? ' ne sont pas affichées et seront retirées' : ' n’est pas affichée et sera retirée'} à la prochaine sauvegarde.
+            </span>
           </p>
-          <p className="mt-1 text-[11px] text-forest-100/50">Toutes années et tous mois confondus</p>
+        </Reveal>
+      )}
+
+      {/* ---- TOTALS ---- */}
+      <Reveal className="grid grid-cols-3 gap-2.5 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+        <div className="relative col-span-3 overflow-hidden rounded-2xl sm:col-span-1 bg-forest-900 bg-forest-grain p-5 text-ivory-50 shadow-lifted">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-300/90">
+            {fullYear ? `Total annuel ${year}` : 'Total de la période'}
+          </p>
+          <p className="mt-2 flex items-baseline gap-2">
+            <span className="font-display text-4xl font-light tabular-nums">{total.value}</span>
+            <span className="text-sm text-forest-100/70">{total.unit}</span>
+          </p>
+          <p className="mt-1 text-[11px] text-forest-100/60">
+            {filledSources ? plural(filledSources, 'source renseignée', 'sources renseignées') : 'Aucune donnée saisie'} · {periodLabel}
+          </p>
         </div>
-        {[
-          { label: 'Scope 1', sub: 'Émissions directes', value: scope1Total, scope: 1 },
-          { label: 'Scope 2', sub: 'Énergie indirecte',  value: scope2Total, scope: 2 },
-          { label: 'Scope 3', sub: 'Autres indirectes',  value: scope3Total, scope: 3 },
-        ].map(s => {
-          const pct = grandTotal > 0 ? Math.min(100, (s.value / grandTotal) * 100) : 0
+        {SCOPES.map(s => {
+          const kg = totals.scopes[s.scope - 1]
+          const pct = totals.total > 0 ? (kg / totals.total) * 100 : 0
           return (
-            <Card key={s.label} className="p-5">
+            <Card key={s.scope} className="p-3.5 sm:p-5">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-xs font-semibold text-ink-700">
-                  <span className={cn('size-2 rounded-full', scopeColor(s.scope).bar)} />
+                <span className="flex items-center gap-1.5 text-xs sm:gap-2 font-semibold text-ink-700">
+                  <span className={cn('size-2 rounded-full', s.bg)} />
                   {s.label}
                 </span>
-                <span className="text-xs tabular-nums text-ink-400">{pct.toFixed(0)} %</span>
+                <span className="hidden text-xs tabular-nums text-ink-400 sm:inline">{fmtPct(kg, totals.total)}</span>
               </div>
-              <p className="mt-2 font-display text-2xl tabular-nums text-forest-900">{formatCO2(s.value)}</p>
-              <p className="text-[11px] text-ink-400">{s.sub}</p>
+              <p className="mt-2 font-display text-xl sm:text-2xl tabular-nums text-forest-900">
+                {fmtCO2(kg, unit).value} <span className="block font-sans text-[11px] text-ink-400 sm:inline sm:text-xs">{fmtCO2(kg, unit).unit}</span>
+              </p>
+              <p className="hidden text-[11px] text-ink-400 sm:block">{s.name}</p>
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ivory-200">
-                <div className={cn('h-full rounded-full transition-all duration-700', scopeColor(s.scope).bar)} style={{ width: `${pct}%` }} />
+                <div className={cn('h-full rounded-full transition-all duration-700', s.bg)} style={{ width: `${pct}%` }} />
               </div>
             </Card>
           )
         })}
       </Reveal>
 
-      {/* ---- GHG / ISO SUMMARY PANEL ---- */}
+      {/* ---- GHG / ISO SUMMARY ---- */}
       {showSummary && (
-        <Card className="animate-fade-up">
+        <Card className="animate-in fade-in-0 slide-in-from-top-2">
           <CardHeader
             eyebrow="Synthèse"
-            title="GHG Protocol / ISO 14069"
+            title="GHG Protocol · ISO 14069"
             action={
-              <Button variant="ghost" size="icon" onClick={() => setShowSummary(false)} aria-label="Fermer la synthèse">
-                <X />
-              </Button>
+              <Button variant="ghost" size="icon" onClick={() => setShowSummary(false)} aria-label="Fermer la synthèse"><X /></Button>
             }
           />
           <CardContent className="grid gap-8 md:grid-cols-2">
-            {/* GHG Protocol */}
-            <div>
-              <h3 className="mb-3 border-b border-ivory-300 pb-2 text-xs font-semibold uppercase tracking-[0.12em] text-ink-500">GHG Protocol — Catégories</h3>
-              <div className="space-y-1">
-                {ghgBreakdown.map(([cat, vals]) => (
-                  <div key={cat} className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-ivory-50">
-                    <span className="min-w-0 truncate text-ink-700">{cat}</span>
-                    <div className="flex flex-shrink-0 items-center gap-3">
-                      <span className="hidden text-[11px] tabular-nums text-ink-400 lg:inline">amont {formatNum(vals.upstream)} · comb. {formatNum(vals.combustion)}</span>
-                      <span className="w-28 text-right font-semibold tabular-nums text-forest-900">{formatCO2(vals.total)}</span>
+            {([['GHG Protocol — catégories', ghgBreakdown.ghg], ['ISO 14069 — postes', ghgBreakdown.iso]] as const).map(([heading, rows]) => (
+              <div key={heading}>
+                <h3 className="mb-3 border-b border-ivory-300 pb-2 text-xs font-semibold uppercase tracking-[0.12em] text-ink-500">{heading}</h3>
+                <div className="space-y-1">
+                  {rows.map(([cat, kg]) => (
+                    <div key={cat} className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-ivory-50">
+                      <span className="min-w-0 text-ink-700">{cat}</span>
+                      <span className="flex flex-shrink-0 items-baseline gap-2">
+                        <span className="text-[11px] tabular-nums text-ink-400">{fmtPct(kg, totals.total)}</span>
+                        <span className="w-28 text-right font-semibold tabular-nums text-forest-900">{co2(kg, unit)}</span>
+                      </span>
                     </div>
-                  </div>
-                ))}
-                {ghgBreakdown.length === 0 && <p className="text-sm text-ink-400">Aucune donnée saisie</p>}
+                  ))}
+                  {rows.length === 0 && <p className="text-sm text-ink-400">Aucune donnée saisie</p>}
+                </div>
               </div>
-            </div>
-            {/* ISO 14069 */}
-            <div>
-              <h3 className="mb-3 border-b border-ivory-300 pb-2 text-xs font-semibold uppercase tracking-[0.12em] text-ink-500">ISO 14069 — Postes</h3>
-              <div className="space-y-1">
-                {isoBreakdown.map(([cat, val]) => (
-                  <div key={cat} className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-ivory-50">
-                    <span className="min-w-0 truncate text-ink-700">{cat}</span>
-                    <span className="flex-shrink-0 font-semibold tabular-nums text-forest-900">{formatCO2(val)}</span>
-                  </div>
-                ))}
-                {isoBreakdown.length === 0 && <p className="text-sm text-ink-400">Aucune donnée saisie</p>}
-              </div>
-            </div>
+            ))}
           </CardContent>
         </Card>
       )}
 
-      {/* ---- YEAR + MONTH SELECTOR ---- */}
+      {/* ---- PERIOD (year fixed, months of the period) ---- */}
       <Reveal>
-        <Card className="flex flex-wrap items-center gap-x-5 gap-y-3 px-5 py-3.5">
-          {/* Year selector */}
-          <label className="flex flex-shrink-0 items-center gap-2">
+        <Card className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-5 sm:px-5">
+          <div className="flex flex-shrink-0 items-center gap-2">
             <Calendar className="size-4 text-gold-500" />
             <span className="text-xs font-semibold text-ink-500">Année</span>
-            <select
-              value={activeYear}
-              onChange={e => setActiveYear(parseInt(e.target.value))}
-              className="h-9 cursor-pointer rounded-xl border border-ivory-400 bg-white px-3 text-sm font-semibold text-forest-900 outline-none transition focus:border-forest-500 focus:ring-4 focus:ring-forest-100"
-            >
-              {(() => {
-                const now = new Date().getFullYear()
-                const start = Math.min(2000, ...availableYears)
-                const end = Math.max(now + 5, ...availableYears)
-                const years: number[] = []
-                for (let y = end; y >= start; y--) years.push(y)
-                return years.map(y => (
-                  <option key={y} value={y}>
-                    {y}{availableYears.includes(y) ? ' ●' : ''}
-                  </option>
-                ))
-              })()}
-            </select>
-          </label>
-
+            <span className="rounded-lg bg-ivory-100 px-2.5 py-1 text-sm font-semibold tabular-nums text-forest-900">{year}</span>
+          </div>
           <span className="hidden h-6 w-px flex-shrink-0 bg-ivory-300 sm:block" />
-
-          {/* Month selector */}
-          <div className="flex flex-wrap items-center gap-1">
-            <span className="mr-1 text-xs font-semibold text-ink-500">Mois</span>
-            {MONTHS.map(m => {
-              const isActive = activeMonth === m.id
-              const isAnnual = m.id === 0
+          <div
+            role="group"
+            aria-label="Mois affiché"
+            className="-mx-1 flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {[0, ...months].map(m => {
+              const isActive = activeMonth === m
+              const filled = m !== 0 && monthsWithData.has(m)
               return (
                 <button
-                  key={m.id}
-                  onClick={() => setActiveMonth(m.id)}
-                  title={m.label}
+                  key={m}
+                  type="button"
+                  onClick={() => setActiveMonth(m)}
+                  aria-pressed={isActive}
+                  title={m === 0 ? `Cumul ${periodLabel.toLowerCase()}` : `${cap(MONTHS_FR[m - 1])}${filled ? ' · données saisies' : ''}`}
                   className={cn(
-                    'h-8 rounded-lg px-2.5 text-xs font-semibold transition-all',
+                    'relative flex h-10 min-w-[44px] flex-shrink-0 items-center justify-center rounded-lg px-2.5 text-xs font-semibold transition-all sm:h-9',
                     isActive
-                      ? isAnnual
-                        ? 'bg-gold-500 text-forest-950 shadow-soft'
-                        : 'bg-forest-900 text-ivory-50 shadow-soft'
-                      : 'text-ink-500 hover:bg-ivory-100 hover:text-forest-900',
-                    isAnnual && !isActive && 'text-gold-700',
+                      ? m === 0 ? 'bg-gold-500 text-forest-950 shadow-soft' : 'bg-forest-900 text-ivory-50 shadow-soft'
+                      : m === 0 ? 'text-gold-700 hover:bg-gold-50' : 'text-ink-500 hover:bg-ivory-100 hover:text-forest-900',
                   )}
                 >
-                  {m.short}
+                  {m === 0 ? 'Cumul' : cap(MONTHS_SHORT_FR[m - 1])}
+                  {filled && (
+                    <span
+                      className={cn('absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full', isActive ? 'bg-gold-300' : 'bg-forest-500')}
+                      aria-hidden
+                    />
+                  )}
                 </button>
               )
             })}
           </div>
           {activeMonth === 0 && (
-            <Badge tone="gold" className="ml-auto">Lecture seule · somme {activeYear}</Badge>
+            <Badge tone="gold" className="self-start sm:self-auto">Lecture seule · cumul</Badge>
           )}
         </Card>
       </Reveal>
 
-      {/* ---- MAIN TABS ---- */}
+      {/* ---- CATEGORY TABS ---- */}
       <Reveal>
-        <div className="flex flex-wrap gap-1 rounded-2xl border border-ivory-300 bg-ivory-200/60 p-1">
-          {TABS.map(tab => {
-            const tabTotal = calcTabTotal(tab.id)
-            const Icon = tab.icon
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'flex flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition-all',
-                  isActive
-                    ? 'bg-white text-forest-900 shadow-soft ring-1 ring-ivory-300'
-                    : 'text-ink-500 hover:bg-white/60 hover:text-forest-900',
-                )}
-              >
-                <Icon className={cn('size-4', isActive ? 'text-gold-500' : 'text-ink-400')} strokeWidth={1.8} />
-                <span>{tab.label}</span>
-                {tabTotal > 0 && (
-                  <span className={cn(
-                    'rounded-full px-2 py-0.5 text-[11px] tabular-nums',
-                    isActive ? 'bg-forest-50 text-forest-700' : 'bg-ivory-300/70 text-ink-600',
-                  )}>
-                    {formatCO2(tabTotal)}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList aria-label="Catégories d’émissions">
+            {TABS.map(tab => {
+              const n = tabStats[tab.id] || 0
+              return (
+                <TabsTrigger key={tab.id} value={tab.id} className="group">
+                  <tab.icon className="text-ink-400 group-data-[state=active]:text-gold-500" strokeWidth={1.8} />
+                  {tab.label}
+                  {n > 0 ? (
+                    <span
+                      className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-forest-50 px-1.5 text-[11px] font-semibold tabular-nums text-forest-700 ring-1 ring-forest-100"
+                      aria-label={plural(n, 'source renseignée', 'sources renseignées')}
+                    >
+                      {n}
+                    </span>
+                  ) : (
+                    <span className="size-1.5 rounded-full bg-ivory-400" aria-label="Aucune source renseignée" />
+                  )}
+                </TabsTrigger>
+              )
+            })}
+          </TabsList>
+        </Tabs>
       </Reveal>
 
       {/* ---- TAB CONTENT ---- */}
-      <div className="space-y-4">
-        {(TAB_SECTIONS[activeTab] || []).map(section => {
-          const isOpen = openSections[section.id] !== false
-          const sectionTotal = calcSectionTotal(section.factors)
-          const sc = scopeColor(section.scope)
+      <section aria-label={tabMeta.label} className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+          <p className="text-sm text-ink-500">
+            <span className="font-semibold text-forest-900">{tabMeta.label}</span>
+            {' · '}{plural(tabStats[activeTab] || 0, 'source renseignée', 'sources renseignées')}
+            {tabKg > 0 && <> · <span className="font-semibold tabular-nums text-forest-900">{co2(tabKg, unit)}</span> ({viewLabel})</>}
+          </p>
+          {!locked && (
+            <button
+              type="button"
+              role="switch"
+              aria-checked={showAll}
+              onClick={() => setShowAll(v => !v)}
+              className="inline-flex min-h-10 items-center gap-2.5 rounded-xl px-2 text-xs font-semibold text-ink-600 hover:text-forest-900"
+            >
+              <span className={cn('relative h-5 w-9 rounded-full transition-colors', showAll ? 'bg-forest-700' : 'bg-ivory-400')}>
+                <span className={cn('absolute top-0.5 size-4 rounded-full bg-white shadow-soft transition-all', showAll ? 'left-[18px]' : 'left-0.5')} />
+              </span>
+              Afficher tous les facteurs
+            </button>
+          )}
+        </div>
 
+        {locked && tabSections.every(s => visibleFactors(s).length === 0) && (
+          <EmptyState icon={tabMeta.icon} title="Aucune donnée dans cette catégorie" description="Rien n’a été saisi ici avant la demande de certification." />
+        )}
+
+        {tabSections.map(section => {
+          const rows = visibleFactors(section)
+          if (locked && rows.length === 0) return null
+          const sc = scopeStyle(section.scope)
+          const kg = sectionKg(section)
           return (
             <Card key={section.id} className="overflow-hidden">
               {/* Section header */}
-              <button
-                onClick={() => toggleSection(section.id)}
-                aria-expanded={isOpen}
-                className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-colors hover:bg-ivory-50"
-              >
-                <div className="flex min-w-0 items-center gap-4">
-                  <span className={cn('flex size-9 flex-shrink-0 items-center justify-center rounded-xl text-xs font-bold', sc.square)}>
+              <div className="flex items-start justify-between gap-4 px-5 py-4 sm:px-6">
+                <div className="flex min-w-0 items-start gap-3.5">
+                  <span className={cn('flex size-9 flex-shrink-0 items-center justify-center rounded-xl text-xs font-bold', sc.bg, section.scope === 1 ? 'text-ivory-50' : 'text-forest-950')}>
                     S{section.scope}
                   </span>
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-display text-[17px] text-forest-900">{section.label}</h3>
-                      <Badge tone={sc.chip}>{section.scopeLabel}</Badge>
-                    </div>
-                    {section.description && (
-                      <p className="mt-0.5 truncate text-xs text-ink-400">{section.description}</p>
-                    )}
+                    <h3 className="font-display text-[17px] leading-snug text-forest-900">{section.label}</h3>
+                    {section.description && <p className="mt-0.5 text-xs text-ink-400">{section.description}</p>}
                   </div>
                 </div>
-                <div className="flex flex-shrink-0 items-center gap-4">
-                  {sectionTotal > 0 && (
-                    <span className="text-sm font-semibold tabular-nums text-forest-900">{formatCO2(sectionTotal)}</span>
-                  )}
-                  <ChevronDown className={cn('size-4 text-ink-400 transition-transform duration-200', !isOpen && '-rotate-90')} />
-                </div>
-              </button>
+                {kg > 0 && <span className="flex-shrink-0 pt-1 text-sm font-semibold tabular-nums text-forest-900">{co2(kg, unit)}</span>}
+              </div>
 
-              {/* Section table */}
-              {isOpen && (
+              {rows.length > 0 && (
                 <div className="border-t border-ivory-300">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="bg-ivory-100 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-400">
-                          <th className="px-6 py-3 text-left font-semibold" style={{ width: '38%' }}>Source d’émission</th>
-                          <th className="px-3 py-3 text-left font-semibold" style={{ width: '8%' }}>Unité</th>
-                          <th className="px-3 py-3 text-right font-semibold" style={{ width: '14%' }}>Quantité</th>
-                          <th className="px-3 py-3 text-right font-semibold" style={{ width: '10%' }}>FE</th>
-                          <th className="px-3 py-3 text-right font-semibold" style={{ width: '18%' }}>Total</th>
-                          <th className="px-3 py-3 text-center font-semibold" style={{ width: '12%' }}>Justif.</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-ivory-200">
-                        {section.factors.map(factor => {
-                          const qty = getQuantity(factor.id)
-                          const upstream = calcUpstream(factor)
-                          const combustion = calcCombustion(factor)
-                          const total = upstream + combustion
-                          return (
-                            <tr key={factor.id} className={cn('transition-colors hover:bg-ivory-50', total > 0 && 'bg-forest-50/40')}>
-                              <td className="min-w-0 px-6 py-3">
-                                <p className="truncate text-sm font-semibold text-ink-800">{factor.nameFr}</p>
-                                <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                                  <span className="inline-flex items-center rounded-md border border-forest-100 bg-forest-50 px-1.5 py-0.5 text-[10px] font-semibold text-forest-700">{factor.source}</span>
-                                  <span className="inline-flex items-center rounded-md bg-ivory-200 px-1.5 py-0.5 font-mono text-[10px] text-ink-600">{factor.sourceRef}</span>
-                                  <span className="text-[10px] text-ink-400">{factor.region} ±{(factor.uncertainty * 100).toFixed(0)} %</span>
-                                </div>
-                              </td>
-                              <td className="whitespace-nowrap px-3 py-3 text-xs text-ink-500">{factor.unit.replace('kgCO2eq/', '')}</td>
-                              <td className="px-3 py-3">
-                                {activeMonth === 0 ? (
-                                  <div className="ml-auto w-28 rounded-xl border border-ivory-300 bg-ivory-100 px-3 py-2 text-right text-sm tabular-nums text-ink-600">
-                                    {qty ? formatNum(qty) : '–'}
-                                  </div>
-                                ) : (() => {
-                                  const rawKey = `${factor.id}_${activeYear}_${activeMonth}`
-                                  const displayed = rawKey in rawValues
-                                    ? rawValues[rawKey]
-                                    : (qty > 0 ? String(qty) : '')
-                                  return (
-                                    <input
-                                      type="text"
-                                      inputMode="decimal"
-                                      value={displayed}
-                                      onChange={e => {
-                                        const raw = e.target.value
-                                        // Allow only digits, dot, comma
-                                        if (raw !== '' && !/^[\d]*[.,]?[\d]*$/.test(raw)) return
-                                        const normalized = raw.replace(',', '.')
-                                        setRawValues(prev => ({ ...prev, [rawKey]: raw }))
-                                        const parsed = parseFloat(normalized)
-                                        setQuantity(factor.id, activeYear, activeMonth, isNaN(parsed) ? 0 : parsed)
-                                      }}
-                                      onBlur={e => {
-                                        const parsed = parseFloat(e.target.value.replace(',', '.')) || 0
-                                        setRawValues(prev => ({ ...prev, [rawKey]: parsed > 0 ? String(parsed) : '' }))
-                                        setQuantity(factor.id, activeYear, activeMonth, parsed)
-                                      }}
-                                      className="ml-auto block w-28 rounded-xl border border-ivory-400 bg-white px-3 py-2 text-right text-sm tabular-nums text-ink-800 outline-none transition placeholder:text-ink-400 focus:border-forest-500 focus:ring-4 focus:ring-forest-100"
-                                      placeholder="0"
-                                      aria-label={`Quantité — ${factor.nameFr}`}
-                                    />
-                                  )
-                                })()}
-                              </td>
-                              <td className="px-3 py-3 text-right text-xs font-medium tabular-nums text-ink-500">{factor.factorTotal}</td>
-                              <td className="px-3 py-3 text-right font-semibold tabular-nums text-forest-900">
-                                {total > 0 ? formatCO2(total) : <span className="text-ink-400">–</span>}
-                              </td>
-                              <td className="px-3 py-3 text-center">
-                                {(() => {
-                                  const factorDocs = getDocsForFactor(factor.id)
-                                  const totalDocs = getDocCount(factor.id)
-                                  const hasDocsForView = factorDocs.length > 0
-                                  return (
-                                    <button
-                                      onClick={() => setDocPanel({ factorId: factor.id, factorName: factor.nameFr })}
-                                      className={cn(
-                                        'inline-flex h-7 items-center gap-1 rounded-lg border px-2 text-[11px] font-semibold transition-all',
-                                        hasDocsForView
-                                          ? 'border-forest-200 bg-forest-50 text-forest-700 hover:bg-forest-100'
-                                          : qty > 0
-                                            ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
-                                            : 'border-ivory-300 bg-white text-ink-400 hover:border-ivory-400 hover:text-ink-600',
-                                      )}
-                                      title={hasDocsForView ? `${factorDocs.length} justificatif(s)` : 'Ajouter un justificatif'}
-                                    >
-                                      {hasDocsForView ? (
-                                        <>
-                                          <Paperclip className="size-3" />
-                                          <span>{factorDocs.length}</span>
-                                        </>
-                                      ) : qty > 0 ? (
-                                        <Upload className="size-3" />
-                                      ) : (
-                                        <Paperclip className="size-3" />
-                                      )}
-                                      {totalDocs > 0 && totalDocs !== factorDocs.length && (
-                                        <span className="text-ink-400">/{totalDocs}</span>
-                                      )}
-                                    </button>
-                                  )
-                                })()}
-                              </td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                      <tfoot>
-                        <tr className="border-t border-ivory-300 bg-ivory-100 text-sm">
-                          <td colSpan={4} className="px-6 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-ink-500">Total de la section</td>
-                          <td className="px-3 py-3 text-right font-display text-base tabular-nums text-forest-900">{formatCO2(sectionTotal)}</td>
-                          <td></td>
-                        </tr>
-                      </tfoot>
-                    </table>
+                  {/* Column headers (desktop) */}
+                  <div className="hidden grid-cols-[minmax(0,1fr)_200px_150px_130px_110px] gap-4 bg-ivory-100 px-6 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-400 md:grid">
+                    <span>Source d’émission</span>
+                    <span className="text-right">Quantité · {activeMonth === 0 ? 'cumul' : MONTHS_SHORT_FR[activeMonth - 1]}</span>
+                    <span className="text-right">Facteur d’émission</span>
+                    <span className="text-right">Total</span>
+                    <span className="text-center">Justificatifs</span>
                   </div>
+                  <ul className="divide-y divide-ivory-200">
+                    {rows.map(f => (
+                      <FactorRow
+                        key={f.id}
+                        factor={f}
+                        unit={unit}
+                        quantity={viewQty(f.id)}
+                        raw={raw[`${f.id}_${activeMonth}`]}
+                        kg={rowKg(f)}
+                        readOnly={readOnlyCells}
+                        docCount={docsFor(f.id).length}
+                        removable={!locked && !hasData(f.id) && pinned.has(f.id) && !showAll}
+                        onInput={v => onInput(f.id, v)}
+                        onBlur={() => onBlurInput(f.id)}
+                        onRemove={() => unpin(f.id)}
+                        onDocs={() => { setDocFactor({ id: f.id, name: f.nameFr }); setDocOpen(true) }}
+                      />
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {!locked && !showAll && (
+                <div className={cn('flex items-center justify-between gap-3 px-5 py-3 sm:px-6', rows.length > 0 ? 'border-t border-ivory-200 bg-ivory-50/60' : 'border-t border-dashed border-ivory-300')}>
+                  {rows.length === 0 && <p className="text-xs text-ink-400">Aucune source renseignée.</p>}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-10 sm:h-8"
+                    onClick={() => { setPickerSection(section); setPickerOpen(true) }}
+                  >
+                    <Plus /> Ajouter une source
+                  </Button>
                 </div>
               )}
             </Card>
           )
         })}
-      </div>
-
-      {/* ---- DOCUMENT PANEL (slide-over) ---- */}
-      {docPanel && createPortal(
-        <div className="fixed inset-0 z-50 flex justify-end font-sans">
-          <div className="absolute inset-0 bg-forest-950/40 backdrop-blur-sm animate-in fade-in-0" onClick={() => setDocPanel(null)} />
-          <div className="relative flex w-full max-w-md flex-col bg-white shadow-lifted animate-in slide-in-from-right">
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4 border-b border-ivory-300 px-6 py-5">
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-600">
-                  Justificatifs · {activeMonth === 0 ? `Année ${activeYear}` : `${MONTHS[activeMonth]?.label} ${activeYear}`}
-                </p>
-                <h3 className="mt-1 truncate font-display text-xl text-forest-900">{docPanel.factorName}</h3>
-              </div>
-              <button
-                onClick={() => setDocPanel(null)}
-                className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ivory-100 hover:text-ink-700"
-                aria-label="Fermer"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            {/* Upload area */}
-            {activeMonth !== 0 && (
-              <div className="border-b border-ivory-300 p-6">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="hidden"
-                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
-                  onChange={e => {
-                    const file = e.target.files?.[0]
-                    if (file) handleUpload(file)
-                    e.target.value = ''
-                  }}
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-ivory-400 bg-ivory-50 px-4 py-6 text-sm text-ink-500 transition-all hover:border-forest-300 hover:bg-forest-50/50 hover:text-forest-800 disabled:opacity-60"
-                >
-                  <span className="flex size-10 items-center justify-center rounded-full border border-ivory-300 bg-white text-forest-600">
-                    {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
-                  </span>
-                  <span className="font-semibold">{uploading ? 'Envoi en cours…' : 'Téléverser un justificatif'}</span>
-                  <span className="text-[11px] text-ink-400">PDF, images, Excel, Word · 10 Mo max.</span>
-                </button>
-              </div>
-            )}
-            {activeMonth === 0 && (
-              <div className="border-b border-gold-200 bg-gold-50 px-6 py-3">
-                <p className="text-xs text-gold-700">Sélectionnez un mois pour téléverser un justificatif.</p>
-              </div>
-            )}
-
-            {/* Documents list */}
-            <div className="flex-1 overflow-y-auto p-6">
-              {(() => {
-                const panelDocs = getDocsForFactor(docPanel.factorId)
-                if (panelDocs.length === 0) {
-                  return (
-                    <EmptyState
-                      icon={Paperclip}
-                      title="Aucun justificatif"
-                      description="Ajoutez une facture ou un relevé pour justifier cette entrée."
-                    />
-                  )
-                }
-                return (
-                  <ul className="space-y-2">
-                    {panelDocs.map(doc => (
-                      <li key={doc.id} className="group flex items-center gap-3 rounded-xl border border-ivory-300 bg-white p-3 transition-colors hover:border-forest-200 hover:bg-ivory-50">
-                        <span className="flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-forest-50 text-forest-600">
-                          <FileText className="size-4" strokeWidth={1.8} />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-ink-800">{doc.original_name}</p>
-                          <p className="text-[11px] text-ink-400">
-                            {formatFileSize(doc.file_size)} · {MONTHS[doc.month]?.short} {doc.year} · {new Date(doc.created_at).toLocaleDateString('fr-FR')}
-                          </p>
-                        </div>
-                        <div className="flex flex-shrink-0 items-center gap-1 opacity-60 transition-opacity group-hover:opacity-100">
-                          <a
-                            href={`/api/documents/${doc.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex size-8 items-center justify-center rounded-lg text-ink-500 hover:bg-white hover:text-forest-700"
-                            title="Voir"
-                          >
-                            <Eye className="size-3.5" />
-                          </a>
-                          <button
-                            onClick={() => handleDeleteDoc(doc.id)}
-                            className="flex size-8 items-center justify-center rounded-lg text-ink-500 hover:bg-red-50 hover:text-red-600"
-                            title="Supprimer"
-                          >
-                            <Trash className="size-3.5" />
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )
-              })()}
-            </div>
-
-            {/* Footer summary */}
-            <div className="border-t border-ivory-300 bg-ivory-50 px-6 py-3 text-center text-[11px] text-ink-500">
-              {getDocCount(docPanel.factorId)} justificatif(s) au total pour cette source
-            </div>
-          </div>
-        </div>
-      , document.body)}
+      </section>
 
       {/* ---- Reference standards ---- */}
       <Reveal>
@@ -1188,6 +812,239 @@ export default function AssessmentDetailClient() {
           </CardContent>
         </Card>
       </Reveal>
+
+      {/* ---- Sticky unsaved-changes bar ---- */}
+      {dirty && !locked && (
+        <div className="sticky bottom-4 z-30 animate-in fade-in-0 slide-in-from-bottom-4">
+          <div
+            role="status"
+            className="mx-auto flex max-w-2xl flex-col gap-3 rounded-2xl border border-forest-800 bg-forest-900 px-5 py-3.5 text-ivory-50 shadow-lifted sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p className="flex items-center gap-2.5 text-sm">
+              <span className="size-2 flex-shrink-0 rounded-full bg-gold-400" />
+              Modifications non enregistrées
+              <kbd className="hidden rounded-md border border-forest-700 px-1.5 py-0.5 text-[10px] text-forest-100/70 lg:inline">Ctrl S</kbd>
+            </p>
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={discard} disabled={saving} className="flex-1 text-ivory-100 hover:bg-forest-800 hover:text-ivory-50 sm:flex-none">
+                Annuler
+              </Button>
+              <Button variant="gold" onClick={save} disabled={saving} className="flex-1 sm:flex-none">
+                {saving ? <Loader2 className="animate-spin" /> : <Save />}
+                {saving ? 'Enregistrement…' : 'Enregistrer'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---- Dialogs ---- */}
+      <DocumentsSheet
+        open={docOpen}
+        onOpenChange={setDocOpen}
+        assessmentId={assessmentId}
+        factor={docFactor}
+        year={year}
+        months={months}
+        initialMonth={activeMonth}
+        docs={docs}
+        locked={locked}
+        onChanged={loadDocuments}
+      />
+
+      <FactorPicker
+        section={pickerSection}
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        visibleIds={new Set(pickerSection ? visibleFactors(pickerSection).map(f => f.id) : [])}
+        onPick={addFactor}
+      />
+
+      <Dialog open={certOpen} onOpenChange={setCertOpen}>
+        <DialogContent
+          eyebrow="Certification"
+          title="Certifier ce bilan carbone"
+          description="Demande d’audit par un expert accrédité GreenLeaves."
+          meta={<Badge tone="forest">{co2(savedTotal, co2UnitFor(savedTotal))} · {periodLabel}</Badge>}
+          footer={
+            <>
+              <Button variant="ghost" onClick={() => setCertOpen(false)}>Annuler</Button>
+              <Button onClick={handleCertRequest} disabled={certSubmitting || !canRequest}>
+                {certSubmitting ? <Loader2 className="animate-spin" /> : <Shield />}
+                {certSubmitting ? 'Envoi en cours…' : 'Envoyer la demande'}
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-5">
+            <div className="rounded-2xl border border-ivory-300 bg-ivory-50 p-5">
+              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-600">Processus de certification</p>
+              <ol className="space-y-3">
+                {[
+                  'Votre demande est transmise à l’équipe GreenLeaves',
+                  'Un expert accrédité est assigné et fixe la date d’audit',
+                  'Audit terrain et vérification de vos données',
+                  'Dépôt du dossier au CNC, puis remise du certificat',
+                ].map((step, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-ink-700">
+                    <span className="mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded-full bg-forest-900 text-[10px] font-bold text-gold-200">{i + 1}</span>
+                    {step}
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <p className="flex items-start gap-2 text-xs text-ink-500">
+              <Lock className="mt-0.5 size-3.5 flex-shrink-0 text-gold-600" />
+              Pendant la certification, les données et justificatifs de ce bilan seront verrouillés.
+            </p>
+            <div>
+              <label htmlFor="cert-message" className="mb-1.5 block text-[13px] font-semibold text-ink-700">
+                Message pour l’expert <span className="font-normal text-ink-400">(optionnel)</span>
+              </label>
+              <Textarea
+                id="cert-message"
+                value={certMessage}
+                onChange={e => setCertMessage(e.target.value)}
+                rows={4}
+                maxLength={2000}
+                placeholder="Précisions sur votre bilan, contraintes d’accès au site, questions…"
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Stagger>
+  )
+}
+
+/* ============================================================
+   FACTOR ROW — grid on desktop, stacked card below md
+   ============================================================ */
+function FactorRow({
+  factor, unit, quantity, raw, kg, readOnly, docCount, removable, onInput, onBlur, onRemove, onDocs,
+}: {
+  factor: EmissionFactor
+  unit: CO2Unit
+  quantity: number
+  raw: string | undefined
+  kg: number
+  readOnly: boolean
+  docCount: number
+  removable: boolean
+  onInput: (v: string) => void
+  onBlur: () => void
+  onRemove: () => void
+  onDocs: () => void
+}) {
+  const u = unitLabel(factor.unit)
+  const docButton = (
+    <button
+      type="button"
+      onClick={onDocs}
+      aria-label={`Justificatifs — ${factor.nameFr} (${docCount})`}
+      className={cn(
+        'inline-flex h-10 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-semibold transition-all md:h-8',
+        docCount > 0
+          ? 'border-forest-200 bg-forest-50 text-forest-700 hover:bg-forest-100'
+          : quantity > 0 && !readOnly
+            ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
+            : 'border-ivory-300 bg-white text-ink-400 hover:border-ivory-400 hover:text-ink-600',
+      )}
+    >
+      {docCount > 0 ? <><Paperclip className="size-3.5" /> {docCount}</> : quantity > 0 && !readOnly ? <><Upload className="size-3.5" /> Ajouter</> : <Paperclip className="size-3.5" />}
+    </button>
+  )
+
+  return (
+    <li className={cn(
+      'grid grid-cols-2 items-center gap-x-4 gap-y-3 px-5 py-4 transition-colors sm:px-6 md:grid-cols-[minmax(0,1fr)_200px_150px_130px_110px] md:py-3',
+      quantity > 0 ? 'bg-forest-50/40' : 'hover:bg-ivory-50',
+    )}>
+      {/* Source */}
+      <div className="col-span-2 flex min-w-0 items-start gap-2 md:col-span-1">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold leading-snug text-ink-800">{factor.nameFr}</p>
+          <p className="mt-0.5 truncate text-[11px] text-ink-400">{factor.region}</p>
+        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="flex size-10 flex-shrink-0 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ivory-100 hover:text-forest-800 md:size-8"
+              aria-label={`Détails du facteur — ${factor.nameFr}`}
+            >
+              <Info className="size-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-[min(320px,calc(100vw-24px))] p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-600">Facteur d’émission</p>
+            <p className="mt-1 font-display text-base text-forest-900">{factor.nameFr}</p>
+            <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs">
+              <dt className="text-ink-400">Valeur</dt>
+              <dd className="text-right font-semibold tabular-nums text-ink-800">{fmtNum(factor.factorTotal, 4)} kgCO₂e/{u}</dd>
+              <dt className="text-ink-400">Source</dt>
+              <dd className="text-right text-ink-700">{factor.source}</dd>
+              <dt className="text-ink-400">Référence</dt>
+              <dd className="text-right font-mono text-[11px] text-ink-700">{factor.sourceRef}</dd>
+              <dt className="text-ink-400">Zone</dt>
+              <dd className="text-right text-ink-700">{factor.region}</dd>
+              <dt className="text-ink-400">Incertitude</dt>
+              <dd className="text-right tabular-nums text-ink-700">± {fmtNum(factor.uncertainty * 100, 0)} %</dd>
+            </dl>
+          </PopoverContent>
+        </Popover>
+        {removable && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="flex size-10 flex-shrink-0 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ivory-100 hover:text-ink-700 md:size-8"
+            aria-label={`Retirer ${factor.nameFr}`}
+          >
+            <X className="size-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Quantity */}
+      <div className="col-span-2 md:col-span-1">
+        <span className="mb-1 block text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-400 md:hidden">Quantité</span>
+        {readOnly ? (
+          <div className="flex h-11 items-center justify-end gap-1.5 rounded-xl border border-ivory-300 bg-ivory-100 px-3 text-sm tabular-nums text-ink-700 md:h-10">
+            {quantity > 0 ? fmtNum(quantity, 4) : '–'}
+            <span className="text-xs text-ink-400">{u}</span>
+          </div>
+        ) : (
+          <div className="relative">
+            <input
+              id={`qty-${factor.id}`}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              value={raw ?? toInput(quantity)}
+              onChange={e => onInput(e.target.value)}
+              onBlur={onBlur}
+              placeholder="0"
+              aria-label={`Quantité en ${u} — ${factor.nameFr}`}
+              className="h-11 w-full rounded-xl border border-ivory-400 bg-white pl-3 pr-16 text-right text-sm tabular-nums text-ink-800 outline-none transition placeholder:text-ink-400 hover:border-forest-300 focus:border-forest-500 focus:ring-4 focus:ring-forest-100 md:h-10"
+            />
+            <span className="pointer-events-none absolute right-3 top-1/2 max-w-[52px] -translate-y-1/2 truncate text-xs text-ink-400">{u}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Factor */}
+      <p className="text-xs tabular-nums text-ink-500 md:text-right">
+        <span className="md:hidden">FE </span>{fmtNum(factor.factorTotal, 4)}
+        <span className="block text-[11px] text-ink-400">kgCO₂e/{u}</span>
+      </p>
+
+      {/* Total */}
+      <p className="text-right text-sm font-semibold tabular-nums text-forest-900">
+        {kg > 0 ? co2(kg, unit) : <span className="font-normal text-ink-400">–</span>}
+      </p>
+
+      {/* Documents */}
+      <div className="col-span-2 flex justify-end md:col-span-1 md:justify-center">{docButton}</div>
+    </li>
   )
 }

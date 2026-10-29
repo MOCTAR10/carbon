@@ -1,15 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
-import * as Dialog from '@radix-ui/react-dialog'
 import { toast } from 'sonner'
 import {
-  Award, Shield, Clock, XCircle, Check, X, Loader2,
-  FileText, Download, Calendar, Building2, ArrowRight, ArrowUpRight, User,
-  BarChart3, Eye, ChevronDown, Landmark, MapPin, FileCheck2, ShieldCheck,
+  Award, Shield, Clock, XCircle, Loader2, FileText, Download, Calendar, Building2, ArrowRight,
+  ArrowUpRight, User, BarChart3, Eye, ChevronDown, Landmark, MapPin, FileCheck2, ShieldCheck,
+  Link2, Copy, History, AlertTriangle,
 } from 'lucide-react'
-import { cn, fmtCO2Text, fmtDate } from '@/lib/utils'
+import { cn, co2UnitFor, fmtCO2, fmtCO2Text, fmtDate, fmtSize, plural, SCOPES } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge, CertStatusBadge } from '@/components/ui/badge'
@@ -17,6 +16,8 @@ import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Stagger, Reveal } from '@/components/ui/motion'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { CertJourney } from '@/components/ui/cert-journey'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,163 +42,88 @@ interface Certification {
   scope3: number
   status: string
   expertName: string | null
-  expertEmail: string | null
   inspectionDate: string | null
-  inspectionNotes: string | null
-  companyMessage: string | null
-  adminNotes: string | null
   rejectionReason: string | null
   certifiedAt: string | null
   certificateNumber: string | null
   requestedAt: string
-
   auditScheduledDate: string | null
   auditLocation: string | null
-  submittedToOgecAt: string | null
-  ogecReference: string | null
-  avisNumber: string | null
-  avisDate: string | null
-  avisPdfUrl: string | null
-  avisPeriodStart: number | null
-  avisPeriodEnd: number | null
-  avisTotalCo2eq: number | null
   expertReportPdfUrl: string | null
-  dossierCompiledAt: string | null
   submittedToCncAt: string | null
   cncDepositReference: string | null
   documents: CertDoc[]
 }
 
-// ─── Workflow ─────────────────────────────────────────────────────────────────
+/** Latest request of a bilan + its earlier (refused) requests */
+type Dossier = Certification & { history: Certification[] }
 
-const WORKFLOW_STEPS: { key: string; label: string }[] = [
-  { key: 'pending',          label: 'Demande' },
-  { key: 'assigned',         label: 'Expert assigné' },
-  { key: 'in_progress',      label: 'Audit en cours' },
-  { key: 'audit_done',       label: 'Audit terminé' },
-  { key: 'submitted_to_cnc', label: 'Déposé au CNC' },
-  { key: 'certified',        label: 'Certifié' },
-]
+const ACTIVE_STATUSES = ['pending', 'assigned', 'in_progress', 'audit_done', 'submitted_to_cnc']
 
-const STATUS_STEP_INDEX: Record<string, number> = {
-  pending:     0,
-  assigned:    1,
-  in_progress: 2,
-  audit_done:  3,
-  submitted_to_cnc: 4,
-  certified:   5,
-  rejected:    -1,
+const fmtD = (d: string | null) => (d ? fmtDate(d) : '—')
+
+const verifyUrl = (n: string) =>
+  `${typeof window !== 'undefined' ? window.location.origin : ''}/verify/${encodeURIComponent(n)}`
+
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch {
+    // Clipboard API needs a secure context; fall back for http (LAN dev)
+    const ta = document.createElement('textarea')
+    ta.value = text
+    ta.style.position = 'fixed'
+    ta.style.opacity = '0'
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    ta.remove()
+  }
+  toast.success('Lien de vérification copié', { description: text })
 }
 
-const SCOPES = [
-  { key: 'scope1', label: 'Scope 1', dot: 'bg-gold-500' },
-  { key: 'scope2', label: 'Scope 2', dot: 'bg-ink-400' },
-  { key: 'scope3', label: 'Scope 3', dot: 'bg-forest-400' },
-] as const
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatDate(d: string | null): string {
-  if (!d) return '—'
-  return fmtDate(d)
-}
-
-function formatFileSize(bytes: number): string {
-  if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(1)} Mo`
-  if (bytes >= 1024)    return `${(bytes / 1024).toFixed(0)} Ko`
-  return `${bytes} o`
-}
-
-// ─── Journey (horizontal, for cards) ──────────────────────────────────────────
-
-function JourneyTrack({ status }: { status: string }) {
-  const currentIdx = STATUS_STEP_INDEX[status] ?? 0
-  return (
-    <ol className="grid grid-cols-6 gap-2">
-      {WORKFLOW_STEPS.map((step, i) => {
-        const done   = i < currentIdx || status === 'certified'
-        const active = i === currentIdx && status !== 'certified'
-        return (
-          <li key={step.key} className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className={cn(
-                'flex size-6 flex-shrink-0 items-center justify-center rounded-full border text-[10px] font-bold',
-                done   && 'border-forest-700 bg-forest-700 text-ivory-50',
-                active && 'border-gold-500 bg-gold-50 text-gold-700 ring-4 ring-gold-100',
-                !done && !active && 'border-ivory-400 bg-white text-ink-400',
-              )}>
-                {done ? <Check className="size-3" strokeWidth={3} /> : i + 1}
-              </span>
-              {i < WORKFLOW_STEPS.length - 1 && (
-                <span className={cn('h-px flex-1', done ? 'bg-forest-600' : 'bg-ivory-300')} />
-              )}
-            </div>
-            <p className={cn(
-              'mt-2 truncate text-[11px] leading-tight',
-              done ? 'text-ink-600' : active ? 'font-semibold text-forest-900' : 'text-ink-400',
-            )}>
-              {step.label}
-            </p>
-          </li>
-        )
-      })}
-    </ol>
-  )
-}
-
-// ─── Journey (vertical, for the detail dialog — matches the dashboard stepper) ─
-
-function JourneyStepper({ status }: { status: string }) {
-  const idx = STATUS_STEP_INDEX[status] ?? 0
-  return (
-    <ol>
-      {WORKFLOW_STEPS.map((step, i) => {
-        const done   = i < idx || status === 'certified'
-        const active = i === idx && status !== 'certified'
-        return (
-          <li key={step.key} className="relative flex items-center gap-3 pb-3 last:pb-0">
-            {i < WORKFLOW_STEPS.length - 1 && (
-              <span className={cn('absolute left-[11px] top-6 h-[calc(100%-12px)] w-px', done ? 'bg-forest-600' : 'bg-ivory-300')} />
-            )}
-            <span className={cn(
-              'relative z-10 flex size-6 flex-shrink-0 items-center justify-center rounded-full border text-[10px] font-bold',
-              done   && 'border-forest-700 bg-forest-700 text-ivory-50',
-              active && 'border-gold-500 bg-gold-50 text-gold-700 ring-4 ring-gold-100',
-              !done && !active && 'border-ivory-400 bg-white text-ink-400',
-            )}>
-              {done ? <Check className="size-3" strokeWidth={3} /> : i + 1}
-            </span>
-            <span className={cn('text-sm', done ? 'text-ink-700' : active ? 'font-semibold text-forest-900' : 'text-ink-400')}>
-              {step.label}
-            </span>
-          </li>
-        )
-      })}
-    </ol>
-  )
-}
+const journeyDates = (c: Certification) => ({
+  pending: fmtDate(c.requestedAt),
+  in_progress: c.auditScheduledDate ? fmtDate(c.auditScheduledDate) : null,
+  audit_done: c.inspectionDate ? fmtDate(c.inspectionDate) : null,
+  submitted_to_cnc: c.submittedToCncAt ? fmtDate(c.submittedToCncAt) : null,
+  certified: c.certifiedAt ? fmtDate(c.certifiedAt) : null,
+})
 
 // ─── Page component ───────────────────────────────────────────────────────────
 
 export default function CertificationsPage() {
   const [certifications, setCertifications] = useState<Certification[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedCert, setSelectedCert] = useState<Certification | null>(null)
+  const [failed, setFailed] = useState(false)
+  const [selectedId, setSelectedId] = useState<number | null>(null)
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setFailed(false)
+    setLoading(true)
     fetch('/api/certifications')
-      .then(r => r.json())
-      .then(data => {
-        setCertifications(Array.isArray(data) ? data : [])
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+      .then(r => { if (!r.ok) throw new Error(); return r.json() })
+      .then(data => setCertifications(Array.isArray(data) ? data : []))
+      .catch(() => setFailed(true))
+      .finally(() => setLoading(false))
   }, [])
+  useEffect(() => { load() }, [load])
 
-  const ACTIVE_STATUSES = ['pending', 'assigned', 'in_progress', 'audit_done', 'submitted_to_cnc']
-  const certified   = certifications.filter(c => c.status === 'certified')
-  const inProgress  = certifications.filter(c => ACTIVE_STATUSES.includes(c.status))
-  const rejected    = certifications.filter(c => c.status === 'rejected')
+  // One dossier per bilan: the newest request carries the status, older ones become its history
+  const dossiers = useMemo<Dossier[]>(() => {
+    const byAssessment = new Map<number, Dossier>()
+    for (const c of certifications) {            // API order: newest first
+      const d = byAssessment.get(c.assessmentId)
+      if (d) d.history.push(c)
+      else byAssessment.set(c.assessmentId, { ...c, history: [] })
+    }
+    return Array.from(byAssessment.values())
+  }, [certifications])
+
+  const certified  = dossiers.filter(c => c.status === 'certified')
+  const inProgress = dossiers.filter(c => ACTIVE_STATUSES.includes(c.status))
+  const rejected   = dossiers.filter(c => c.status === 'rejected')
+  const selected   = dossiers.find(d => d.id === selectedId) ?? null
 
   if (loading) return <CertificationsSkeleton />
 
@@ -206,14 +132,16 @@ export default function CertificationsPage() {
       <Reveal>
         <PageHeader
           eyebrow="Conformité & certification"
-          title="Mes certifications"
+          title="Certifications"
           description="Suivez chaque demande : audit terrain par un expert accrédité GreenLeaves, dépôt du dossier au CNC, puis délivrance du certificat."
-          actions={
+          actions={dossiers.length > 0 ? (
             <>
-              <Badge tone="forest" className="px-3 py-1 text-xs">
-                <Award className="size-3.5" />
-                {certified.length} certifié{certified.length !== 1 ? 's' : ''}
-              </Badge>
+              {certified.length > 0 && (
+                <Badge tone="forest" className="px-3 py-1 text-xs">
+                  <Award className="size-3.5" />
+                  {plural(certified.length, 'bilan certifié', 'bilans certifiés')}
+                </Badge>
+              )}
               {inProgress.length > 0 && (
                 <Badge tone="gold" className="px-3 py-1 text-xs">
                   <Clock className="size-3.5" />
@@ -221,18 +149,25 @@ export default function CertificationsPage() {
                 </Badge>
               )}
             </>
-          }
+          ) : undefined}
         />
       </Reveal>
 
-      {/* Empty state */}
-      {certifications.length === 0 && (
+      {failed && (
+        <Card className="flex flex-col items-center gap-3 p-10 text-center">
+          <AlertTriangle className="size-6 text-amber-600" />
+          <p className="text-sm font-semibold text-ink-800">Impossible de charger vos certifications</p>
+          <Button variant="outline" size="sm" onClick={load}>Réessayer</Button>
+        </Card>
+      )}
+
+      {!failed && dossiers.length === 0 && (
         <Reveal>
           <Card className="p-10">
             <EmptyState
               icon={Award}
-              title="Aucune certification"
-              description="Ouvrez un bilan finalisé et cliquez sur « Certifier ce bilan » pour commencer."
+              title="Aucune demande de certification"
+              description="Ouvrez un bilan complété et cliquez sur « Certifier ce bilan » pour lancer l’audit."
               action={
                 <Button asChild>
                   <Link href="/dashboard/assessments"><BarChart3 /> Voir mes bilans</Link>
@@ -243,40 +178,39 @@ export default function CertificationsPage() {
         </Reveal>
       )}
 
-      {/* Certified */}
       {certified.length > 0 && (
         <Section icon={FileCheck2} title="Bilans certifiés" count={certified.length} tone="gold">
           <div className="grid gap-5 lg:grid-cols-2">
             {certified.map(cert => (
-              <CredentialCard key={cert.id} cert={cert} onSelect={() => setSelectedCert(cert)} />
+              <CredentialCard key={cert.id} cert={cert} onSelect={() => setSelectedId(cert.id)} />
             ))}
           </div>
         </Section>
       )}
 
-      {/* In progress */}
       {inProgress.length > 0 && (
         <Section icon={Clock} title="En cours de certification" count={inProgress.length}>
           <div className="space-y-4">
             {inProgress.map(cert => (
-              <ProgressCard key={cert.id} cert={cert} onSelect={() => setSelectedCert(cert)} />
+              <ProgressCard key={cert.id} cert={cert} onSelect={() => setSelectedId(cert.id)} />
             ))}
           </div>
         </Section>
       )}
 
-      {/* Rejected */}
       {rejected.length > 0 && (
-        <Section icon={XCircle} title="Certifications refusées" count={rejected.length}>
+        <Section icon={XCircle} title="Demandes refusées" count={rejected.length}>
           <div className="space-y-4">
             {rejected.map(cert => (
-              <RejectedCard key={cert.id} cert={cert} onSelect={() => setSelectedCert(cert)} />
+              <RejectedCard key={cert.id} cert={cert} onSelect={() => setSelectedId(cert.id)} />
             ))}
           </div>
         </Section>
       )}
 
-      <CertDetailDialog cert={selectedCert} onClose={() => setSelectedCert(null)} />
+      <Dialog open={!!selected} onOpenChange={o => { if (!o) setSelectedId(null) }}>
+        {selected && <CertDetail key={selected.id} cert={selected} />}
+      </Dialog>
     </Stagger>
   )
 }
@@ -290,9 +224,9 @@ function Section({
     <Reveal>
       <section>
         <div className="mb-4 flex items-center gap-3">
-          <Icon className={cn('size-4', tone === 'gold' ? 'text-gold-500' : 'text-forest-500')} strokeWidth={1.8} />
+          <Icon className={cn('size-4', tone === 'gold' ? 'text-gold-600' : 'text-forest-500')} strokeWidth={1.8} />
           <h2 className="font-display text-xl text-forest-900">{title}</h2>
-          <span className="rounded-full bg-ivory-200 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-ink-500">{count}</span>
+          <span className="rounded-full bg-ivory-200 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-ink-600">{count}</span>
           <span className="h-px flex-1 bg-ivory-300" />
         </div>
         {children}
@@ -304,101 +238,100 @@ function Section({
 // ─── Shared card bits ─────────────────────────────────────────────────────────
 
 function CardMeta({ cert }: { cert: Certification }) {
+  // Separator lives on the following item so it never dangles at the end of a wrapped line
+  const sep = "before:mr-3 before:text-ivory-400 before:content-['•']"
   return (
     <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-500">
       <span className="inline-flex items-center gap-1"><Building2 className="size-3" />{cert.siteName}</span>
-      <span className="text-ivory-400">•</span>
-      <span>{cert.assessmentYear}</span>
-      <span className="text-ivory-400">•</span>
-      <span className="font-semibold tabular-nums text-ink-700">{fmtCO2Text(cert.totalCo2eq)}</span>
+      <span className={sep}>{cert.assessmentYear}</span>
+      <span className={cn(sep, 'font-semibold tabular-nums text-ink-700')}>{fmtCO2Text(cert.totalCo2eq)}</span>
       {cert.expertName && (
-        <>
-          <span className="text-ivory-400">•</span>
-          <span className="inline-flex items-center gap-1"><User className="size-3" />{cert.expertName}</span>
-        </>
+        <span className={cn(sep, 'inline-flex items-center gap-1')}><User className="size-3" />{cert.expertName}</span>
       )}
     </p>
   )
 }
 
-function ScopeChips({ cert }: { cert: Certification }) {
+function HistoryNote({ cert }: { cert: Dossier }) {
+  if (!cert.history.length) return null
   return (
-    <div className="flex flex-wrap gap-2">
-      {SCOPES.map(s => (
-        <span key={s.key} className="inline-flex items-center gap-1.5 rounded-lg border border-ivory-300 bg-ivory-50 px-2 py-1 text-[11px] text-ink-600">
-          <span className={cn('size-1.5 rounded-full', s.dot)} />
-          <span className="font-semibold">{s.label}</span>
-          <span className="tabular-nums">{fmtCO2Text(cert[s.key])}</span>
-        </span>
-      ))}
-    </div>
+    <span className="inline-flex items-center gap-1 text-[11px] text-ink-500">
+      <History className="size-3" /> {plural(cert.history.length, 'demande antérieure', 'demandes antérieures')}
+    </span>
   )
 }
 
 // ─── Certified: credential card ───────────────────────────────────────────────
 
-function CredentialCard({ cert, onSelect }: { cert: Certification; onSelect: () => void }) {
+function CredentialCard({ cert, onSelect }: { cert: Dossier; onSelect: () => void }) {
   return (
-    <button
-      onClick={onSelect}
-      className="group relative w-full overflow-hidden rounded-2xl border border-gold-300/70 bg-white p-6 text-left shadow-gold transition-all hover:-translate-y-0.5 hover:shadow-lifted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
-    >
+    <div className="group relative overflow-hidden rounded-2xl border border-gold-300/70 bg-white shadow-gold transition-all hover:shadow-lifted">
       <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-gold-300 via-gold-500 to-gold-300" />
       <span className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full border border-gold-200/60" />
       <span className="pointer-events-none absolute -right-6 -top-6 size-24 rounded-full border border-gold-200/60" />
 
-      <div className="relative flex items-start justify-between gap-4">
-        <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold-100 to-gold-50 ring-1 ring-gold-300/60">
-          <Award className="size-6 text-gold-600" strokeWidth={1.6} />
+      <button
+        onClick={onSelect}
+        className="relative block w-full p-6 pb-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold-100 to-gold-50 ring-1 ring-gold-300/60">
+            <Award className="size-6 text-gold-600" strokeWidth={1.6} />
+          </div>
+          <CertStatusBadge status={cert.status} />
         </div>
-        <CertStatusBadge status={cert.status} />
-      </div>
 
-      <p className="relative mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-600">Certificat CNC</p>
-      <p className="relative mt-1 font-display text-2xl tracking-tight text-forest-900">
-        {cert.certificateNumber ? `N° ${cert.certificateNumber}` : 'Numéro en attente'}
-      </p>
+        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-600">Certificat délivré par le CNC</p>
+        <p className="mt-1 font-display text-2xl tracking-tight text-forest-900">
+          {cert.certificateNumber ? `N° ${cert.certificateNumber}` : 'Numéro en attente'}
+        </p>
 
-      <h3 className="relative mt-4 truncate text-sm font-semibold text-ink-800">{cert.assessmentName}</h3>
-      <div className="relative mt-1"><CardMeta cert={cert} /></div>
+        <h3 className="mt-4 truncate text-sm font-semibold text-ink-800">{cert.assessmentName}</h3>
+        <div className="mt-1"><CardMeta cert={cert} /></div>
+      </button>
 
-      <div className="relative mt-5 flex items-center justify-between border-t border-ivory-300 pt-4">
+      <div className="relative mx-6 flex flex-wrap items-center justify-between gap-3 border-t border-ivory-300 py-4">
         <span className="text-xs text-ink-500">
-          Délivré le <span className="font-semibold text-ink-700">{formatDate(cert.certifiedAt)}</span>
+          Délivré le <span className="font-semibold text-ink-700">{fmtD(cert.certifiedAt)}</span>
         </span>
-        <span className="inline-flex items-center gap-1 text-xs font-semibold text-forest-700 transition-colors group-hover:text-gold-600">
-          Voir le certificat <ArrowRight className="size-3" />
-        </span>
+        <div className="flex items-center gap-1">
+          {cert.certificateNumber && (
+            <Button variant="ghost" size="sm" onClick={() => copyText(verifyUrl(cert.certificateNumber!))}>
+              <Link2 /> Copier le lien de vérification
+            </Button>
+          )}
+          <Button variant="link" size="sm" onClick={onSelect}>
+            Ouvrir <ArrowRight />
+          </Button>
+        </div>
       </div>
-    </button>
+    </div>
   )
 }
 
 // ─── In progress card ─────────────────────────────────────────────────────────
 
-function ProgressCard({ cert, onSelect }: { cert: Certification; onSelect: () => void }) {
+function ProgressCard({ cert, onSelect }: { cert: Dossier; onSelect: () => void }) {
   return (
-    <button onClick={onSelect} className="group block w-full text-left focus:outline-none">
-      <Card className="p-6 transition-all group-hover:shadow-lifted group-focus-visible:ring-2 group-focus-visible:ring-gold-400">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="truncate font-display text-lg text-forest-900">{cert.assessmentName}</h3>
-              <CertStatusBadge status={cert.status} />
-            </div>
-            <div className="mt-1.5"><CardMeta cert={cert} /></div>
-          </div>
-          <div className="hidden md:block"><ScopeChips cert={cert} /></div>
+    <button onClick={onSelect} className="group block w-full rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
+      <Card className="p-5 transition-all group-hover:shadow-lifted sm:p-6">
+        <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <h3 className="min-w-0 truncate font-display text-lg text-forest-900">{cert.assessmentName}</h3>
+          <span className="flex-shrink-0"><CertStatusBadge status={cert.status} /></span>
+        </div>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <CardMeta cert={cert} />
+          <HistoryNote cert={cert} />
         </div>
 
-        <div className="mt-6"><JourneyTrack status={cert.status} /></div>
+        <div className="mt-6"><CertJourney status={cert.status} dates={journeyDates(cert)} /></div>
 
         {(cert.auditScheduledDate || cert.auditLocation || cert.submittedToCncAt) && (
           <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 border-t border-ivory-300 pt-4 text-xs text-ink-500">
             {cert.auditScheduledDate && (
               <span className="inline-flex items-center gap-1.5">
                 <Calendar className="size-3.5 text-forest-500" /> Audit terrain le{' '}
-                <span className="font-semibold text-ink-700">{formatDate(cert.auditScheduledDate)}</span>
+                <span className="font-semibold text-ink-700">{fmtD(cert.auditScheduledDate)}</span>
               </span>
             )}
             {cert.auditLocation && (
@@ -408,9 +341,9 @@ function ProgressCard({ cert, onSelect }: { cert: Certification; onSelect: () =>
             )}
             {cert.submittedToCncAt && (
               <span className="inline-flex items-center gap-1.5">
-                <Landmark className="size-3.5 text-gold-500" /> Déposé au CNC le{' '}
-                <span className="font-semibold text-ink-700">{formatDate(cert.submittedToCncAt)}</span>
-                {cert.cncDepositReference && <span className="text-ink-400">· Réf. {cert.cncDepositReference}</span>}
+                <Landmark className="size-3.5 text-gold-600" /> Déposé au CNC le{' '}
+                <span className="font-semibold text-ink-700">{fmtD(cert.submittedToCncAt)}</span>
+                {cert.cncDepositReference && <span>· Réf. {cert.cncDepositReference}</span>}
               </span>
             )}
           </div>
@@ -422,22 +355,24 @@ function ProgressCard({ cert, onSelect }: { cert: Certification; onSelect: () =>
 
 // ─── Rejected card ────────────────────────────────────────────────────────────
 
-function RejectedCard({ cert, onSelect }: { cert: Certification; onSelect: () => void }) {
+function RejectedCard({ cert, onSelect }: { cert: Dossier; onSelect: () => void }) {
   return (
-    <button onClick={onSelect} className="group block w-full text-left focus:outline-none">
-      <Card className="flex items-start gap-4 p-5 transition-all group-hover:shadow-lifted group-focus-visible:ring-2 group-focus-visible:ring-gold-400">
-        <span className="flex size-10 flex-shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500 ring-1 ring-red-100">
+    <button onClick={onSelect} className="group block w-full rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
+      <Card className="flex items-start gap-4 p-5 transition-all group-hover:shadow-lifted">
+        <span className="flex size-10 flex-shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600 ring-1 ring-red-100">
           <XCircle className="size-5" strokeWidth={1.7} />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-sm font-semibold text-ink-800">{cert.assessmentName}</h3>
-            <CertStatusBadge status={cert.status} />
+          <h3 className="truncate text-sm font-semibold text-ink-800">{cert.assessmentName}</h3>
+          <div className="mt-1.5"><CertStatusBadge status={cert.status} /></div>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <CardMeta cert={cert} />
+            <HistoryNote cert={cert} />
           </div>
-          <div className="mt-1"><CardMeta cert={cert} /></div>
           {cert.rejectionReason && (
-            <p className="mt-3 border-l-2 border-red-200 pl-3 text-sm text-red-700/90">{cert.rejectionReason}</p>
+            <p className="mt-3 border-l-2 border-red-200 pl-3 text-sm text-red-700">{cert.rejectionReason}</p>
           )}
+          <p className="mt-3 text-xs text-ink-500">Corrigez votre bilan, puis soumettez une nouvelle demande depuis sa page.</p>
         </div>
         <ArrowUpRight className="size-4 flex-shrink-0 text-ink-400 transition-colors group-hover:text-forest-700" />
       </Card>
@@ -447,259 +382,193 @@ function RejectedCard({ cert, onSelect }: { cert: Certification; onSelect: () =>
 
 // ─── Detail dialog ────────────────────────────────────────────────────────────
 
-function CertDetailDialog({ cert, onClose }: { cert: Certification | null; onClose: () => void }) {
-  return (
-    <Dialog.Root open={!!cert} onOpenChange={open => { if (!open) onClose() }}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-forest-950/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=open]:fade-in-0" />
-        <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-3xl border border-ivory-300 bg-ivory-50 font-sans text-ink-800 shadow-lifted focus:outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
-        >
-          {cert && <CertDetail key={cert.id} cert={cert} onClose={onClose} />}
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
-  )
+async function downloadBlob(url: string, filename: string, init?: RequestInit) {
+  const res = await fetch(url, init)
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    toast.error(data.error || 'Erreur lors du téléchargement')
+    return
+  }
+  const blobUrl = URL.createObjectURL(await res.blob())
+  const a = document.createElement('a')
+  a.href = blobUrl
+  a.download = filename
+  a.click()
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
 }
 
-function CertDetail({ cert, onClose }: { cert: Certification; onClose: () => void }) {
-  const [certLoading, setCertLoading] = useState(false)
-  const [trackingLoading, setTrackingLoading] = useState(false)
-  const [reportLoading, setReportLoading] = useState(false)
+function CertDetail({ cert }: { cert: Dossier }) {
+  const [busy, setBusy] = useState<'cert' | 'tracking' | 'report' | null>(null)
   const [showDocs, setShowDocs] = useState(false)
 
   // Most recent certificate uploaded by the expert (documents are sorted newest first)
   const certificateDoc    = cert.documents.find(d => d.docType === 'certificate')
-  const canDownloadCert   = cert.status === 'certified' && !!certificateDoc
-  const canDownloadReport = !!cert.expertReportPdfUrl
   const isCertified       = cert.status === 'certified'
   const isRejected        = cert.status === 'rejected'
+  const canDownloadCert   = isCertified && !!certificateDoc
+  const canDownloadReport = !!cert.expertReportPdfUrl
+  const unit = co2UnitFor(Number(cert.totalCo2eq) || 0)
 
-  async function downloadBlob(url: string, filename: string) {
-    const res = await fetch(url)
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      toast.error(data.error || 'Erreur lors du téléchargement')
-      return
-    }
-    const blobUrl = URL.createObjectURL(await res.blob())
-    const a = document.createElement('a')
-    a.href = blobUrl
-    a.download = filename
-    a.click()
-    URL.revokeObjectURL(blobUrl)
+  const run = async (kind: 'cert' | 'tracking' | 'report', fn: () => Promise<void>) => {
+    setBusy(kind)
+    try { await fn() } catch { toast.error('Erreur lors du téléchargement') } finally { setBusy(null) }
   }
+  const downloadCertificate = () => certificateDoc && run('cert', () =>
+    downloadBlob(`/api/certification-documents/${certificateDoc.id}`, certificateDoc.originalName))
+  const downloadTracking = () => run('tracking', () =>
+    downloadBlob(`/api/certifications/${cert.id}/tracking`, `suivi-demande-certification-${cert.id}.pdf`))
+  const downloadExpertReport = () => run('report', () =>
+    downloadBlob(`/api/admin/certifications/${cert.id}/generate-pdf`, `rapport-audit-${cert.id}.pdf`, { method: 'POST' }))
 
-  async function downloadCertificate() {
-    if (!certificateDoc) return
-    setCertLoading(true)
-    try { await downloadBlob(`/api/certification-documents/${certificateDoc.id}`, certificateDoc.originalName) }
-    finally { setCertLoading(false) }
-  }
-
-  async function downloadTracking() {
-    setTrackingLoading(true)
-    try { await downloadBlob(`/api/certifications/${cert.id}/tracking`, `suivi-demande-certification-${cert.id}.pdf`) }
-    finally { setTrackingLoading(false) }
-  }
-
-  async function downloadExpertReport() {
-    setReportLoading(true)
-    try {
-      const res = await fetch(`/api/admin/certifications/${cert.id}/generate-pdf`, { method: 'POST' })
-      if (!res.ok) {
-        const data = await res.json()
-        toast.error(data.error || 'Erreur lors de la génération du rapport')
-        return
-      }
-      const blob = await res.blob()
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href     = url
-      a.download = `rapport-expert-certification-${cert.id}.pdf`
-      a.click()
-      URL.revokeObjectURL(url)
-    } finally {
-      setReportLoading(false)
-    }
-  }
-
-  // Status-specific message shown to company
   const statusMessage: Record<string, string> = {
-    pending:     'Votre demande est en attente d’attribution à un expert accrédité GreenLeaves.',
-    assigned:    `L’expert ${cert.expertName || ''} a été désigné pour votre audit.`,
-    in_progress: 'L’audit de votre bilan est en cours. L’expert examine vos données et documents.',
-    audit_done:  'L’audit terrain est terminé. L’expert accrédité prépare le dépôt de votre dossier au Conseil National du Climat (CNC).',
+    pending:          'Votre demande est en attente d’attribution à un expert accrédité GreenLeaves.',
+    assigned:         cert.expertName
+      ? `L’expert ${cert.expertName} a été désigné pour votre audit terrain.`
+      : 'Un expert accrédité a été désigné pour votre audit terrain.',
+    in_progress:      'L’audit de votre bilan est en cours : l’expert examine vos données et justificatifs.',
+    audit_done:       'L’audit est validé. L’expert accrédité prépare le dépôt de votre dossier au Conseil National du Climat (CNC).',
     submitted_to_cnc: 'Votre dossier a été déposé au CNC par l’expert accrédité. Le certificat sera disponible ici dès sa délivrance.',
-    certified:   'Votre bilan carbone est certifié par le CNC. Téléchargez le certificat ci-dessous.',
-    rejected:    cert.rejectionReason || 'Votre demande a été refusée.',
+    certified:        'Votre bilan carbone est certifié par le CNC.',
+    rejected:         'Votre demande a été refusée. Corrigez votre bilan puis soumettez une nouvelle demande.',
   }
 
   const timeline: { icon: React.ElementType; label: string; value: React.ReactNode; highlight?: boolean }[] = [
-    { icon: Calendar, label: 'Demande envoyée le', value: formatDate(cert.requestedAt) },
+    { icon: Calendar, label: 'Demande envoyée le', value: fmtD(cert.requestedAt) },
     ...(cert.expertName ? [{ icon: User, label: 'Expert auditeur', value: cert.expertName }] : []),
-    ...(cert.auditScheduledDate ? [{ icon: Calendar, label: 'Audit terrain prévu le', value: formatDate(cert.auditScheduledDate) }] : []),
+    ...(cert.auditScheduledDate ? [{ icon: Calendar, label: 'Audit terrain prévu le', value: fmtD(cert.auditScheduledDate) }] : []),
     ...(cert.auditLocation ? [{ icon: MapPin, label: 'Lieu de l’audit', value: cert.auditLocation }] : []),
-    ...(cert.inspectionDate ? [{ icon: Eye, label: 'Audit réalisé le', value: formatDate(cert.inspectionDate) }] : []),
+    ...(cert.inspectionDate ? [{ icon: Eye, label: 'Audit réalisé le', value: fmtD(cert.inspectionDate) }] : []),
     ...(cert.submittedToCncAt ? [{
-      icon: Landmark, label: 'Dossier déposé au CNC le',
-      value: <>{formatDate(cert.submittedToCncAt)}{cert.cncDepositReference && ` · Réf. ${cert.cncDepositReference}`}</>,
+      icon: Landmark, label: 'Déposé au CNC le',
+      value: <>{fmtD(cert.submittedToCncAt)}{cert.cncDepositReference && ` · Réf. ${cert.cncDepositReference}`}</>,
     }] : []),
-    ...(cert.certifiedAt ? [{ icon: ShieldCheck, label: 'Certifié le', value: formatDate(cert.certifiedAt), highlight: true }] : []),
+    ...(cert.certifiedAt && isCertified ? [{ icon: ShieldCheck, label: 'Certifié le', value: fmtD(cert.certifiedAt), highlight: true }] : []),
   ]
 
   return (
-    <>
-      {/* Header */}
-      <div className={cn(
-        'relative flex-shrink-0 overflow-hidden px-7 pb-6 pt-7',
-        isCertified ? 'bg-forest-900 bg-forest-grain text-ivory-50' : 'border-b border-ivory-300 bg-white',
-      )}>
+    <DialogContent
+      size="lg"
+      eyebrow={isCertified ? 'Certificat délivré par le CNC' : 'Demande de certification'}
+      title={cert.assessmentName}
+      description={`${cert.siteName} · Exercice ${cert.assessmentYear}`}
+      meta={<CertStatusBadge status={cert.status} />}
+      footer={
+        <>
+          <Button asChild variant="link" className="sm:mr-auto">
+            <Link href={`/dashboard/assessments/${cert.assessmentId}`}>Voir le bilan <ArrowRight /></Link>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-6">
+        {/* Downloads first: this is why the company opens the dossier */}
         {isCertified && (
-          <>
-            <span className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full border border-gold-400/15" />
-            <span className="pointer-events-none absolute -right-4 -top-4 size-32 rounded-full border border-gold-400/15" />
-          </>
-        )}
-        <div className="relative flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p className={cn('text-[11px] font-semibold uppercase tracking-[0.18em]', isCertified ? 'text-gold-300' : 'text-gold-600')}>
-              {isCertified ? 'Certificat CNC' : 'Demande de certification'}
+          <div className="relative overflow-hidden rounded-2xl bg-forest-900 bg-forest-grain p-5 text-ivory-50 sm:p-6">
+            <span className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full border border-gold-400/20" />
+            <span className="pointer-events-none absolute -right-2 -top-2 size-20 rounded-full border border-gold-400/20" />
+            <p className="relative text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-300">Numéro de certificat</p>
+            <p className="relative mt-1 font-display text-2xl tracking-tight sm:text-3xl">
+              {cert.certificateNumber ? `N° ${cert.certificateNumber}` : 'Numéro en attente'}
             </p>
-            <Dialog.Title className={cn('mt-1.5 font-display text-2xl tracking-tight', isCertified ? 'text-ivory-50' : 'text-forest-900')}>
-              {isCertified && cert.certificateNumber ? `N° ${cert.certificateNumber}` : cert.assessmentName}
-            </Dialog.Title>
-            <Dialog.Description className={cn('mt-1 text-sm', isCertified ? 'text-forest-100/70' : 'text-ink-500')}>
-              {isCertified && cert.certificateNumber ? `${cert.assessmentName} · ` : ''}{cert.siteName} · {cert.assessmentYear}
-            </Dialog.Description>
+            <p className="relative mt-1 text-sm text-ivory-200">Délivré le {fmtD(cert.certifiedAt)}</p>
+            <div className="relative mt-5 flex flex-col gap-2 sm:flex-row">
+              {canDownloadCert ? (
+                <Button variant="gold" onClick={downloadCertificate} disabled={busy === 'cert'}>
+                  {busy === 'cert' ? <Loader2 className="animate-spin" /> : <Download />} Télécharger le certificat
+                </Button>
+              ) : (
+                <p className="text-sm text-ivory-200">La copie numérique du certificat sera ajoutée par l’expert.</p>
+              )}
+              {cert.certificateNumber && (
+                <Button
+                  variant="outline"
+                  className="border-white/20 bg-white/5 text-ivory-50 hover:border-gold-300 hover:bg-white/10"
+                  onClick={() => copyText(verifyUrl(cert.certificateNumber!))}
+                >
+                  <Copy /> Copier le lien de vérification
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="flex flex-shrink-0 items-center gap-2">
-            <CertStatusBadge status={cert.status} />
-            <Dialog.Close asChild>
-              <button
-                className={cn(
-                  'flex size-8 items-center justify-center rounded-lg transition-colors',
-                  isCertified ? 'text-forest-100/70 hover:bg-white/10 hover:text-ivory-50' : 'text-ink-400 hover:bg-ivory-100 hover:text-ink-700',
-                )}
-                aria-label="Fermer"
-              >
-                <X className="size-4" />
-              </button>
-            </Dialog.Close>
-          </div>
-        </div>
-      </div>
+        )}
 
-      <div className="flex-1 space-y-6 overflow-y-auto px-7 py-6">
-
-        {/* Status message */}
         <div className={cn(
           'rounded-2xl border px-4 py-3.5 text-sm leading-relaxed',
-          isRejected  ? 'border-red-200 bg-red-50 text-red-700' :
-          isCertified ? 'border-gold-200 bg-gold-50 text-gold-700' :
-                        'border-forest-100 bg-forest-50 text-forest-800',
+          isRejected ? 'border-red-200 bg-red-50 text-red-700' : 'border-forest-100 bg-forest-50 text-forest-800',
         )}>
-          {statusMessage[cert.status]}
+          {statusMessage[cert.status] ?? ''}
         </div>
 
-        {/* Workflow progress */}
+        {cert.rejectionReason && isRejected && (
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-red-600">Motif du refus</p>
+            <p className="rounded-xl border border-red-100 bg-red-50/60 p-4 text-sm leading-relaxed text-red-700">{cert.rejectionReason}</p>
+          </div>
+        )}
+
+        <div>
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">Documents</p>
+          <div className="space-y-2.5">
+            {canDownloadReport && (
+              <DownloadRow
+                icon={Shield}
+                title="Rapport d’audit expert"
+                subtitle="Rapport complet de l’audit GreenLeaves (PDF)"
+                loading={busy === 'report'}
+                onClick={downloadExpertReport}
+              />
+            )}
+            <DownloadRow
+              icon={FileText}
+              title="Fiche de suivi de la demande"
+              subtitle="État d’avancement de votre dossier (PDF)"
+              loading={busy === 'tracking'}
+              onClick={downloadTracking}
+            />
+          </div>
+        </div>
+
         {!isRejected && (
-          <div className="grid gap-6 sm:grid-cols-[200px_1fr]">
-            <div>
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-400">Progression du dossier</p>
-              <JourneyStepper status={cert.status} />
+          <div>
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">Progression du dossier</p>
+            <div className="grid gap-6 sm:grid-cols-[210px_1fr]">
+              <CertJourney status={cert.status} orientation="vertical" />
+              <Timeline rows={timeline} />
             </div>
-            <Timeline rows={timeline} />
           </div>
         )}
         {isRejected && <Timeline rows={timeline} />}
 
-        {/* Emissions summary */}
         <div>
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-400">Émissions déclarées</p>
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+            Émissions déclarées <span className="font-normal normal-case tracking-normal">({fmtCO2(0, unit).unit})</span>
+          </p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-xl bg-forest-900 p-3.5 text-ivory-50">
-              <p className="text-[11px] text-forest-100/60">Total</p>
-              <p className="mt-1 font-display text-lg tabular-nums">{fmtCO2Text(cert.totalCo2eq)}</p>
+              <p className="text-[11px] text-ivory-200">Total</p>
+              <p className="mt-1 font-display text-lg tabular-nums">{fmtCO2(cert.totalCo2eq, unit).value}</p>
             </div>
             {SCOPES.map(s => (
-              <div key={s.key} className="rounded-xl border border-ivory-300 bg-white p-3.5">
+              <div key={s.scope} className="rounded-xl border border-ivory-300 bg-white p-3.5">
                 <p className="flex items-center gap-1.5 text-[11px] text-ink-500">
-                  <span className={cn('size-1.5 rounded-full', s.dot)} /> {s.label}
+                  <span className={cn('size-1.5 rounded-full', s.bg)} /> {s.label}
                 </p>
-                <p className="mt-1 font-display text-lg tabular-nums text-forest-900">{fmtCO2Text(cert[s.key])}</p>
+                <p className="mt-1 font-display text-lg tabular-nums text-forest-900">
+                  {fmtCO2(cert[`scope${s.scope}` as 'scope1'], unit).value}
+                </p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Admin / expert notes */}
-        {cert.adminNotes && (
-          <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-400">Notes de l&apos;expert</p>
-            <p className="rounded-xl border border-ivory-300 bg-white p-4 text-sm leading-relaxed text-ink-700">{cert.adminNotes}</p>
-          </div>
-        )}
-
-        {cert.rejectionReason && (
-          <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-red-500">Motif de refus</p>
-            <p className="rounded-xl border border-red-100 bg-red-50/60 p-4 text-sm leading-relaxed text-red-700">{cert.rejectionReason}</p>
-          </div>
-        )}
-
-        {/* Downloads */}
-        <div>
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-400">Téléchargements</p>
-          <div className="space-y-2.5">
-            {canDownloadCert && (
-              <button
-                onClick={downloadCertificate}
-                disabled={certLoading}
-                className="flex w-full items-center gap-4 rounded-2xl border border-gold-300 bg-gradient-to-r from-gold-50 to-white p-4 text-left shadow-gold transition-all hover:-translate-y-0.5 disabled:opacity-60"
-              >
-                <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-gold-500 text-forest-950">
-                  <Award className="size-5" strokeWidth={1.8} />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-forest-900">Certificat CNC</span>
-                  <span className="block truncate text-xs text-gold-700">Copie numérique du certificat — N° {cert.certificateNumber}</span>
-                </span>
-                <span className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-gold-500 px-3 text-xs font-semibold text-forest-950">
-                  {certLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
-                  Télécharger
-                </span>
-              </button>
-            )}
-
-            <DownloadRow
-              icon={FileText}
-              title="Fiche de suivi de la demande"
-              subtitle="État d’avancement de votre dossier (PDF)"
-              loading={trackingLoading}
-              onClick={downloadTracking}
-            />
-
-            {canDownloadReport && (
-              <DownloadRow
-                icon={Shield}
-                title="Rapport d’audit expert"
-                subtitle="Rapport complet d’audit — expert GreenLeaves"
-                loading={reportLoading}
-                onClick={downloadExpertReport}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Uploaded documents */}
         {cert.documents.length > 0 && (
           <div>
             <button
               onClick={() => setShowDocs(!showDocs)}
-              className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-400 transition-colors hover:text-forest-800"
+              aria-expanded={showDocs}
+              className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500 transition-colors hover:text-forest-800"
             >
-              Documents joints ({cert.documents.length})
+              Pièces du dossier ({cert.documents.length})
               <ChevronDown className={cn('size-3.5 transition-transform', showDocs && 'rotate-180')} />
             </button>
             {showDocs && (
@@ -709,12 +578,12 @@ function CertDetail({ cert, onClose }: { cert: Certification; onClose: () => voi
                     <FileText className="size-4 flex-shrink-0 text-forest-500" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-ink-800">{doc.originalName}</p>
-                      <p className="text-xs text-ink-400">{formatFileSize(doc.fileSize)} • {formatDate(doc.createdAt)}</p>
+                      <p className="text-xs text-ink-500">{fmtSize(doc.fileSize)} · {fmtD(doc.createdAt)}</p>
                     </div>
                     <a
                       href={`/api/certification-documents/${doc.id}`}
-                      className="flex size-8 items-center justify-center rounded-lg text-ink-500 transition-colors hover:bg-ivory-100 hover:text-forest-900"
-                      title="Télécharger"
+                      className="flex size-9 items-center justify-center rounded-lg text-ink-500 transition-colors hover:bg-ivory-100 hover:text-forest-900"
+                      aria-label={`Télécharger ${doc.originalName}`}
                     >
                       <Download className="size-4" />
                     </a>
@@ -724,28 +593,36 @@ function CertDetail({ cert, onClose }: { cert: Certification; onClose: () => voi
             )}
           </div>
         )}
-      </div>
 
-      {/* Footer */}
-      <div className="flex flex-shrink-0 items-center justify-between border-t border-ivory-300 bg-white px-7 py-4">
-        <Link
-          href={`/dashboard/assessments/${cert.assessmentId}`}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-forest-700 transition-colors hover:text-gold-600"
-        >
-          Voir le bilan <ArrowRight className="size-3.5" />
-        </Link>
-        <Button variant="outline" size="sm" onClick={onClose}>Fermer</Button>
+        {cert.history.length > 0 && (
+          <div>
+            <p className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+              <History className="size-3.5" /> Demandes antérieures
+            </p>
+            <ul className="divide-y divide-ivory-300 overflow-hidden rounded-xl border border-ivory-300 bg-white">
+              {cert.history.map(h => (
+                <li key={h.id} className="px-4 py-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-sm text-ink-700">Demande du {fmtD(h.requestedAt)}</span>
+                    <CertStatusBadge status={h.status} />
+                  </div>
+                  {h.rejectionReason && <p className="mt-1.5 text-xs leading-relaxed text-ink-500">{h.rejectionReason}</p>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
-    </>
+    </DialogContent>
   )
 }
 
 function Timeline({ rows }: { rows: { icon: React.ElementType; label: string; value: React.ReactNode; highlight?: boolean }[] }) {
   return (
-    <dl className="divide-y divide-ivory-300 overflow-hidden rounded-2xl border border-ivory-300 bg-white">
+    <dl className="divide-y divide-ivory-300 self-start overflow-hidden rounded-2xl border border-ivory-300 bg-white">
       {rows.map(r => (
-        <div key={r.label} className={cn('flex items-center gap-3 px-4 py-3 text-sm', r.highlight && 'bg-gold-50/70')}>
-          <r.icon className={cn('size-4 flex-shrink-0', r.highlight ? 'text-gold-600' : 'text-ink-400')} strokeWidth={1.8} />
+        <div key={r.label} className={cn('flex items-start gap-3 px-4 py-3 text-sm', r.highlight && 'bg-gold-50/70')}>
+          <r.icon className={cn('mt-0.5 size-4 flex-shrink-0', r.highlight ? 'text-gold-600' : 'text-ink-400')} strokeWidth={1.8} />
           <dt className="text-ink-500">{r.label}</dt>
           <dd className={cn('ml-auto text-right font-semibold', r.highlight ? 'text-gold-700' : 'text-ink-800')}>{r.value}</dd>
         </div>
@@ -761,7 +638,7 @@ function DownloadRow({
     <button
       onClick={onClick}
       disabled={loading}
-      className="group flex w-full items-center gap-4 rounded-2xl border border-ivory-300 bg-white p-4 text-left transition-colors hover:border-forest-200 hover:bg-forest-50/40 disabled:opacity-60"
+      className="group flex w-full items-center gap-4 rounded-2xl border border-ivory-300 bg-white p-4 text-left transition-colors hover:border-forest-200 hover:bg-forest-50/40 disabled:cursor-wait"
     >
       <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-xl bg-ivory-100 text-forest-700 ring-1 ring-ivory-300">
         <Icon className="size-5" strokeWidth={1.7} />
@@ -782,8 +659,8 @@ function CertificationsSkeleton() {
     <div className="space-y-10">
       <div className="space-y-3">
         <Skeleton className="h-3 w-48" />
-        <Skeleton className="h-10 w-80" />
-        <Skeleton className="h-3 w-[28rem]" />
+        <Skeleton className="h-10 w-80 max-w-full" />
+        <Skeleton className="h-3 w-[28rem] max-w-full" />
       </div>
       <div className="grid gap-5 lg:grid-cols-2">
         <Skeleton className="h-64 rounded-2xl" />

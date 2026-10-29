@@ -47,7 +47,7 @@ export async function GET() {
       ),
       // Certification requests with status
       query(
-        `SELECT cr.id, cr.status, cr.requested_at,
+        `SELECT cr.id, cr.assessment_id, cr.status, cr.requested_at,
                 CASE WHEN cr.status = 'certified' THEN cr.certified_at END AS certified_at,
                 CASE WHEN cr.status = 'certified' THEN cr.certificate_number END AS certificate_number,
                 cr.expert_name,

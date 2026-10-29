@@ -29,10 +29,14 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        setError(data.error || 'Email ou mot de passe incorrect')
+        setError(
+          res.status === 429
+            ? (data.error || 'Trop de tentatives. Patientez quelques minutes avant de réessayer.')
+            : data.error || 'Email ou mot de passe incorrect',
+        )
         setLoading(false)
         return
       }
@@ -64,7 +68,7 @@ export default function LoginPage() {
         </Link>
 
         <div className="relative">
-          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-300/90">Bilan carbone &amp; certification</p>
+          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-300">Bilan carbone &amp; certification</p>
           <h2 className="font-display text-5xl font-light leading-[1.08] tracking-tight">
             Mesurez, auditez,<br />
             <em className="font-normal text-gold-200">certifiez</em> votre empreinte.
@@ -77,20 +81,20 @@ export default function LoginPage() {
                 </span>
                 <span>
                   <span className="block text-sm font-semibold text-ivory-50">{p.title}</span>
-                  <span className="block text-sm text-forest-100/60">{p.text}</span>
+                  <span className="block text-sm text-forest-200">{p.text}</span>
                 </span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="relative flex items-center gap-2 text-xs text-forest-100/50">
+        <div className="relative flex items-center gap-2 text-xs text-forest-200">
           <svg className="h-2.5 w-4 rounded-[2px]" viewBox="0 0 3 2" aria-hidden>
             <rect width="3" height="0.67" fill="#009E60" />
             <rect y="0.66" width="3" height="0.67" fill="#FCD116" />
             <rect y="1.33" width="3" height="0.67" fill="#3A75C4" />
           </svg>
-          République Gabonaise · Plateforme opérée par GreenLeaves
+          République gabonaise · Plateforme opérée par GreenLeaves
         </div>
       </aside>
 
@@ -105,8 +109,8 @@ export default function LoginPage() {
           </Link>
 
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-600">Espace sécurisé</p>
-          <h1 className="mt-2 font-display text-4xl font-normal tracking-tight text-forest-900">Bon retour parmi nous</h1>
-          <p className="mt-2 text-sm text-ink-500">Connectez-vous pour accéder à votre tableau de bord.</p>
+          <h1 className="mt-2 font-display text-4xl font-normal tracking-tight text-forest-900">Connexion à votre espace</h1>
+          <p className="mt-2 text-sm text-ink-500">Saisissez vos identifiants pour accéder à votre espace entreprise.</p>
 
           {error && (
             <div role="alert" className="mt-6 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
@@ -182,7 +186,7 @@ export default function LoginPage() {
 
           <p className="mt-10 text-center text-xs text-ink-400">
             En vous connectant, vous acceptez les{' '}
-            <Link href="/conditions-utilisation" className="font-medium text-forest-700 hover:underline">conditions d&apos;utilisation</Link>
+            <Link href="/conditions-utilisation" className="font-medium text-forest-700 hover:underline">conditions d’utilisation</Link>
             {' '}et la{' '}
             <Link href="/privacy" className="font-medium text-forest-700 hover:underline">politique de confidentialité</Link>.
           </p>
