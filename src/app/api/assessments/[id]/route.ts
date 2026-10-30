@@ -10,8 +10,8 @@ const UPLOAD_DIR = path.join(process.cwd(), 'uploads')
 
 async function findOwned(id: number, companyId: number) {
   const r = await query(
-    `SELECT a.*, s.name AS site_name, s.type AS site_type, s.country AS site_country, s.address AS site_address
-     FROM assessments a JOIN sites s ON a.site_id = s.id
+    `SELECT a.*, s.name AS site_name, s.type AS site_type, s.country AS site_country, s.address AS site_address, s.surface AS site_surface, c.sector AS company_sector
+     FROM assessments a JOIN sites s ON a.site_id = s.id JOIN companies c ON c.id = s.company_id
      WHERE a.id = $1 AND s.company_id = $2`,
     [id, companyId]
   )

@@ -4,12 +4,16 @@ import { useEffect, useMemo, useState } from 'react'
 import { Check, Plus, Search } from 'lucide-react'
 import { cn, fmtNum } from '@/lib/utils'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import type { EmissionFactor } from '@/lib/emission-factors'
-import { norm, unitLabel, type SubSection } from './sections'
+import { CATEGORY_LABELS, SUBCATEGORY_LABELS, type EmissionFactor } from '@/lib/emission-factors'
+import { searchFactors } from '@/lib/copilot'
+import { unitLabel, type SubSection } from './sections'
 
-/** Searchable list of a section's emission factors; picking one adds it to the entry table. */
+/**
+ * Searchable list of a section's emission factors (or of the whole library with `global`);
+ * picking one adds it to the entry table. Everyday words are understood (gasoil → gazole, clim → frigorigène…).
+ */
 export function FactorPicker({
-  section, open, onOpenChange, visibleIds, onPick,
+  section, open, onOpenChange, visibleIds, onPick, global = false,
 }: {
   section: SubSection | null
   open: boolean
@@ -17,6 +21,8 @@ export function FactorPicker({
   /** Factors already shown in the table */
   visibleIds: Set<string>
   onPick: (factor: EmissionFactor) => void
+  /** Whole-library search: each result shows its tab and section */
+  global?: boolean
 }) {
   const [q, setQ] = useState('')
   const [active, setActive] = useState(0)
@@ -25,17 +31,13 @@ export function FactorPicker({
 
   const results = useMemo(() => {
     if (!section) return []
-    // Every word must match somewhere ("elec gabon" → "Électricité Gabon")
+    // Every word must match somewhere ("elec gabon" → "Électricité Gabon"), directly or through a synonym.
     // Retired factors stay in a bilan that uses them but are never offered again
     const offered = section.factors.filter(f => f.status !== 'retired')
-    const words = norm(q).split(/\s+/).filter(Boolean)
-    return words.length
-      ? offered.filter(f => {
-          const hay = norm(`${f.nameFr} ${f.name} ${f.region} ${f.sourceRef} ${f.source} ${f.keywords.join(' ')}`)
-          return words.every(w => hay.includes(w))
-        })
-      : offered
-  }, [section, q])
+    const found = searchFactors(q, offered)
+    // Global search with no query: too long to browse, wait for a word
+    return global && !q.trim() ? [] : found.slice(0, global ? 60 : undefined)
+  }, [section, q, global])
 
   useEffect(() => { setActive(0) }, [q])
 
@@ -103,7 +105,10 @@ export function FactorPicker({
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-ink-800">{f.nameFr}</span>
-                      <span className="block truncate text-[11px] text-ink-400">{f.region} · {f.source}</span>
+                      <span className="block truncate text-[11px] text-ink-400">
+                        {global && <span className="font-semibold text-gold-700">{CATEGORY_LABELS[f.category] ?? f.category} › {SUBCATEGORY_LABELS[f.subcategory] ?? f.subcategory} · </span>}
+                        {f.region} · {f.source}
+                      </span>
                     </span>
                     <span className="flex-shrink-0 text-right text-[11px] tabular-nums text-ink-500">
                       {fmtNum(f.factorTotal, 4)}
@@ -114,7 +119,9 @@ export function FactorPicker({
               )
             })}
             {results.length === 0 && (
-              <li className="px-3 py-10 text-center text-sm text-ink-400">Aucun facteur ne correspond à « {q} ».</li>
+              <li className="px-3 py-10 text-center text-sm text-ink-400">
+                {global && !q.trim() ? 'Tapez un mot : gasoil, électricité, clim, bouteille de gaz, billet d’avion…' : <>Aucun facteur ne correspond à « {q} ».</>}
+              </li>
             )}
           </ul>
         </div>
