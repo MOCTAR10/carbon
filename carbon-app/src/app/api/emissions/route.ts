@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query, withTransaction } from '@/lib/db'
 import { getCompanySession, unauthorized, parseId, certificationLock, lockedResponse } from '@/lib/company'
-import { ALL_EMISSION_FACTORS, SCOPE_MAPPING, type EmissionFactor } from '@/lib/emission-factors'
+import { getFactorMap } from '@/lib/factor-library'
 
 export const dynamic = 'force-dynamic'
 
-const FACTORS = new Map<string, EmissionFactor>(ALL_EMISSION_FACTORS.map(f => [f.id, f]))
 const MAX_ENTRIES = 20_000
 const MAX_QUANTITY = 1e10   // quantity is NUMERIC(15,4)
 const MAX_TOTAL = 1e12      // total_co2eq is NUMERIC(15,2)
@@ -62,7 +61,9 @@ export async function POST(request: NextRequest) {
     const assessment = accessCheck.rows[0]
     if (await certificationLock(assessmentId)) return lockedResponse()
 
-    // Rebuild every row from the server's factor table: the client only chooses factor, period and quantity.
+    // Rebuild every row from the factor library (DB): the client only chooses factor, period and quantity.
+    // Retired factors are still accepted so a bilan that already uses one can be re-saved.
+    const FACTORS = await getFactorMap()
     const rows: unknown[][] = []
     for (const e of entries) {
       const factor = FACTORS.get(String(e.emissionFactorId))
@@ -79,10 +80,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: `Période hors du périmètre du bilan (${factor.nameFr}, ${month}/${year})` }, { status: 400 })
       }
       if (quantity === 0) continue
-      const scopeInfo = SCOPE_MAPPING[factor.subcategory] || { scope: 3, ghgCategory: 'Autre', isoCategory: '' }
       rows.push([
         factor.category, factor.subcategory, factor.id, factor.nameFr, quantity, factor.unit,
-        factor.factorTotal, quantity * factor.factorTotal, scopeInfo.scope, scopeInfo.ghgCategory, scopeInfo.isoCategory,
+        factor.factorTotal, quantity * factor.factorTotal, factor.scope, factor.ghgCategory, factor.isoCategory,
         `${factor.nameFr} - ${factor.source}`, factor.region || null, month, year,
       ])
     }

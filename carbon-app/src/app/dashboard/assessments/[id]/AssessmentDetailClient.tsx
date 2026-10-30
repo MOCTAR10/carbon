@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import {
   AlertTriangle, ArrowLeft, ArrowRight, Award, BarChart3, Calendar, Check, FileSearch, Info, Loader2,
-  Lock, Paperclip, Plus, RotateCcw, Save, Shield, Upload, X,
+  Lock, Paperclip, Plus, RotateCcw, Save, Search, Shield, Sparkles, Upload, X,
 } from 'lucide-react'
 import {
   cn, co2UnitFor, fmtCO2, fmtNum, fmtPct, plural, scopeStyle, SCOPES, MONTHS_FR, MONTHS_SHORT_FR, type CO2Unit,
@@ -21,11 +21,16 @@ import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/field'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ALL_EMISSION_FACTORS, SCOPE_MAPPING, type EmissionFactor } from '@/lib/emission-factors'
-import { TABS, TAB_SECTIONS, unitLabel, type SubSection } from './sections'
+import type { EmissionFactor } from '@/lib/emission-factors'
+import type { LibraryFactor } from '@/lib/factor-library'
+import { TABS, buildSections, unitLabel, type SubSection } from './sections'
 import { DocumentsSheet, type AuditDoc } from './DocumentsSheet'
 import { FactorPicker } from './FactorPicker'
 import { DetailSkeleton } from './DetailSkeleton'
+import { CopilotCard, CopilotSheet, type CopilotView } from './Copilot'
+import {
+  analyse, buildHints, buildPlan, checklist, resolveAnswers, type Answers, type Context, type Hint, type Previous,
+} from '@/lib/copilot'
 
 /* ============================================================
    TYPES & HELPERS
@@ -39,14 +44,27 @@ interface Assessment {
   start_month: number | null
   end_month: number | null
   certification_lock: string | null
+  site_type: string | null
+  site_country: string | null
+  site_surface: string | number | null
+  company_sector: string | null
+}
+
+interface Profile {
+  answers: Answers
+  confirmed: boolean
+  inherited: boolean
+  previous: { id: number; year: number } | null
 }
 
 /** factorId → month (1-12) → quantity, for the bilan's single year */
 type Quantities = Record<string, Record<number, number>>
 
-const FACTORS = new Map<string, EmissionFactor>(ALL_EMISSION_FACTORS.map(f => [f.id, f]))
-const TAB_OF = new Map<string, string>()
-Object.entries(TAB_SECTIONS).forEach(([tab, sections]) => sections.forEach(s => s.factors.forEach(f => TAB_OF.set(f.id, tab))))
+/* Factor library (from /api/emission-factors), set by load() before any bilan data is read */
+let FACTORS = new Map<string, LibraryFactor>()
+function setLibrary(list: LibraryFactor[]) {
+  FACTORS = new Map(list.map(f => [f.id, f]))
+}
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -77,8 +95,7 @@ function totalsOf(q: Quantities) {
     if (!f) continue
     const kg = sumMonths(byMonth) * f.factorTotal
     t.total += kg
-    const scope = SCOPE_MAPPING[f.subcategory]?.scope ?? 3
-    t.scopes[scope - 1] += kg
+    t.scopes[f.scope - 1] += kg
   }
   return t
 }
@@ -129,6 +146,14 @@ export default function AssessmentDetailClient() {
   const [certOpen, setCertOpen] = useState(false)
   const [certMessage, setCertMessage] = useState('')
   const [certSubmitting, setCertSubmitting] = useState(false)
+  const [library, setLibraryState] = useState<LibraryFactor[]>([])
+  /** Factors the bilan held when loaded: retired ones stay visible for them */
+  const [usedAtLoad, setUsedAtLoad] = useState<Set<string>>(new Set())
+  const [profile, setProfile] = useState<Profile>({ answers: {}, confirmed: false, inherited: false, previous: null })
+  const [previous, setPrevious] = useState<Previous | null>(null)
+  const [copilotOpen, setCopilotOpen] = useState(false)
+  const [copilotView, setCopilotView] = useState<CopilotView>('profile')
+  const [searchOpen, setSearchOpen] = useState(false)
 
   /* ---- Load ---- */
   const loadDocuments = useCallback(async () => {
@@ -148,13 +173,17 @@ export default function AssessmentDetailClient() {
       if (!aRes.ok) throw new Error('assessment')
       const a: Assessment = await aRes.json()
 
-      const [eRes, cRes] = await Promise.all([
+      const [eRes, cRes, fRes] = await Promise.all([
         fetch(`/api/emissions?assessmentId=${assessmentId}`),
         fetch(`/api/certifications/${assessmentId}`).catch(() => null),
+        fetch('/api/emission-factors'),
       ])
       // Never open the editor on partial data: saving would replace the stored entries
-      if (!eRes.ok) throw new Error('emissions')
+      if (!eRes.ok || !fRes.ok) throw new Error('emissions')
       const rows = await eRes.json()
+      const lib: LibraryFactor[] = (await fRes.json()).factors ?? []
+      if (!lib.length) throw new Error('factors')
+      setLibrary(lib)
       const cert = cRes?.ok ? await cRes.json().catch(() => null) : null
 
       const start = a.start_month || 1
@@ -170,6 +199,8 @@ export default function AssessmentDetailClient() {
         ;(map[fid] ??= {})[m] = (map[fid][m] || 0) + q
       }
 
+      setLibraryState(lib)
+      setUsedAtLoad(new Set(Object.keys(map)))
       setAssessment(a)
       setCertStatus(cert?.certification?.status ?? null)
       setQty(map)
@@ -183,7 +214,23 @@ export default function AssessmentDetailClient() {
     }
   }, [assessmentId])
 
-  useEffect(() => { load(); loadDocuments() }, [load, loadDocuments])
+  const loadProfile = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/assessments/${assessmentId}/profile`)
+      if (!res.ok) return
+      const p: Profile = await res.json()
+      setProfile(p)
+      if (p.previous) {
+        const e = await fetch(`/api/emissions?assessmentId=${p.previous.id}`)
+        if (!e.ok) return
+        const kgByFactor: Record<string, number> = {}
+        for (const r of await e.json()) kgByFactor[r.emission_factor_id] = (kgByFactor[r.emission_factor_id] || 0) + (Number(r.total_co2eq) || 0)
+        setPrevious({ year: p.previous.year, kgByFactor })
+      }
+    } catch { /* Copilote unavailable: data entry still works */ }
+  }, [assessmentId])
+
+  useEffect(() => { load(); loadDocuments(); loadProfile() }, [load, loadDocuments, loadProfile])
 
   /* ---- Derived ---- */
   const locked = !!assessment?.certification_lock
@@ -200,7 +247,9 @@ export default function AssessmentDetailClient() {
     : `${cap(MONTHS_FR[startMonth - 1])} – ${MONTHS_FR[endMonth - 1]} ${year}`
 
   const dirty = useMemo(() => signature(qty) !== signature(saved), [qty, saved])
-  const totals = useMemo(() => totalsOf(qty), [qty])
+  // library is a dependency: totals and sections must follow the factor list once it arrives
+  const totals = useMemo(() => totalsOf(qty), [qty, library]) // eslint-disable-line react-hooks/exhaustive-deps
+  const sectionsByTab = useMemo(() => buildSections(library, usedAtLoad), [library, usedAtLoad])
   const savedTotal = useMemo(() => totalsOf(saved).total, [saved])
   const unit = co2UnitFor(totals.total)
 
@@ -219,7 +268,7 @@ export default function AssessmentDetailClient() {
     const stats: Record<string, number> = {}
     for (const fid of Object.keys(qty)) {
       if (!hasData(fid)) continue
-      const tab = TAB_OF.get(fid)
+      const tab = FACTORS.get(fid)?.category
       if (tab) stats[tab] = (stats[tab] || 0) + 1
     }
     return stats
@@ -236,10 +285,9 @@ export default function AssessmentDetailClient() {
     const map: Record<string, number> = {}
     const iso: Record<string, number> = {}
     for (const [fid, byMonth] of Object.entries(qty)) {
-      const f = FACTORS.get(fid)
-      const si = f && SCOPE_MAPPING[f.subcategory]
-      if (!f || !si) continue
-      const kg = sumMonths(byMonth) * f.factorTotal
+      const si = FACTORS.get(fid)
+      if (!si?.ghgCategory) continue
+      const kg = sumMonths(byMonth) * si.factorTotal
       if (!kg) continue
       map[si.ghgCategory] = (map[si.ghgCategory] || 0) + kg
       const isoKey = `${si.isoCategory} — ${si.ghgCategory.split(' ').slice(1).join(' ')}`
@@ -250,6 +298,27 @@ export default function AssessmentDetailClient() {
       iso: Object.entries(iso).sort((a, b) => a[0].localeCompare(b[0])),
     }
   }, [qty])
+
+  /* ---- Copilote ---- */
+  const ctx: Context = useMemo(() => ({
+    sector: assessment?.company_sector ?? null,
+    siteType: assessment?.site_type ?? null,
+    country: assessment?.site_country ?? null,
+    surface: Number(assessment?.site_surface) || null,
+  }), [assessment])
+  const answers = useMemo(() => resolveAnswers(profile.answers, ctx), [profile.answers, ctx])
+  const plan = useMemo(() => buildPlan(answers, ctx, library, qty), [answers, ctx, library, qty])
+  const hints = useMemo(
+    () => buildHints({ plan, factors: library, qty, docs, year, months, ctx, previous }),
+    [plan, library, qty, docs, year, months, ctx, previous],
+  )
+  const analysis = useMemo(() => analyse(plan, library, qty), [plan, library, qty])
+  const checks = useMemo(
+    () => checklist({ profileConfirmed: profile.confirmed, plan, hints, saved: !dirty, hasData: totals.total > 0, hasPrevious: !!previous }),
+    [profile.confirmed, plan, hints, dirty, totals.total, previous],
+  )
+  const factorsById = useMemo(() => new Map(library.map(f => [f.id, f])), [library])
+  const openCopilot = (view: CopilotView) => { setCopilotView(view); setCopilotOpen(true) }
 
   /* ---- Editing ---- */
   const setQuantity = (fid: string, month: number, value: number) =>
@@ -272,6 +341,58 @@ export default function AssessmentDetailClient() {
     setPinned(prev => new Set(prev).add(f.id))
     if (activeMonth === 0) setActiveMonth(startMonth)
     setFocusId(f.id)
+  }
+
+  /** Copilote / global search: show a factor in its tab, ready to type */
+  const revealFactor = (f: EmissionFactor, month?: number) => {
+    setActiveTab(f.category)
+    setPinned(prev => new Set(prev).add(f.id))
+    setActiveMonth(month ?? (activeMonth === 0 ? startMonth : activeMonth))
+    setFocusId(f.id)
+  }
+
+  const saveProfile = async (next: Answers) => {
+    try {
+      const res = await fetch(`/api/assessments/${assessmentId}/profile`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answers: next }),
+      })
+      if (!res.ok) throw new Error()
+      const p = await res.json()
+      setProfile(prev => ({ ...prev, answers: p.answers, confirmed: true, inherited: false }))
+      toast.success('Profil d’activité enregistré', { description: 'Votre plan de collecte est prêt.' })
+      return true
+    } catch {
+      toast.error('Enregistrement du profil impossible.')
+      return false
+    }
+  }
+
+  const gotoHint = (h: Hint) => {
+    const f = h.factorId ? FACTORS.get(h.factorId) : undefined
+    if (!f) return
+    setCopilotOpen(false)
+    if (h.id.startsWith('proof:')) {
+      if (h.month) setActiveMonth(h.month)
+      setDocFactor({ id: f.id, name: f.nameFr })
+      setDocOpen(true)
+      return
+    }
+    revealFactor(f, h.month)
+  }
+
+  const replaceFactor = async (fromId: string, toId: string) => {
+    try {
+      const res = await fetch('/api/emissions/replace', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assessmentId: Number(assessmentId), from: fromId, to: toId }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) { toast.error('Remplacement impossible', { description: data?.error }); return }
+      toast.success('Facteur remplacé', { description: 'Quantités et justificatifs transférés, bilan recalculé.' })
+      await Promise.all([load(), loadDocuments()])
+    } catch {
+      toast.error('Erreur de connexion au serveur.')
+    }
   }
 
   const unpin = (fid: string) => setPinned(prev => { const next = new Set(prev); next.delete(fid); return next })
@@ -414,7 +535,7 @@ export default function AssessmentDetailClient() {
 
   const a = assessment!
   const total = fmtCO2(totals.total, unit)
-  const tabSections = TAB_SECTIONS[activeTab] || []
+  const tabSections = sectionsByTab[activeTab] || []
   const tabMeta = TABS.find(t => t.id === activeTab)!
   const tabKg = tabSections.reduce((s, sec) => s + sectionKg(sec), 0)
   const viewLabel = activeMonth === 0 ? `cumul ${fullYear ? year : 'de la période'}` : `${MONTHS_FR[activeMonth - 1]} ${year}`
@@ -587,6 +708,13 @@ export default function AssessmentDetailClient() {
         })}
       </Reveal>
 
+      {/* ---- COPILOTE ---- */}
+      {!locked && library.length > 0 && (
+        <Reveal>
+          <CopilotCard confirmed={profile.confirmed} plan={plan} hints={hints} checks={checks} analysis={analysis} onOpen={openCopilot} />
+        </Reveal>
+      )}
+
       {/* ---- GHG / ISO SUMMARY ---- */}
       {showSummary && (
         <Card className="animate-in fade-in-0 slide-in-from-top-2">
@@ -703,6 +831,10 @@ export default function AssessmentDetailClient() {
             {tabKg > 0 && <> · <span className="font-semibold tabular-nums text-forest-900">{co2(tabKg, unit)}</span> ({viewLabel})</>}
           </p>
           {!locked && (
+            <div className="flex flex-wrap items-center gap-1">
+            <Button variant="outline" size="sm" className="h-10 sm:h-8" onClick={() => setSearchOpen(true)}>
+              <Search /> Rechercher une source
+            </Button>
             <button
               type="button"
               role="switch"
@@ -715,6 +847,7 @@ export default function AssessmentDetailClient() {
               </span>
               Afficher tous les facteurs
             </button>
+            </div>
           )}
         </div>
 
@@ -860,6 +993,46 @@ export default function AssessmentDetailClient() {
         onPick={addFactor}
       />
 
+      <FactorPicker
+        section={searchOpen ? {
+          id: 'all', label: 'Toutes les sources d’émission', scope: 1,
+          description: 'Recherchez dans toute la bibliothèque : mots courants acceptés (gasoil, clim, groupe, bouteille, billet d’avion…).',
+          factors: library,
+        } : null}
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        visibleIds={new Set(Object.keys(qty).filter(hasData))}
+        onPick={f => revealFactor(f)}
+        global
+      />
+
+      {!locked && (
+        <CopilotSheet
+          open={copilotOpen}
+          onOpenChange={setCopilotOpen}
+          view={copilotView}
+          onViewChange={setCopilotView}
+          ctx={ctx}
+          siteName={a.site_name}
+          savedAnswers={profile.answers}
+          answers={answers}
+          confirmed={profile.confirmed}
+          inherited={profile.inherited}
+          locked={locked}
+          dirty={dirty}
+          plan={plan}
+          hints={hints}
+          checks={checks}
+          analysis={analysis}
+          factorsById={factorsById}
+          previousYear={previous?.year ?? null}
+          onSaveProfile={saveProfile}
+          onAddFactor={f => { setCopilotOpen(false); revealFactor(f) }}
+          onGoto={gotoHint}
+          onReplace={replaceFactor}
+        />
+      )}
+
       <Dialog open={certOpen} onOpenChange={setCertOpen}>
         <DialogContent
           eyebrow="Certification"
@@ -893,6 +1066,30 @@ export default function AssessmentDetailClient() {
                 ))}
               </ol>
             </div>
+            {profile.confirmed && (
+              <div className="rounded-2xl border border-ivory-300 bg-white p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-600">
+                    <Sparkles className="size-3.5" /> Contrôles du Copilote
+                  </p>
+                  <Badge tone={checks.every(c => c.ok) ? 'forest' : 'amber'}>{checks.filter(c => c.ok).length}/{checks.length}</Badge>
+                </div>
+                <ul className="space-y-1">
+                  {checks.filter(c => !c.ok).map(c => (
+                    <li key={c.id} className="flex items-start gap-2 text-xs text-ink-600">
+                      <AlertTriangle className="mt-0.5 size-3.5 flex-shrink-0 text-amber-600" />
+                      <span><span className="font-semibold text-forest-900">{c.label}</span> — {c.detail}</span>
+                    </li>
+                  ))}
+                  {checks.every(c => c.ok) && <li className="text-xs text-forest-700">Tous les contrôles sont validés : dossier prêt pour l’audit.</li>}
+                </ul>
+                {!checks.every(c => c.ok) && (
+                  <Button variant="link" size="sm" className="mt-1 h-auto" onClick={() => { setCertOpen(false); openCopilot('checks') }}>
+                    Corriger avec le Copilote <ArrowRight />
+                  </Button>
+                )}
+              </div>
+            )}
             <p className="flex items-start gap-2 text-xs text-ink-500">
               <Lock className="mt-0.5 size-3.5 flex-shrink-0 text-gold-600" />
               Pendant la certification, les données et justificatifs de ce bilan seront verrouillés.

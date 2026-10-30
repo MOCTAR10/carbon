@@ -30,4 +30,7 @@ export async function deleteStaleQaData() {
   await deleteCompanies(rows.map(r => r.company_id))
   // Admin/expert notifications pointing at deleted requests
   await db.query(`DELETE FROM notifications n USING users u WHERE u.id = n.user_id AND u.email LIKE $1`, [`%@${QA_DOMAIN}`])
+  // Factors imported by tests/api/factors.spec.ts ("qa_" ids)
+  await db.query(`DELETE FROM emission_factor_changes WHERE factor_id LIKE 'qa\\_%'`)
+  await db.query(`DELETE FROM emission_factors WHERE id LIKE 'qa\\_%'`)
 }

@@ -1,11 +1,5 @@
 import { Flame, Package, Truck, Users, Trash2, Building, Factory, type LucideIcon } from 'lucide-react'
-import {
-  ENERGY_FUELS_STATIONARY, ENERGY_FUELS_ORGANIC, ENERGY_FUELS_MOBILE,
-  ELECTRICITY_FACTORS, STEAM_COOLING_FACTORS, REFRIGERANT_FACTORS,
-  INPUTS_METALS, INPUTS_PLASTICS, INPUTS_OTHER,
-  FREIGHT_FACTORS, TRANSPORT_PEOPLE_FACTORS, WASTE_FACTORS, CAPITAL_GOODS_FACTORS,
-  type EmissionFactor,
-} from '@/lib/emission-factors'
+import type { LibraryFactor } from '@/lib/factor-library'
 
 /* 7 main tabs, matching the sheets of the Carbon-Footprint template */
 export const TABS: { id: string; label: string; icon: LucideIcon }[] = [
@@ -22,55 +16,81 @@ export interface SubSection {
   id: string
   label: string
   scope: 1 | 2 | 3
-  factors: EmissionFactor[]
+  factors: LibraryFactor[]
   description?: string
 }
 
-const sub = (list: EmissionFactor[], ...subs: string[]) => list.filter(f => subs.includes(f.subcategory))
+type SectionDef = Omit<SubSection, 'factors'> & { subcategories: string[] }
 
-export const TAB_SECTIONS: Record<string, SubSection[]> = {
+/* Sections of each tab, defined by the factor subcategories they gather. Factors come from the library (DB). */
+export const SECTION_DEFS: Record<string, SectionDef[]> = {
   energy: [
-    { id: 'fuels_stationary', label: 'Combustibles fossiles (sources fixes)', scope: 1, factors: ENERGY_FUELS_STATIONARY, description: 'Butane, propane, gaz naturel, gazole, charbon, coke — consommation directe sur site' },
-    { id: 'fuels_organic', label: 'Combustibles d’origine organique', scope: 1, factors: ENERGY_FUELS_ORGANIC, description: 'Biodiesel, biométhane, bois, granulés — sources renouvelables' },
-    { id: 'fuels_mobile', label: 'Combustibles (sources mobiles)', scope: 1, factors: ENERGY_FUELS_MOBILE, description: 'Essence, gazole, GPL, GNL, kérosène — véhicules et engins' },
-    { id: 'steam', label: 'Achat de vapeur et de froid', scope: 2, factors: STEAM_COOLING_FACTORS, description: 'Réseaux de chaleur et de froid' },
-    { id: 'electricity', label: 'Achat d’électricité', scope: 2, factors: ELECTRICITY_FACTORS, description: 'Électricité par pays et par usage (chauffage, industrie, transport…)' },
+    { id: 'fuels_stationary', label: 'Combustibles fossiles (sources fixes)', scope: 1, subcategories: ['fuels_stationary'], description: 'Butane, propane, gaz naturel, gazole, charbon, coke — consommation directe sur site' },
+    { id: 'fuels_organic', label: 'Combustibles d’origine organique', scope: 1, subcategories: ['fuels_organic'], description: 'Biodiesel, biométhane, bois, granulés — sources renouvelables' },
+    { id: 'fuels_mobile', label: 'Combustibles (sources mobiles)', scope: 1, subcategories: ['fuels_mobile'], description: 'Essence, gazole, GPL, GNL, kérosène — véhicules et engins' },
+    { id: 'marine_fuels', label: 'Combustibles marins', scope: 1, subcategories: ['marine_fuels'], description: 'Navires, barges, navires de soutien offshore (plongée, soudage sous-marin) — soutes HFO, VLSFO, MGO/MDO' },
+    { id: 'steam', label: 'Achat de vapeur et de froid', scope: 2, subcategories: ['steam', 'cooling'], description: 'Réseaux de chaleur et de froid' },
+    { id: 'electricity', label: 'Achat d’électricité', scope: 2, subcategories: ['electricity'], description: 'Électricité par pays et par usage (chauffage, industrie, transport…)' },
   ],
   non_energy: [
-    { id: 'refrigerants', label: 'Fluides frigorigènes (HFC)', scope: 1, factors: sub(REFRIGERANT_FACTORS, 'refrigerants'), description: 'Fuites de climatisation et de réfrigération' },
-    { id: 'process', label: 'Émissions de procédés', scope: 1, factors: sub(REFRIGERANT_FACTORS, 'process'), description: 'CO₂, N₂O, CH₄ — émissions directes hors combustion' },
+    { id: 'refrigerants', label: 'Fluides frigorigènes et gaz fluorés', scope: 1, subcategories: ['refrigerants'], description: 'Fuites de climatisation et de réfrigération, SF₆ des postes électriques' },
+    { id: 'process', label: 'Émissions de procédés', scope: 1, subcategories: ['process'], description: 'CO₂, N₂O, CH₄ hors combustion — calcination de calcaire, clinker, chaux' },
+    { id: 'flaring_venting', label: 'Torchage et ventage', scope: 1, subcategories: ['flaring_venting'], description: 'Gaz brûlé en torchère ou rejeté à l’évent — champs pétroliers et gaziers' },
+    { id: 'effluents_biogas', label: 'Effluents et biogaz', scope: 1, subcategories: ['effluents_biogas'], description: 'Lagunes d’effluents (POME, agro-industrie), fosses septiques, biogaz rejeté ou torché' },
   ],
   inputs: [
-    { id: 'metals', label: 'Métaux', scope: 3, factors: INPUTS_METALS, description: 'Acier, aluminium, cuivre, nickel — neufs et recyclés' },
-    { id: 'plastics', label: 'Plastiques', scope: 3, factors: INPUTS_PLASTICS, description: 'PET, PEHD, PVC, nylon, plastique moyen' },
-    { id: 'other_inputs', label: 'Verre, papier, construction, eau', scope: 3, factors: INPUTS_OTHER, description: 'Verre, papier/carton, béton, ciment, eau potable' },
+    { id: 'metals', label: 'Métaux', scope: 3, subcategories: ['metals'], description: 'Acier, aluminium, cuivre, nickel — neufs et recyclés' },
+    { id: 'plastics', label: 'Plastiques', scope: 3, subcategories: ['plastics'], description: 'PET, PEHD, PVC, nylon, plastique moyen' },
+    { id: 'other_inputs', label: 'Autres achats', scope: 3, subcategories: ['glass', 'paper', 'construction', 'utilities', 'food', 'tyres', 'textiles', 'lubricants'], description: 'Verre, papier, matériaux de construction, eau, alimentation, pneus, tenues, lubrifiants' },
   ],
   freight: [
-    { id: 'road', label: 'Fret routier', scope: 3, factors: sub(FREIGHT_FACTORS, 'road'), description: 'Camions articulés, rigides, utilitaires' },
-    { id: 'air_freight', label: 'Fret aérien', scope: 3, factors: sub(FREIGHT_FACTORS, 'air'), description: 'Transport aérien de marchandises' },
-    { id: 'rail_freight', label: 'Fret ferroviaire', scope: 3, factors: sub(FREIGHT_FACTORS, 'rail'), description: 'Transport ferroviaire de marchandises' },
-    { id: 'maritime_freight', label: 'Fret maritime et fluvial', scope: 3, factors: sub(FREIGHT_FACTORS, 'maritime', 'river'), description: 'Conteneur maritime, fret fluvial' },
+    { id: 'road', label: 'Fret routier', scope: 3, subcategories: ['road'], description: 'Camions articulés, rigides, utilitaires' },
+    { id: 'air_freight', label: 'Fret aérien', scope: 3, subcategories: ['air'], description: 'Transport aérien de marchandises' },
+    { id: 'rail_freight', label: 'Fret ferroviaire', scope: 3, subcategories: ['rail'], description: 'Transport ferroviaire de marchandises' },
+    { id: 'maritime_freight', label: 'Fret maritime et fluvial', scope: 3, subcategories: ['maritime', 'river'], description: 'Conteneur maritime, fret fluvial' },
   ],
   transport: [
-    { id: 'car', label: 'Voitures', scope: 3, factors: sub(TRANSPORT_PEOPLE_FACTORS, 'car'), description: 'Essence, gazole, électrique, hybride' },
-    { id: 'public', label: 'Transports en commun', scope: 3, factors: sub(TRANSPORT_PEOPLE_FACTORS, 'bus', 'train', 'metro'), description: 'Bus, TGV, TER, métro' },
-    { id: 'plane', label: 'Avion', scope: 3, factors: sub(TRANSPORT_PEOPLE_FACTORS, 'plane'), description: 'Court, moyen et long-courrier' },
+    { id: 'car', label: 'Voitures', scope: 3, subcategories: ['car'], description: 'Essence, gazole, électrique, hybride' },
+    { id: 'public', label: 'Transports en commun', scope: 3, subcategories: ['bus', 'train', 'metro', 'ferry'], description: 'Bus, autocar, train, métro, ferry' },
+    { id: 'plane', label: 'Avion', scope: 3, subcategories: ['plane'], description: 'Court, moyen et long-courrier' },
   ],
   waste: [
-    { id: 'building_waste', label: 'Déchets du bâtiment', scope: 3, factors: sub(WASTE_FACTORS, 'building'), description: 'Béton, bois, déchets inertes, plâtre' },
-    { id: 'mineral_waste', label: 'Déchets minéraux', scope: 3, factors: sub(WASTE_FACTORS, 'mineral'), description: 'Incinération, enfouissement' },
-    { id: 'organic_waste', label: 'Déchets organiques', scope: 3, factors: sub(WASTE_FACTORS, 'organic'), description: 'Compost, papier, carton' },
-    { id: 'plastic_waste', label: 'Déchets plastiques', scope: 3, factors: sub(WASTE_FACTORS, 'plastic'), description: 'Plastique moyen, PE, PVC' },
-    { id: 'household_waste', label: 'Ordures ménagères', scope: 3, factors: sub(WASTE_FACTORS, 'household'), description: 'Déchets ménagers courants' },
-    { id: 'dangerous_waste', label: 'Déchets dangereux', scope: 3, factors: sub(WASTE_FACTORS, 'dangerous'), description: 'Déchets industriels spéciaux' },
-    { id: 'wastewater', label: 'Eaux usées', scope: 3, factors: sub(WASTE_FACTORS, 'water'), description: 'Traitement des eaux usées' },
+    { id: 'building_waste', label: 'Déchets du bâtiment', scope: 3, subcategories: ['building'], description: 'Béton, bois, déchets inertes, plâtre' },
+    { id: 'mineral_waste', label: 'Déchets minéraux', scope: 3, subcategories: ['mineral'], description: 'Incinération, enfouissement' },
+    { id: 'organic_waste', label: 'Déchets organiques', scope: 3, subcategories: ['organic'], description: 'Compost, papier, carton' },
+    { id: 'plastic_waste', label: 'Déchets plastiques', scope: 3, subcategories: ['plastic'], description: 'Plastique moyen, PE, PVC' },
+    { id: 'household_waste', label: 'Ordures ménagères et DIB', scope: 3, subcategories: ['household'], description: 'Déchets ménagers courants' },
+    { id: 'dangerous_waste', label: 'Déchets dangereux', scope: 3, subcategories: ['dangerous'], description: 'Déchets industriels spéciaux' },
+    { id: 'wastewater', label: 'Eaux usées', scope: 3, subcategories: ['water'], description: 'Traitement des eaux usées' },
   ],
   capital: [
-    { id: 'buildings', label: 'Bâtiments (méthode surface)', scope: 3, factors: sub(CAPITAL_GOODS_FACTORS, 'buildings'), description: 'Bureau, entrepôt, industriel — kgCO₂e/m² amorti' },
-    { id: 'vehicles', label: 'Véhicules', scope: 3, factors: sub(CAPITAL_GOODS_FACTORS, 'vehicles'), description: 'Véhicules de société, camions' },
-    { id: 'it', label: 'Informatique', scope: 3, factors: sub(CAPITAL_GOODS_FACTORS, 'it'), description: 'Ordinateurs, serveurs, smartphones' },
-    { id: 'furniture', label: 'Mobilier', scope: 3, factors: sub(CAPITAL_GOODS_FACTORS, 'furniture'), description: 'Bureaux, chaises' },
+    { id: 'buildings', label: 'Bâtiments (méthode surface)', scope: 3, subcategories: ['buildings'], description: 'Bureau, entrepôt, industriel — kgCO₂e/m² amorti' },
+    { id: 'vehicles', label: 'Véhicules', scope: 3, subcategories: ['vehicles'], description: 'Véhicules de société, camions' },
+    { id: 'it', label: 'Informatique', scope: 3, subcategories: ['it'], description: 'Ordinateurs, serveurs, smartphones' },
+    { id: 'furniture', label: 'Mobilier', scope: 3, subcategories: ['furniture'], description: 'Bureaux, chaises' },
   ],
+}
+
+/**
+ * Tab → sections with their factors. Retired factors appear only where the bilan already uses them.
+ * Factors whose subcategory no section claims (new imports) go to an "Autres sources" section of their tab.
+ */
+export function buildSections(factors: LibraryFactor[], usedIds: Set<string> = new Set()): Record<string, SubSection[]> {
+  const visible = factors.filter(f => f.status === 'active' || usedIds.has(f.id))
+  const out: Record<string, SubSection[]> = {}
+  for (const tab of TABS) {
+    const defs = SECTION_DEFS[tab.id] ?? []
+    const claimed = new Set(defs.flatMap(d => d.subcategories))
+    const inTab = visible.filter(f => f.category === tab.id)
+    const sections: SubSection[] = defs.map(({ subcategories, ...d }) => ({ ...d, factors: inTab.filter(f => subcategories.includes(f.subcategory)) }))
+    const other = inTab.filter(f => !claimed.has(f.subcategory))
+    for (const scope of [1, 2, 3] as const) {
+      const list = other.filter(f => f.scope === scope)
+      if (list.length) sections.push({ id: `other_${tab.id}_${scope}`, label: 'Autres sources', scope, factors: list, description: 'Sources ajoutées à la bibliothèque' })
+    }
+    out[tab.id] = sections
+  }
+  return out
 }
 
 /** Accent- and case-insensitive key for search */
