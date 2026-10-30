@@ -28,17 +28,20 @@ export const SECTION_DEFS: Record<string, SectionDef[]> = {
     { id: 'fuels_stationary', label: 'Combustibles fossiles (sources fixes)', scope: 1, subcategories: ['fuels_stationary'], description: 'Butane, propane, gaz naturel, gazole, charbon, coke — consommation directe sur site' },
     { id: 'fuels_organic', label: 'Combustibles d’origine organique', scope: 1, subcategories: ['fuels_organic'], description: 'Biodiesel, biométhane, bois, granulés — sources renouvelables' },
     { id: 'fuels_mobile', label: 'Combustibles (sources mobiles)', scope: 1, subcategories: ['fuels_mobile'], description: 'Essence, gazole, GPL, GNL, kérosène — véhicules et engins' },
+    { id: 'marine_fuels', label: 'Combustibles marins', scope: 1, subcategories: ['marine_fuels'], description: 'Navires, barges, navires de soutien offshore (plongée, soudage sous-marin) — soutes HFO, VLSFO, MGO/MDO' },
     { id: 'steam', label: 'Achat de vapeur et de froid', scope: 2, subcategories: ['steam', 'cooling'], description: 'Réseaux de chaleur et de froid' },
     { id: 'electricity', label: 'Achat d’électricité', scope: 2, subcategories: ['electricity'], description: 'Électricité par pays et par usage (chauffage, industrie, transport…)' },
   ],
   non_energy: [
-    { id: 'refrigerants', label: 'Fluides frigorigènes (HFC)', scope: 1, subcategories: ['refrigerants'], description: 'Fuites de climatisation et de réfrigération' },
-    { id: 'process', label: 'Émissions de procédés', scope: 1, subcategories: ['process'], description: 'CO₂, N₂O, CH₄ — émissions directes hors combustion' },
+    { id: 'refrigerants', label: 'Fluides frigorigènes et gaz fluorés', scope: 1, subcategories: ['refrigerants'], description: 'Fuites de climatisation et de réfrigération, SF₆ des postes électriques' },
+    { id: 'process', label: 'Émissions de procédés', scope: 1, subcategories: ['process'], description: 'CO₂, N₂O, CH₄ hors combustion — calcination de calcaire, clinker, chaux' },
+    { id: 'flaring_venting', label: 'Torchage et ventage', scope: 1, subcategories: ['flaring_venting'], description: 'Gaz brûlé en torchère ou rejeté à l’évent — champs pétroliers et gaziers' },
+    { id: 'effluents_biogas', label: 'Effluents et biogaz', scope: 1, subcategories: ['effluents_biogas'], description: 'Lagunes d’effluents (POME, agro-industrie), fosses septiques, biogaz rejeté ou torché' },
   ],
   inputs: [
     { id: 'metals', label: 'Métaux', scope: 3, subcategories: ['metals'], description: 'Acier, aluminium, cuivre, nickel — neufs et recyclés' },
     { id: 'plastics', label: 'Plastiques', scope: 3, subcategories: ['plastics'], description: 'PET, PEHD, PVC, nylon, plastique moyen' },
-    { id: 'other_inputs', label: 'Verre, papier, construction, eau', scope: 3, subcategories: ['glass', 'paper', 'construction', 'utilities'], description: 'Verre, papier/carton, béton, ciment, eau potable' },
+    { id: 'other_inputs', label: 'Autres achats', scope: 3, subcategories: ['glass', 'paper', 'construction', 'utilities', 'food', 'tyres', 'textiles', 'lubricants'], description: 'Verre, papier, matériaux de construction, eau, alimentation, pneus, tenues, lubrifiants' },
   ],
   freight: [
     { id: 'road', label: 'Fret routier', scope: 3, subcategories: ['road'], description: 'Camions articulés, rigides, utilitaires' },
@@ -48,7 +51,7 @@ export const SECTION_DEFS: Record<string, SectionDef[]> = {
   ],
   transport: [
     { id: 'car', label: 'Voitures', scope: 3, subcategories: ['car'], description: 'Essence, gazole, électrique, hybride' },
-    { id: 'public', label: 'Transports en commun', scope: 3, subcategories: ['bus', 'train', 'metro'], description: 'Bus, TGV, TER, métro' },
+    { id: 'public', label: 'Transports en commun', scope: 3, subcategories: ['bus', 'train', 'metro', 'ferry'], description: 'Bus, autocar, train, métro, ferry' },
     { id: 'plane', label: 'Avion', scope: 3, subcategories: ['plane'], description: 'Court, moyen et long-courrier' },
   ],
   waste: [
@@ -56,7 +59,7 @@ export const SECTION_DEFS: Record<string, SectionDef[]> = {
     { id: 'mineral_waste', label: 'Déchets minéraux', scope: 3, subcategories: ['mineral'], description: 'Incinération, enfouissement' },
     { id: 'organic_waste', label: 'Déchets organiques', scope: 3, subcategories: ['organic'], description: 'Compost, papier, carton' },
     { id: 'plastic_waste', label: 'Déchets plastiques', scope: 3, subcategories: ['plastic'], description: 'Plastique moyen, PE, PVC' },
-    { id: 'household_waste', label: 'Ordures ménagères', scope: 3, subcategories: ['household'], description: 'Déchets ménagers courants' },
+    { id: 'household_waste', label: 'Ordures ménagères et DIB', scope: 3, subcategories: ['household'], description: 'Déchets ménagers courants' },
     { id: 'dangerous_waste', label: 'Déchets dangereux', scope: 3, subcategories: ['dangerous'], description: 'Déchets industriels spéciaux' },
     { id: 'wastewater', label: 'Eaux usées', scope: 3, subcategories: ['water'], description: 'Traitement des eaux usées' },
   ],

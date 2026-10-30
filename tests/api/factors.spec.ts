@@ -28,6 +28,29 @@ test.describe('Bibliothèque de facteurs (base de données)', () => {
     expect(diffs, diffs.join('\n')).toEqual([])
   })
 
+  test('sources internationales et nouveaux postes : chaque facteur actif calcule juste, avec son scope', async ({ company }) => {
+    test.setTimeout(120_000)
+    const { factors } = await (await company.api.get('/api/emission-factors')).json()
+    const active = (factors as { id: string; status: string; factorTotal: number; scope: number; subcategory: string; source: string }[])
+      .filter(f => f.status === 'active' && !f.id.startsWith('qa_'))
+    // DEFRA, GIEC, OMI factors and the three new postes are in the library
+    const subs = new Set(active.map(f => f.subcategory))
+    for (const s of ['flaring_venting', 'effluents_biogas', 'marine_fuels']) expect(subs.has(s), s).toBe(true)
+    for (const src of ['DEFRA 2024', 'GIEC 2006', 'OMI 2018 / GIEC 2006']) expect(active.some(f => f.source === src), src).toBe(true)
+    expect(active.find(f => f.id === 'hfo_maritime')?.subcategory).toBe('marine_fuels')
+
+    const site = await createSite(company.api)
+    const asmt = await createAssessment(company.api, site.id)
+    const res = await saveEntries(company.api, asmt.id, active.map((f, i) => ({ emissionFactorId: f.id, quantity: 10, month: (i % 12) + 1, year: YEAR })))
+    expect(res.status(), await res.text()).toBe(201)
+    const byId = new Map<string, { total_co2eq: string; scope: number }>((await res.json()).entries.map((e: { emission_factor_id: string }) => [e.emission_factor_id, e]))
+    const bad = active.filter(f => {
+      const e = byId.get(f.id)
+      return !e || e.scope !== f.scope || Math.abs(parseFloat(e.total_co2eq) - Math.round(10 * f.factorTotal * 100) / 100) > 0.011
+    }).map(f => f.id)
+    expect(bad).toEqual([])
+  })
+
   test('lecture réservée aux comptes connectés ; administration réservée aux admins', async ({ company, admin, baseURL }) => {
     const anon = await pwRequest.newContext({ baseURL })
     expect((await anon.get('/api/emission-factors')).status()).toBe(401)
