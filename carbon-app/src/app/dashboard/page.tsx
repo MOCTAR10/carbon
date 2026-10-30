@@ -19,7 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Stagger, Reveal } from '@/components/ui/motion'
 import { CertJourney } from '@/components/ui/cert-journey'
 
-type YearRow = { year: number; total: number; scope1: number; scope2: number; scope3: number; assessments: number }
+type YearRow = { year: number; total: number; scope1: number; scope2: number; scope3: number; assessments: number; siteIds?: number[] }
 type Assessment = {
   id: number; name: string; year: number; status: string; created_at: string
   total_co2eq: number | string; scope1_co2eq: number | string; scope2_co2eq: number | string; scope3_co2eq: number | string
@@ -213,7 +213,7 @@ export default function DashboardPage() {
             {[
               { label: 'En attente',     value: certCounts.pending },
               { label: 'Audit en cours', value: certCounts.inProgress },
-              { label: 'Déposés au CNC', value: certCounts.atCnc ?? 0 },
+              { label: 'Déposés à la DGEPN', value: certCounts.atCnc ?? 0 },
               { label: 'Certifiés',      value: certCounts.certified, accent: true },
               { label: 'Refusées',       value: certCounts.rejected },
             ].map(s => (
@@ -407,9 +407,9 @@ function nextStep(
       case 'in_progress':
         return { ...base, title: 'Audit terrain en cours', body: `${live.expert_name ?? 'L’expert'} vérifie vos données sur site. Restez disponible pour répondre à ses questions.` }
       case 'audit_done':
-        return { ...base, title: 'Audit validé', body: 'Le dossier est en préparation pour le CNC. L’expert le déposera en votre nom.' }
+        return { ...base, title: 'Audit validé', body: 'Le dossier est en préparation pour la DGEPN. L’expert le déposera en votre nom.' }
       default:
-        return { ...base, title: 'Dossier déposé au CNC', body: 'Dossier déposé au CNC — en attente du certificat. Vous serez notifié dès sa délivrance.' }
+        return { ...base, title: 'Dossier déposé à la DGEPN', body: 'Dossier déposé à la DGEPN — avis du CNC puis délivrance du certificat. Vous serez notifié dès sa délivrance.' }
     }
   }
 
@@ -433,7 +433,7 @@ function nextStep(
   if (!cert) {
     return {
       key: 'request', icon: Send, eyebrow: 'Prochaine étape', title: 'Demandez la certification', context: ctx,
-      body: 'Votre bilan contient des données. Un expert accrédité réalisera l’audit terrain puis déposera votre dossier au CNC.',
+      body: 'Votre bilan contient des données. Un expert accrédité réalisera l’audit terrain puis déposera votre dossier à la DGEPN.',
       cta: { label: 'Demander la certification', href: `/dashboard/assessments/${focus.id}` },
     }
   }
@@ -450,7 +450,10 @@ function FootprintHero({ byYear, latest }: { byYear: YearRow[]; latest: YearRow 
   const prev = byYear.find(y => y.year < latest.year && y.total > 0)
   const unit = co2UnitFor(latest.total)
   const total = fmtCO2(latest.total, unit)
-  const delta = prev ? (latest.total - prev.total) / prev.total : null
+  // A % change is only honest for a closed year on the same sites; otherwise say why there is none
+  const running = latest.year >= new Date().getFullYear()
+  const samePerimeter = !!prev && [...(latest.siteIds ?? [])].sort().join() === [...(prev.siteIds ?? [])].sort().join()
+  const delta = prev && !running && samePerimeter ? (latest.total - prev.total) / prev.total : null
   const trend = byYear.filter(y => y.total > 0).slice(0, 6).reverse()
   const trendMax = Math.max(...trend.map(y => y.total))
   const trendUnit = co2UnitFor(trendMax)
@@ -473,7 +476,9 @@ function FootprintHero({ byYear, latest }: { byYear: YearRow[]; latest: YearRow 
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
             {delta === null || !prev ? (
-              <span className="rounded-full border border-white/15 px-2.5 py-0.5 text-xs font-semibold text-forest-100/80">Premier exercice</span>
+              <span className="rounded-full border border-white/15 px-2.5 py-0.5 text-xs font-semibold text-forest-100/80">
+                {running ? 'Exercice en cours' : prev ? `Périmètre différent de ${prev.year}` : 'Premier exercice'}
+              </span>
             ) : (
               <span className={cn(
                 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums',
@@ -484,7 +489,7 @@ function FootprintHero({ byYear, latest }: { byYear: YearRow[]; latest: YearRow 
               </span>
             )}
             <span className="text-forest-100/60">
-              {prev ? `vs ${prev.year} · ` : ''}{plural(latest.assessments, 'bilan')} sur l’exercice
+              {delta !== null && prev ? `vs ${prev.year} · ` : ''}{plural(latest.assessments, 'bilan')} sur l’exercice
             </span>
           </div>
         </div>
@@ -586,7 +591,7 @@ function Onboarding({ sites, assessments, next }: { sites: number; assessments: 
   const steps = [
     { title: 'Ajouter un site', body: 'Siège, usine, agence… le périmètre de votre bilan.', done: sites > 0 },
     { title: 'Bilan et données', body: 'Créez un bilan puis saisissez vos consommations mensuelles.', done: false, started: assessments > 0 },
-    { title: 'Certification', body: 'Audit terrain par un expert accrédité, puis certificat du CNC.', done: false },
+    { title: 'Certification', body: 'Audit terrain par un expert accrédité, puis certificat délivré par la DGEPN.', done: false },
   ]
   const activeIdx = steps.findIndex(s => !s.done)
   const doneCount = steps.filter(s => s.done).length
@@ -660,7 +665,7 @@ function CertifiedHero({ cert }: { cert: Cert }) {
 
   return (
     <section
-      aria-label="Certificat CNC"
+      aria-label="Certificat DGEPN"
       className="relative overflow-hidden rounded-3xl border border-gold-200 bg-gradient-to-br from-gold-50 via-ivory-50 to-white p-6 shadow-gold sm:p-8"
     >
       <div className="pointer-events-none absolute -right-10 top-1/2 size-56 -translate-y-1/2 rounded-full border border-gold-300/40" />
@@ -672,7 +677,7 @@ function CertifiedHero({ cert }: { cert: Cert }) {
             <Award className="size-7" strokeWidth={1.6} />
           </span>
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-700">Bilan certifié par le CNC</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-700">Bilan certifié par la DGEPN</p>
             <p className="mt-1 break-words font-display text-xl text-forest-900 sm:text-3xl">N° {cert.certificate_number}</p>
             <p className="mt-1 text-sm text-ink-600">
               {cert.assessment_name} · exercice {cert.assessment_year}

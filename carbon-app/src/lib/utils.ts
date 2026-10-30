@@ -80,8 +80,8 @@ export function plural(n: number, one: string, many = `${one}s`) {
 
 // ── Scope palette — the single source of truth (UI, charts and PDF) ───────────
 export const SCOPES = [
-  { scope: 1, label: 'Scope 1', name: 'Émissions directes',  hex: '#1A402C', rgb: [26, 64, 44] as [number, number, number],   bg: 'bg-forest-700', text: 'text-forest-700', onDark: 'bg-ivory-100' },
-  { scope: 2, label: 'Scope 2', name: 'Énergie indirecte',   hex: '#B8935A', rgb: [184, 147, 90] as [number, number, number], bg: 'bg-gold-500',   text: 'text-gold-600',   onDark: 'bg-gold-400' },
-  { scope: 3, label: 'Scope 3', name: 'Autres indirectes',   hex: '#7FA98F', rgb: [127, 169, 143] as [number, number, number], bg: 'bg-forest-300', text: 'text-forest-500', onDark: 'bg-forest-300' },
+  { scope: 1, label: 'Scope 1', name: 'Émissions directes',  hex: '#1E7A4E', rgb: [30, 122, 78] as [number, number, number],  bg: 'bg-scope1', text: 'text-scope1-ink', onDark: 'bg-scope1-light', chipText: 'text-white' },
+  { scope: 2, label: 'Scope 2', name: 'Énergie indirecte',   hex: '#D98E1F', rgb: [217, 142, 31] as [number, number, number], bg: 'bg-scope2', text: 'text-scope2-ink', onDark: 'bg-scope2-light', chipText: 'text-forest-950' },
+  { scope: 3, label: 'Scope 3', name: 'Autres indirectes',   hex: '#2878A8', rgb: [40, 120, 168] as [number, number, number], bg: 'bg-scope3', text: 'text-scope3-ink', onDark: 'bg-scope3-light', chipText: 'text-white' },
 ] as const
 export const scopeStyle = (scope: number) => SCOPES[Math.min(Math.max(scope, 1), 3) - 1]

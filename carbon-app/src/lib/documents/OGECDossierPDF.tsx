@@ -716,7 +716,7 @@ function OGECDossierDocument({ d }: { d: OGECDossierData }) {
           ) : (
             <View style={s.noteBox}>
               <Text style={s.noteText}>
-                L'Avis de Conformite CNC n'a pas encore ete enregistre. Ce document officiel sera transmis par le Conseil National Climat apres examen du dossier. CarbonTrack l'enregistrera des reception.
+                L'Avis de Conformite CNC n'a pas encore ete enregistre. Ce document officiel sera emis par le Conseil National Climat apres examen du dossier transmis par la DGEPN. CarbonTrack l'enregistrera des reception.
               </Text>
             </View>
           )}

@@ -1,7 +1,7 @@
 /**
  * GET /api/certification-documents/[id]
  *
- * Serves a certification document (e.g. the CNC certificate uploaded by the expert).
+ * Serves a certification document (e.g. the DGEPN certificate uploaded by the expert).
  * Accessible to: any admin, the expert assigned to the certification, or the owning company.
  */
 

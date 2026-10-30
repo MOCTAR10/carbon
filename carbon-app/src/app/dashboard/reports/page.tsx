@@ -198,7 +198,7 @@ function Reports() {
                     {period.start === 1 && period.end === 12 ? `Année ${report.assessment.year}` : `${monthShort(period.start)} – ${monthShort(period.end)} ${report.assessment.year}`}
                     {' · '}{plural(report.entries?.length || 0, 'poste')}
                   </span>
-                  {certificateNumber && <Badge tone="forest" dot><Award className="size-3" /> Certifié CNC</Badge>}
+                  {certificateNumber && <Badge tone="forest" dot><Award className="size-3" /> Certifié DGEPN</Badge>}
                 </div>
               )}
             </Card>
@@ -272,7 +272,7 @@ function Reports() {
           <p className="mt-5 flex items-start gap-2 border-t border-ivory-200 pt-4 text-xs text-ink-500">
             <QrCode className="mt-0.5 size-3.5 flex-shrink-0 text-gold-600" />
             {certificateNumber
-              ? <span>Le rapport inclut un QR code de vérification du certificat CNC n° {certificateNumber}.</span>
+              ? <span>Le rapport inclut un QR code de vérification du certificat DGEPN n° {certificateNumber}.</span>
               : <span>Une fois le bilan certifié, le rapport inclura un QR code de vérification du certificat.</span>}
           </p>
         </DialogContent>

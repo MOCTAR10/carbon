@@ -133,7 +133,7 @@ export default function CertificationsPage() {
         <PageHeader
           eyebrow="Conformité & certification"
           title="Certifications"
-          description="Suivez chaque demande : audit terrain par un expert accrédité GreenLeaves, dépôt du dossier au CNC, puis délivrance du certificat."
+          description="Suivez chaque demande : audit terrain par un expert accrédité GreenLeaves, dépôt du dossier à la DGEPN, qui recueille l’avis du CNC puis délivre le certificat."
           actions={dossiers.length > 0 ? (
             <>
               {certified.length > 0 && (
@@ -281,7 +281,7 @@ function CredentialCard({ cert, onSelect }: { cert: Dossier; onSelect: () => voi
           <CertStatusBadge status={cert.status} />
         </div>
 
-        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-600">Certificat délivré par le CNC</p>
+        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-600">Certificat délivré par la DGEPN</p>
         <p className="mt-1 font-display text-2xl tracking-tight text-forest-900">
           {cert.certificateNumber ? `N° ${cert.certificateNumber}` : 'Numéro en attente'}
         </p>
@@ -341,7 +341,7 @@ function ProgressCard({ cert, onSelect }: { cert: Dossier; onSelect: () => void 
             )}
             {cert.submittedToCncAt && (
               <span className="inline-flex items-center gap-1.5">
-                <Landmark className="size-3.5 text-gold-600" /> Déposé au CNC le{' '}
+                <Landmark className="size-3.5 text-gold-600" /> Déposé à la DGEPN le{' '}
                 <span className="font-semibold text-ink-700">{fmtD(cert.submittedToCncAt)}</span>
                 {cert.cncDepositReference && <span>· Réf. {cert.cncDepositReference}</span>}
               </span>
@@ -426,9 +426,9 @@ function CertDetail({ cert }: { cert: Dossier }) {
       ? `L’expert ${cert.expertName} a été désigné pour votre audit terrain.`
       : 'Un expert accrédité a été désigné pour votre audit terrain.',
     in_progress:      'L’audit de votre bilan est en cours : l’expert examine vos données et justificatifs.',
-    audit_done:       'L’audit est validé. L’expert accrédité prépare le dépôt de votre dossier au Conseil National du Climat (CNC).',
-    submitted_to_cnc: 'Votre dossier a été déposé au CNC par l’expert accrédité. Le certificat sera disponible ici dès sa délivrance.',
-    certified:        'Votre bilan carbone est certifié par le CNC.',
+    audit_done:       'L’audit est validé. L’expert accrédité prépare le dépôt de votre dossier à la DGEPN (Direction Générale de l’Environnement et de la Protection de la Nature).',
+    submitted_to_cnc: 'Votre dossier a été déposé à la DGEPN par l’expert accrédité. La DGEPN recueille l’avis du CNC puis délivre le certificat, disponible ici dès sa délivrance.',
+    certified:        'Votre bilan carbone est certifié par la DGEPN.',
     rejected:         'Votre demande a été refusée. Corrigez votre bilan puis soumettez une nouvelle demande.',
   }
 
@@ -439,7 +439,7 @@ function CertDetail({ cert }: { cert: Dossier }) {
     ...(cert.auditLocation ? [{ icon: MapPin, label: 'Lieu de l’audit', value: cert.auditLocation }] : []),
     ...(cert.inspectionDate ? [{ icon: Eye, label: 'Audit réalisé le', value: fmtD(cert.inspectionDate) }] : []),
     ...(cert.submittedToCncAt ? [{
-      icon: Landmark, label: 'Déposé au CNC le',
+      icon: Landmark, label: 'Déposé à la DGEPN le',
       value: <>{fmtD(cert.submittedToCncAt)}{cert.cncDepositReference && ` · Réf. ${cert.cncDepositReference}`}</>,
     }] : []),
     ...(cert.certifiedAt && isCertified ? [{ icon: ShieldCheck, label: 'Certifié le', value: fmtD(cert.certifiedAt), highlight: true }] : []),
@@ -448,7 +448,7 @@ function CertDetail({ cert }: { cert: Dossier }) {
   return (
     <DialogContent
       size="lg"
-      eyebrow={isCertified ? 'Certificat délivré par le CNC' : 'Demande de certification'}
+      eyebrow={isCertified ? 'Certificat délivré par la DGEPN' : 'Demande de certification'}
       title={cert.assessmentName}
       description={`${cert.siteName} · Exercice ${cert.assessmentYear}`}
       meta={<CertStatusBadge status={cert.status} />}

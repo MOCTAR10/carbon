@@ -94,7 +94,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       createdAt:   d.created_at,
     }))
 
-    // Documents attached to the certification itself (e.g. the CNC certificate)
+    // Documents attached to the certification itself (e.g. the DGEPN certificate)
     const certDocsResult = await query(
       `SELECT id, doc_type, original_name, file_size, mime_type, created_at
        FROM certification_documents WHERE certification_id = $1 ORDER BY created_at DESC`,
@@ -341,9 +341,9 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       )
 
     } else if (action === 'submit_to_cnc') {
-      // Expert has physically deposited the dossier at the CNC
+      // Expert has physically deposited the dossier at the DGEPN
       if (cert.status !== 'audit_done') {
-        return NextResponse.json({ error: "Finalisez l'audit avant de déclarer le dépôt au CNC" }, { status: 400 })
+        return NextResponse.json({ error: "Finalisez l'audit avant de déclarer le dépôt à la DGEPN" }, { status: 400 })
       }
       const { depositDate, depositReference } = body
       if (!depositDate) return NextResponse.json({ error: 'Date de dépôt requise' }, { status: 400 })
@@ -359,14 +359,14 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       await notifyCompanyUsers(
         cert.company_id,
         'cert_comment',
-        'Dossier déposé au CNC',
-        `Votre dossier "${cert.assessment_name}" a été déposé au Conseil National du Climat par l'expert. En attente du certificat.`,
+        'Dossier déposé à la DGEPN',
+        `Votre dossier "${cert.assessment_name}" a été déposé à la DGEPN par l'expert. La DGEPN recueille l'avis du CNC puis délivre le certificat.`,
         `/dashboard/certifications`
       )
       await notifyAllAdmins(
         'cert_comment',
-        'Dossier déposé au CNC',
-        `L'expert a déposé le dossier "${cert.assessment_name}" au CNC.`,
+        'Dossier déposé à la DGEPN',
+        `L'expert a déposé le dossier "${cert.assessment_name}" à la DGEPN.`,
         `/admin/certifications/${certId}`
       )
 
@@ -387,7 +387,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         'cert_rejected',
         'Demande de certification refusée',
         cert.status === 'submitted_to_cnc'
-          ? `Le CNC a refusé la certification de "${cert.assessment_name}".`
+          ? `La DGEPN a refusé la certification de "${cert.assessment_name}".`
           : `L'expert a refusé la certification de "${cert.assessment_name}".`,
         `/dashboard/certifications`
       )

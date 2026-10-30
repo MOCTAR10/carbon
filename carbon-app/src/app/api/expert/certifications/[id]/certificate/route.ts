@@ -1,7 +1,7 @@
 /**
  * POST /api/expert/certifications/[id]/certificate
  *
- * The assigned expert uploads the digital copy of the certificate issued by the CNC
+ * The assigned expert uploads the digital copy of the certificate issued by the DGEPN (after the CNC's avis)
  * (multipart: file, certificateNumber, certifiedAt). Moves the request to 'certified'.
  * Re-uploading on a certified request replaces the current copy (older files are kept).
  */
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
     const cert = owned.rows[0]
     if (!['submitted_to_cnc', 'certified'].includes(cert.status)) {
-      return NextResponse.json({ error: 'Enregistrez d\'abord le dépôt du dossier au CNC' }, { status: 400 })
+      return NextResponse.json({ error: 'Enregistrez d\'abord le dépôt du dossier à la DGEPN' }, { status: 400 })
     }
 
     const formData = await request.formData()
@@ -91,14 +91,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       await notifyCompanyUsers(
         cert.company_id,
         'cert_validated',
-        'Bilan carbone certifié par le CNC',
-        `Le certificat CNC de "${cert.assessment_name}" (N° ${certificateNumber}) est disponible au téléchargement.`,
+        'Bilan carbone certifié par la DGEPN',
+        `Le certificat DGEPN de "${cert.assessment_name}" (N° ${certificateNumber}) est disponible au téléchargement.`,
         `/dashboard/certifications`
       )
       await notifyAllAdmins(
         'cert_validated',
-        'Certificat CNC reçu',
-        `L'expert a téléversé le certificat CNC de "${cert.assessment_name}" (N° ${certificateNumber}).`,
+        'Certificat DGEPN reçu',
+        `L'expert a téléversé le certificat DGEPN de "${cert.assessment_name}" (N° ${certificateNumber}).`,
         `/admin/certifications/${certId}`
       )
     }

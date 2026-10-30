@@ -15,7 +15,7 @@ import { cn, fmtSize } from '@/lib/utils'
 const STEPS = [
   { icon: FileCheck2,  title: 'Créez votre bilan GES',     text: 'Saisissez vos données par site, scopes 1, 2 et 3.' },
   { icon: MapPin,      title: 'Audit terrain accrédité',   text: 'Un expert GreenLeaves vérifie vos données sur site.' },
-  { icon: ShieldCheck, title: 'Certificat délivré par le CNC', text: 'L’expert dépose votre dossier complet auprès du CNC.' },
+  { icon: ShieldCheck, title: 'Certificat délivré par la DGEPN', text: 'L’expert dépose votre dossier complet à la DGEPN, qui recueille l’avis du CNC puis délivre le certificat.' },
 ]
 
 const SECTOR_GROUPS: SelectGroup[] = [

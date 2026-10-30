@@ -350,7 +350,7 @@ function SidebarContent({
             <p className="text-xs font-semibold text-ivory-50">Parcours de certification</p>
           </div>
           <p className="text-[11px] leading-relaxed text-forest-100/80">
-            Audit terrain par un expert accrédité GreenLeaves, dépôt du dossier et certificat délivré par le CNC.
+            Audit terrain par un expert accrédité GreenLeaves, dépôt du dossier à la DGEPN et certificat délivré par la DGEPN après avis du CNC.
           </p>
         </div>
       )}

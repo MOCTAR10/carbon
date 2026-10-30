@@ -269,7 +269,7 @@ function CompanySection({ company, onSaved }: { company: Company; onSaved: (c: C
     <form onSubmit={submit} noValidate>
       <Section
         id="entreprise" icon={Building2} title="Entreprise"
-        description="Identité de votre organisation telle qu’elle figure sur vos rapports, le dossier remis au CNC et votre certificat."
+        description="Identité de votre organisation telle qu’elle figure sur vos rapports, le dossier remis à la DGEPN et votre certificat."
         footer={<SaveBar dirty={dirty} saving={saving} onReset={() => { setForm(initial); setError('') }} />}
       >
         <LogoPicker company={company} onChange={logoUrl => onSaved({ ...company, logoUrl })} />

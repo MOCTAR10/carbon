@@ -74,7 +74,7 @@ export async function GET() {
         ORDER BY active DESC
         LIMIT 5
       `),
-      // CNC workflow stats
+      // DGEPN deposit workflow stats
       query(`
         SELECT
           COUNT(*) FILTER (WHERE cr.status = 'submitted_to_cnc')        AS cnc_pending,

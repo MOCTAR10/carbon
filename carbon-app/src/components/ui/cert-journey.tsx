@@ -7,8 +7,8 @@ export const JOURNEY_STEPS = [
   { status: 'assigned',         label: 'Expert assigné',   short: 'Expert' },
   { status: 'in_progress',      label: 'Audit terrain',    short: 'Audit' },
   { status: 'audit_done',       label: 'Audit validé',     short: 'Validé' },
-  { status: 'submitted_to_cnc', label: 'Déposé au CNC',    short: 'CNC' },
-  { status: 'certified',        label: 'Certificat CNC',   short: 'Certificat' },
+  { status: 'submitted_to_cnc', label: 'Déposé à la DGEPN', short: 'DGEPN' },
+  { status: 'certified',        label: 'Certificat DGEPN', short: 'Certificat' },
 ] as const
 
 type StepState = 'done' | 'active' | 'todo' | 'refused'
@@ -68,7 +68,7 @@ export function CertJourney({
               states[i] === 'done' ? 'text-ink-700' : states[i] === 'active' ? 'font-semibold text-forest-900' : states[i] === 'refused' ? 'font-semibold text-red-700' : 'text-ink-400')}>
               {states[i] === 'refused' ? 'Demande refusée' : step.label}
             </span>
-            {dates?.[step.status] && <span className="mt-0.5 block text-xs text-ink-400">{dates[step.status]}</span>}
+            {states[i] !== 'todo' && dates?.[step.status] && <span className="mt-0.5 block text-xs text-ink-400">{dates[step.status]}</span>}
           </span>
         </li>
       ))}
@@ -89,7 +89,7 @@ export function CertJourney({
             <span className={cn('pr-2 text-xs leading-tight',
               states[i] === 'done' ? 'text-ink-600' : states[i] === 'active' ? 'font-semibold text-forest-900' : states[i] === 'refused' ? 'font-semibold text-red-700' : 'text-ink-400')}>
               {states[i] === 'refused' ? 'Refusée' : step.label}
-              {dates?.[step.status] && <span className="mt-0.5 block font-normal text-ink-400">{dates[step.status]}</span>}
+              {states[i] !== 'todo' && dates?.[step.status] && <span className="mt-0.5 block font-normal text-ink-400">{dates[step.status]}</span>}
             </span>
           </li>
         ))}

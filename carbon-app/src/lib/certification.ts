@@ -1,11 +1,12 @@
 import path from 'path'
 
-// Certification workflow (CNC portal removed — the accredited expert carries the dossier to the CNC):
+// Certification workflow (CNC portal removed — the expert submits the dossier to the DGEPN,
+// which obtains the CNC's avis and issues the certificate):
 //   pending → assigned (admin assigns an expert)
 //           → in_progress (expert starts the review / field audit)
 //           → audit_done (expert finalises the field audit)
-//           → submitted_to_cnc (expert deposited the dossier at the CNC)
-//           → certified (expert uploaded the CNC-issued certificate)
+//           → submitted_to_cnc (expert deposited the dossier at the DGEPN)
+//           → certified (expert uploaded the DGEPN-issued certificate)
 //   any non-final status → rejected
 
 export const CERT_STATUSES = [
@@ -23,7 +24,7 @@ export const CERT_STATUS_LABELS: Record<CertStatus, string> = {
   assigned:         'Expert assigné',
   in_progress:      'Audit en cours',
   audit_done:       'Audit terminé',
-  submitted_to_cnc: 'Déposé au CNC',
+  submitted_to_cnc: 'Déposé à la DGEPN',
   certified:        'Certifié',
   rejected:         'Rejeté',
 }

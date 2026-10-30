@@ -82,15 +82,15 @@ export function CumulativeChart({ data, unit, id }: { data: { label: string; cum
       <AreaChart data={data} margin={{ top: 10, right: 8, left: -8, bottom: 0 }}>
         <defs>
           <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#B8935A" stopOpacity={0.32} />
-            <stop offset="95%" stopColor="#B8935A" stopOpacity={0} />
+            <stop offset="5%" stopColor="#C99A4A" stopOpacity={0.32} />
+            <stop offset="95%" stopColor="#C99A4A" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid {...GRID_PROPS} />
         <XAxis dataKey="label" {...AXIS_PROPS} interval="preserveStartEnd" />
         <YAxis tickFormatter={axisTick(unit)} {...AXIS_PROPS} width={64} />
         <Tooltip {...TOOLTIP_PROPS} formatter={(v: number) => fmtCO2Text(v, unit)} />
-        <Area type="monotone" dataKey="cumulative" name="Cumul" stroke="#1A402C" strokeWidth={2.5} fill={`url(#${id})`} />
+        <Area type="monotone" dataKey="cumulative" name="Cumul" stroke="#1C5136" strokeWidth={2.5} fill={`url(#${id})`} />
       </AreaChart>
     </ResponsiveContainer>
   )
