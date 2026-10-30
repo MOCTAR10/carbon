@@ -21,8 +21,9 @@ import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/field'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ALL_EMISSION_FACTORS, SCOPE_MAPPING, type EmissionFactor } from '@/lib/emission-factors'
-import { TABS, TAB_SECTIONS, unitLabel, type SubSection } from './sections'
+import type { EmissionFactor } from '@/lib/emission-factors'
+import type { LibraryFactor } from '@/lib/factor-library'
+import { TABS, buildSections, unitLabel, type SubSection } from './sections'
 import { DocumentsSheet, type AuditDoc } from './DocumentsSheet'
 import { FactorPicker } from './FactorPicker'
 import { DetailSkeleton } from './DetailSkeleton'
@@ -44,9 +45,11 @@ interface Assessment {
 /** factorId → month (1-12) → quantity, for the bilan's single year */
 type Quantities = Record<string, Record<number, number>>
 
-const FACTORS = new Map<string, EmissionFactor>(ALL_EMISSION_FACTORS.map(f => [f.id, f]))
-const TAB_OF = new Map<string, string>()
-Object.entries(TAB_SECTIONS).forEach(([tab, sections]) => sections.forEach(s => s.factors.forEach(f => TAB_OF.set(f.id, tab))))
+/* Factor library (from /api/emission-factors), set by load() before any bilan data is read */
+let FACTORS = new Map<string, LibraryFactor>()
+function setLibrary(list: LibraryFactor[]) {
+  FACTORS = new Map(list.map(f => [f.id, f]))
+}
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
@@ -77,8 +80,7 @@ function totalsOf(q: Quantities) {
     if (!f) continue
     const kg = sumMonths(byMonth) * f.factorTotal
     t.total += kg
-    const scope = SCOPE_MAPPING[f.subcategory]?.scope ?? 3
-    t.scopes[scope - 1] += kg
+    t.scopes[f.scope - 1] += kg
   }
   return t
 }
@@ -129,6 +131,9 @@ export default function AssessmentDetailClient() {
   const [certOpen, setCertOpen] = useState(false)
   const [certMessage, setCertMessage] = useState('')
   const [certSubmitting, setCertSubmitting] = useState(false)
+  const [library, setLibraryState] = useState<LibraryFactor[]>([])
+  /** Factors the bilan held when loaded: retired ones stay visible for them */
+  const [usedAtLoad, setUsedAtLoad] = useState<Set<string>>(new Set())
 
   /* ---- Load ---- */
   const loadDocuments = useCallback(async () => {
@@ -148,13 +153,17 @@ export default function AssessmentDetailClient() {
       if (!aRes.ok) throw new Error('assessment')
       const a: Assessment = await aRes.json()
 
-      const [eRes, cRes] = await Promise.all([
+      const [eRes, cRes, fRes] = await Promise.all([
         fetch(`/api/emissions?assessmentId=${assessmentId}`),
         fetch(`/api/certifications/${assessmentId}`).catch(() => null),
+        fetch('/api/emission-factors'),
       ])
       // Never open the editor on partial data: saving would replace the stored entries
-      if (!eRes.ok) throw new Error('emissions')
+      if (!eRes.ok || !fRes.ok) throw new Error('emissions')
       const rows = await eRes.json()
+      const lib: LibraryFactor[] = (await fRes.json()).factors ?? []
+      if (!lib.length) throw new Error('factors')
+      setLibrary(lib)
       const cert = cRes?.ok ? await cRes.json().catch(() => null) : null
 
       const start = a.start_month || 1
@@ -170,6 +179,8 @@ export default function AssessmentDetailClient() {
         ;(map[fid] ??= {})[m] = (map[fid][m] || 0) + q
       }
 
+      setLibraryState(lib)
+      setUsedAtLoad(new Set(Object.keys(map)))
       setAssessment(a)
       setCertStatus(cert?.certification?.status ?? null)
       setQty(map)
@@ -200,7 +211,9 @@ export default function AssessmentDetailClient() {
     : `${cap(MONTHS_FR[startMonth - 1])} – ${MONTHS_FR[endMonth - 1]} ${year}`
 
   const dirty = useMemo(() => signature(qty) !== signature(saved), [qty, saved])
-  const totals = useMemo(() => totalsOf(qty), [qty])
+  // library is a dependency: totals and sections must follow the factor list once it arrives
+  const totals = useMemo(() => totalsOf(qty), [qty, library]) // eslint-disable-line react-hooks/exhaustive-deps
+  const sectionsByTab = useMemo(() => buildSections(library, usedAtLoad), [library, usedAtLoad])
   const savedTotal = useMemo(() => totalsOf(saved).total, [saved])
   const unit = co2UnitFor(totals.total)
 
@@ -219,7 +232,7 @@ export default function AssessmentDetailClient() {
     const stats: Record<string, number> = {}
     for (const fid of Object.keys(qty)) {
       if (!hasData(fid)) continue
-      const tab = TAB_OF.get(fid)
+      const tab = FACTORS.get(fid)?.category
       if (tab) stats[tab] = (stats[tab] || 0) + 1
     }
     return stats
@@ -236,10 +249,9 @@ export default function AssessmentDetailClient() {
     const map: Record<string, number> = {}
     const iso: Record<string, number> = {}
     for (const [fid, byMonth] of Object.entries(qty)) {
-      const f = FACTORS.get(fid)
-      const si = f && SCOPE_MAPPING[f.subcategory]
-      if (!f || !si) continue
-      const kg = sumMonths(byMonth) * f.factorTotal
+      const si = FACTORS.get(fid)
+      if (!si?.ghgCategory) continue
+      const kg = sumMonths(byMonth) * si.factorTotal
       if (!kg) continue
       map[si.ghgCategory] = (map[si.ghgCategory] || 0) + kg
       const isoKey = `${si.isoCategory} — ${si.ghgCategory.split(' ').slice(1).join(' ')}`
@@ -414,7 +426,7 @@ export default function AssessmentDetailClient() {
 
   const a = assessment!
   const total = fmtCO2(totals.total, unit)
-  const tabSections = TAB_SECTIONS[activeTab] || []
+  const tabSections = sectionsByTab[activeTab] || []
   const tabMeta = TABS.find(t => t.id === activeTab)!
   const tabKg = tabSections.reduce((s, sec) => s + sectionKg(sec), 0)
   const viewLabel = activeMonth === 0 ? `cumul ${fullYear ? year : 'de la période'}` : `${MONTHS_FR[activeMonth - 1]} ${year}`

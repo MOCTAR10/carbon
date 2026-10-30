@@ -26,13 +26,15 @@ export function FactorPicker({
   const results = useMemo(() => {
     if (!section) return []
     // Every word must match somewhere ("elec gabon" → "Électricité Gabon")
+    // Retired factors stay in a bilan that uses them but are never offered again
+    const offered = section.factors.filter(f => f.status !== 'retired')
     const words = norm(q).split(/\s+/).filter(Boolean)
     return words.length
-      ? section.factors.filter(f => {
-          const hay = norm(`${f.nameFr} ${f.name} ${f.region} ${f.sourceRef}`)
+      ? offered.filter(f => {
+          const hay = norm(`${f.nameFr} ${f.name} ${f.region} ${f.sourceRef} ${f.source} ${f.keywords.join(' ')}`)
           return words.every(w => hay.includes(w))
         })
-      : section.factors
+      : offered
   }, [section, q])
 
   useEffect(() => { setActive(0) }, [q])

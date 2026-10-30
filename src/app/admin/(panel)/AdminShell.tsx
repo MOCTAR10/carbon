@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
   LayoutDashboard, Building2, Users,
-  Award, LogOut, Menu, X, ChevronRight, Leaf, User, UserCheck, CalendarDays
+  Award, LogOut, Menu, X, ChevronRight, Leaf, User, UserCheck, CalendarDays, Library
 } from 'lucide-react'
 import LoadingScreen from '@/components/LoadingScreen'
 import NotificationBell from '@/components/NotificationBell'
@@ -56,6 +56,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     { href: '/admin/certifications', label: 'Certifications', icon: Award },
     { href: '/admin/inspections',   label: 'Inspections',    icon: CalendarDays },
     { href: '/admin/experts', label: 'Experts', icon: UserCheck },
+    { href: '/admin/factors', label: 'Facteurs d’émission', icon: Library },
   ]
 
   if (loading) return <LoadingScreen theme="dark" label="Espace Administration" />
