@@ -353,7 +353,7 @@ export async function generateReportPdf(
     T(b, bx + bW / 2, 156, { align: 'center' })
   })
 
-  // Verification QR only when the bilan holds a CNC certificate (the public /verify page)
+  // Verification QR only when the bilan holds a DGEPN certificate (the public /verify page)
   if (certificateNumber) {
     try {
       const { default: QRCode } = await import('qrcode')
@@ -362,7 +362,7 @@ export async function generateReportPdf(
       doc.setFillColor(...WHITE); doc.roundedRect((pw - 44) / 2, 172, 44, 44, 3, 3, 'F')
       doc.addImage(qr, 'PNG', (pw - 38) / 2, 175, 38, 38)
       doc.setFontSize(8); doc.setTextColor(...GOLD_LIGHT)
-      T(`Certificat CNC n° ${certificateNumber}`, pw / 2, 224, { align: 'center' })
+      T(`Certificat DGEPN n° ${certificateNumber}`, pw / 2, 224, { align: 'center' })
       doc.setFontSize(7); doc.setTextColor(200, 214, 204)
       T('Scannez pour vérifier l’authenticité du certificat', pw / 2, 229, { align: 'center' })
     } catch { /* QR skipped */ }

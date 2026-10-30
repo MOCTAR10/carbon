@@ -3,7 +3,7 @@ import { test, expect, bilanWithData, createSite, createAssessment, requestCerti
 import { EXPERT, FILES } from '../support/data'
 import { one } from '../support/db'
 
-// The product's core journey: company → admin → field expert → CNC deposit → certificate.
+// The product's core journey: company → admin → field expert → DGEPN deposit → certificate.
 // Runs serially inside the test (each step depends on the previous one).
 
 type CompanyCert = { id: number; status: string; adminNotes: unknown; inspectionNotes: unknown; expertReportPdfUrl: unknown; certificateNumber: string | null; certifiedAt: string | null }
@@ -24,7 +24,7 @@ test.describe('Parcours de certification', () => {
     expect(res.status()).toBe(400)
   })
 
-  test('de la demande au certificat CNC, avec verrouillage et confidentialité à chaque étape', async ({ company, admin, expert, baseURL }) => {
+  test('de la demande au certificat DGEPN, avec verrouillage et confidentialité à chaque étape', async ({ company, admin, expert, baseURL }) => {
     test.setTimeout(120_000)
     const { asmt } = await bilanWithData(company.api)
 
@@ -68,7 +68,7 @@ test.describe('Parcours de certification', () => {
     expect(dossier.status()).toBe(200)
 
     expect((await expertAction(expert, cert.id, { action: 'set_date', auditDate: `${YEAR}-06-15`, auditLocation: 'Libreville' })).status()).toBe(200)
-    // Certificate cannot be uploaded before the CNC deposit
+    // Certificate cannot be uploaded before the DGEPN deposit
     const early = await expert.post(`/api/expert/certifications/${cert.id}/certificate`, {
       multipart: { file: { name: 'c.pdf', mimeType: 'application/pdf', buffer: FILES.pdf }, certificateNumber: 'X', certifiedAt: `${YEAR}-07-01` },
     })
@@ -89,7 +89,7 @@ test.describe('Parcours de certification', () => {
     expect(view.inspectionNotes).toBeNull()
     expect(view.certificateNumber).toBeNull()
 
-    // ── 5. Dépôt au CNC puis certificat ──
+    // ── 5. Dépôt à la DGEPN puis certificat ──
     const dep = await expertAction(expert, cert.id, { action: 'submit_to_cnc', depositDate: `${YEAR}-07-01`, depositReference: 'CNC-DEP-QA' })
     expect(dep.status(), await dep.text()).toBe(200)
     expect((await companyView(company.api, cert.id)).status).toBe('submitted_to_cnc')

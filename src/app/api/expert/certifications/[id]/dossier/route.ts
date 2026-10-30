@@ -1,7 +1,7 @@
 /**
  * GET /api/expert/certifications/[id]/dossier
  *
- * Full certification dossier (ZIP) that the accredited expert carries to the CNC:
+ * Full certification dossier (ZIP) that the accredited expert submits to the DGEPN:
  *   01_Dossier_certification.pdf   — summary (company, emissions, checklist, opinion)
  *   02_Rapport_audit_expert.pdf    — detailed expert audit report
  *   03_Detail_emissions.csv        — every emission entry of the assessment
@@ -109,7 +109,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 
     // Store without compression: PDFs/images are already compressed, and it keeps generation fast
     const zip = zipSync(files, { level: 0 })
-    const filename = `Dossier_CNC_${safe(cert.company_name)}_${cert.assessment_year}_${certId}.zip`
+    const filename = `Dossier_DGEPN_${safe(cert.company_name)}_${cert.assessment_year}_${certId}.zip`
 
     return new NextResponse(zip, {
       headers: {

@@ -8,16 +8,46 @@ import { Button } from '@/components/ui/button'
 const TRUST_POINTS = [
   { icon: FileCheck2,  title: 'Bilan GES conforme',       text: 'ISO 14064-1 et GHG Protocol, scopes 1, 2 et 3.' },
   { icon: MapPin,      title: 'Audit terrain accrédité',  text: 'Un expert GreenLeaves vérifie vos données sur site.' },
-  { icon: ShieldCheck, title: 'Dépôt au CNC',             text: 'Votre dossier complet est déposé auprès du CNC.' },
+  { icon: ShieldCheck, title: 'Certificat DGEPN',         text: 'L’expert dépose votre dossier à la DGEPN, qui délivre le certificat.' },
 ]
+
+type Who = { firstName: string; lastName: string; space: string; logoUrl: string | null }
+
+const inputCls = 'h-12 w-full rounded-xl border border-ivory-400 bg-white pl-10 text-sm text-ink-800 outline-none transition placeholder:text-ink-400 focus:border-forest-500 focus:ring-4 focus:ring-forest-100 disabled:opacity-60'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [who, setWho] = useState<Who | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Step 1: identify the account from the e-mail alone
+  const handleLookup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch('/api/auth/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) { setError(data.error || 'Adresse e-mail introuvable'); return }
+      setWho(data)
+    } catch {
+      setError('Impossible de joindre le serveur. Vérifiez votre connexion.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const changeEmail = () => { setWho(null); setPassword(''); setError('') }
+  const initials = who ? (((who.firstName[0] ?? '') + (who.lastName[0] ?? '')).toUpperCase() || email.charAt(0).toUpperCase()) : ''
+
+  // Step 2: password
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -35,7 +65,7 @@ export default function LoginPage() {
         setError(
           res.status === 429
             ? (data.error || 'Trop de tentatives. Patientez quelques minutes avant de réessayer.')
-            : data.error || 'Email ou mot de passe incorrect',
+            : res.status === 401 ? 'Mot de passe incorrect.' : data.error || 'Connexion impossible',
         )
         setLoading(false)
         return
@@ -109,8 +139,10 @@ export default function LoginPage() {
           </Link>
 
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-600">Espace sécurisé</p>
-          <h1 className="mt-2 font-display text-4xl font-normal tracking-tight text-forest-900">Connexion à votre espace</h1>
-          <p className="mt-2 text-sm text-ink-500">Saisissez vos identifiants pour accéder à votre espace entreprise.</p>
+          <h1 className="mt-2 font-display text-4xl font-normal tracking-tight text-forest-900">Se connecter</h1>
+          <p className="mt-2 text-sm text-ink-500">
+            {who ? 'Saisissez votre mot de passe pour continuer.' : 'Saisissez votre adresse e-mail professionnelle.'}
+          </p>
 
           {error && (
             <div role="alert" className="mt-6 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
@@ -122,57 +154,88 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form method="post" onSubmit={handleSubmit} className="mt-8 space-y-5">
-            <div>
-              <label htmlFor="email" className="mb-1.5 block text-[13px] font-semibold text-ink-700">Adresse email</label>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-400" />
-                <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={e => { setEmail(e.target.value); setError('') }}
-                  className="h-12 w-full rounded-xl border border-ivory-400 bg-white pl-10 pr-4 text-sm text-ink-800 outline-none transition placeholder:text-ink-400 focus:border-forest-500 focus:ring-4 focus:ring-forest-100 disabled:opacity-60"
-                  placeholder="vous@entreprise.ga"
-                  required
-                  disabled={loading}
-                />
+          {!who ? (
+            <form method="post" onSubmit={handleLookup} className="mt-8 space-y-5">
+              <div>
+                <label htmlFor="email" className="mb-1.5 block text-[13px] font-semibold text-ink-700">Adresse email</label>
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-400" />
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    autoComplete="username"
+                    autoFocus
+                    value={email}
+                    onChange={e => { setEmail(e.target.value); setError('') }}
+                    className={inputCls + ' pr-4'}
+                    placeholder="vous@entreprise.ga"
+                    required
+                    disabled={loading}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="password" className="mb-1.5 block text-[13px] font-semibold text-ink-700">Mot de passe</label>
-              <div className="relative">
-                <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-400" />
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={e => { setPassword(e.target.value); setError('') }}
-                  className="h-12 w-full rounded-xl border border-ivory-400 bg-white pl-10 pr-11 text-sm text-ink-800 outline-none transition placeholder:text-ink-400 focus:border-forest-500 focus:ring-4 focus:ring-forest-100 disabled:opacity-60"
-                  placeholder="Votre mot de passe"
-                  required
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ivory-100 hover:text-ink-700"
-                  aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-                >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              <Button type="submit" size="lg" disabled={loading} className="w-full">
+                {loading
+                  ? <><Loader2 className="animate-spin" /> Vérification…</>
+                  : <>Continuer <ArrowRight /></>}
+              </Button>
+            </form>
+          ) : (
+            <form method="post" onSubmit={handleSubmit} className="mt-8 space-y-5">
+              {/* Who is signing in */}
+              <div className="flex items-center gap-3.5 rounded-2xl border border-ivory-300 bg-white p-4 shadow-sm">
+                {who.logoUrl
+                  ? <img src={who.logoUrl} alt="" className="size-12 flex-shrink-0 rounded-xl border border-ivory-300 object-contain p-1" />
+                  : <span className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-forest-900 font-display text-lg text-gold-200">{initials}</span>}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[15px] font-semibold text-forest-900">{who.space}</span>
+                  <span className="block truncate text-sm text-ink-600">{[who.firstName, who.lastName].filter(Boolean).join(' ') || email}</span>
+                  <span className="block truncate text-xs text-ink-400">{email}</span>
+                </span>
+                <button type="button" onClick={changeEmail} className="flex-shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-forest-700 hover:bg-ivory-100">
+                  Modifier
                 </button>
               </div>
-            </div>
+              {/* Lets password managers pair the password with the e-mail */}
+              <input type="email" name="email" autoComplete="username" value={email} readOnly hidden />
 
-            <Button type="submit" size="lg" disabled={loading} className="w-full">
-              {loading
-                ? <><Loader2 className="animate-spin" /> Connexion en cours…</>
-                : <>Se connecter <ArrowRight /></>}
-            </Button>
-          </form>
+              <div>
+                <label htmlFor="password" className="mb-1.5 block text-[13px] font-semibold text-ink-700">Mot de passe</label>
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-400" />
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    autoComplete="current-password"
+                    autoFocus
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); setError('') }}
+                    className={inputCls + ' pr-11'}
+                    placeholder="Votre mot de passe"
+                    required
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ivory-100 hover:text-ink-700"
+                    aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  >
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button type="submit" size="lg" disabled={loading} className="w-full">
+                {loading
+                  ? <><Loader2 className="animate-spin" /> Connexion en cours…</>
+                  : <>Se connecter <ArrowRight /></>}
+              </Button>
+            </form>
+          )}
 
           <div className="my-8 flex items-center gap-4">
             <span className="h-px flex-1 bg-ivory-300" />

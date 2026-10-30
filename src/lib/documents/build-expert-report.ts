@@ -1,6 +1,6 @@
 /**
  * Builds the Expert Audit Report PDF for a certification request.
- * Shared by the report download route and the full CNC dossier (ZIP) route.
+ * Shared by the report download route and the full DGEPN dossier (ZIP) route.
  */
 
 import { query } from '@/lib/db'

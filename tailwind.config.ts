@@ -29,15 +29,19 @@ const config: Config = {
           50:  '#EEF4F0',
           100: '#D7E5DC',
           200: '#AFCBB9',
-          300: '#7FA98F',
-          400: '#538767',
-          500: '#356A4C',
-          600: '#24533A',
-          700: '#1A402C',
-          800: '#133223',
-          900: '#0F2A1D',
-          950: '#091A12',
+          300: '#7DBB97',
+          400: '#4E9A72',
+          500: '#2F7A55',
+          600: '#226345',
+          700: '#1C5136',
+          800: '#174430',
+          900: '#123A28',
+          950: '#0B2519',
         },
+        // Scope palette: distinct hue AND lightness so the three scopes never blur together
+        scope1: { DEFAULT: '#1E7A4E', ink: '#17603D', light: '#5CCB93' },
+        scope2: { DEFAULT: '#D98E1F', ink: '#9A5F0B', light: '#F2B24D' },
+        scope3: { DEFAULT: '#2878A8', ink: '#1F5F86', light: '#72BDE6' },
         ivory: {
           50:  '#FDFCF8',
           100: '#FAF8F2',
@@ -49,9 +53,9 @@ const config: Config = {
           50:  '#FAF5EC',
           100: '#F2E7D3',
           200: '#E5CFA8',
-          300: '#D3B27C',
-          400: '#C4A068',
-          500: '#B8935A',
+          300: '#E2BE7E',
+          400: '#D4A85A',
+          500: '#C99A4A',
           600: '#7F6237', // AA (5.3:1) for small text on ivory
           700: '#654C2B',
         },
@@ -71,10 +75,10 @@ const config: Config = {
       boxShadow: {
         'soft':   '0 1px 2px rgba(15,42,29,0.04), 0 4px 16px -4px rgba(15,42,29,0.06)',
         'lifted': '0 2px 4px rgba(15,42,29,0.04), 0 16px 40px -12px rgba(15,42,29,0.14)',
-        'gold':   '0 0 0 1px rgba(184,147,90,0.35), 0 8px 24px -8px rgba(184,147,90,0.35)',
+        'gold':   '0 0 0 1px rgba(201,154,74,0.38), 0 8px 24px -8px rgba(201,154,74,0.38)',
       },
       backgroundImage: {
-        'forest-grain': 'radial-gradient(120% 80% at 0% 0%, rgba(184,147,90,0.10) 0%, transparent 55%), radial-gradient(100% 70% at 100% 100%, rgba(83,135,103,0.18) 0%, transparent 60%)',
+        'forest-grain': 'radial-gradient(120% 80% at 0% 0%, rgba(201,154,74,0.14) 0%, transparent 55%), radial-gradient(100% 70% at 100% 100%, rgba(78,154,114,0.26) 0%, transparent 60%)',
       },
       keyframes: {
         'fade-up': {

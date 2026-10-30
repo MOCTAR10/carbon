@@ -7,7 +7,7 @@ Aucun mock : chaque test crée sa propre entreprise via l’API publique d’ins
 
 | Projet | Dossier | Couvre |
 |---|---|---|
-| `api` | `tests/api/` | Inscription / connexion / limitation, cloisonnement des portails, isolation entre entreprises, moteur de calcul (les 139 facteurs), validation des saisies, justificatifs et logo (types, taille, en-têtes), sites, paramètres du compte, **parcours complet de certification** (demande → admin → expert → dépôt CNC → certificat → vérification publique), refus et déverrouillage |
+| `api` | `tests/api/` | Inscription / connexion / limitation, cloisonnement des portails, isolation entre entreprises, moteur de calcul (les 139 facteurs), validation des saisies, justificatifs et logo (types, taille, en-têtes), sites, paramètres du compte, **parcours complet de certification** (demande → admin → expert → dépôt DGEPN → certificat → vérification publique), refus et déverrouillage |
 | `desktop` | `tests/e2e/` | Parcours dans le navigateur à 1440 px |
 | `mobile` | `tests/e2e/` | Les mêmes parcours à 390 px (sauf tests marqués `@desktop-only`) |
 

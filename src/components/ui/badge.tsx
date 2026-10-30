@@ -40,7 +40,7 @@ export const CERT_STATUS_BADGE: Record<string, { label: string; tone: Tone }> = 
   assigned:         { label: 'Expert assigné', tone: 'sky' },
   in_progress:      { label: 'Audit terrain',  tone: 'sky' },
   audit_done:       { label: 'Audit validé',   tone: 'violet' },
-  submitted_to_cnc: { label: 'Déposé au CNC',  tone: 'gold' },
+  submitted_to_cnc: { label: 'Déposé à la DGEPN', tone: 'gold' },
   certified:        { label: 'Certifié',       tone: 'forest' },
   rejected:         { label: 'Refusée',        tone: 'red' },
 }

@@ -176,7 +176,7 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   assigned:    { label: 'Assigné',              cls: 'bg-blue-500/20 text-blue-400' },
   in_progress: { label: "En cours d'inspection", cls: 'bg-violet-500/20 text-violet-400' },
   audit_done:  { label: 'Audit finalisé',        cls: 'bg-teal-500/20 text-teal-400' },
-  submitted_to_cnc: { label: 'Déposé au CNC',     cls: 'bg-amber-500/20 text-amber-400' },
+  submitted_to_cnc: { label: 'Déposé à la DGEPN', cls: 'bg-amber-500/20 text-amber-400' },
   certified:   { label: 'Certifié',              cls: 'bg-green-500/20 text-green-400' },
   rejected:    { label: 'Rejeté',                cls: 'bg-red-500/20 text-red-400' },
 }
@@ -494,7 +494,7 @@ export default function ExpertCertDetailPage() {
         <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex items-center gap-3">
           <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-green-400">Bilan certifié par le CNC</p>
+            <p className="text-sm font-bold text-green-400">Bilan certifié par la DGEPN</p>
             <p className="text-xs text-green-500 mt-0.5">{fmtDate(cert.certifiedAt)}{cert.certificateNumber && ` · Certificat n° ${cert.certificateNumber}`}</p>
           </div>
         </div>
@@ -503,8 +503,8 @@ export default function ExpertCertDetailPage() {
         <div className="bg-teal-500/10 border border-teal-500/30 rounded-xl p-4 flex items-center gap-3">
           <FileCheck className="w-5 h-5 text-teal-400 flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-teal-400">Audit finalisé — dossier prêt pour le CNC</p>
-            <p className="text-xs text-teal-500 mt-0.5">Téléchargez le dossier complet, déposez-le au CNC, puis enregistrez le dépôt ci-dessous.</p>
+            <p className="text-sm font-bold text-teal-400">Audit finalisé — dossier prêt pour la DGEPN</p>
+            <p className="text-xs text-teal-500 mt-0.5">Téléchargez le dossier complet, déposez-le à la DGEPN, puis enregistrez le dépôt ci-dessous.</p>
           </div>
         </div>
       )}
@@ -512,8 +512,8 @@ export default function ExpertCertDetailPage() {
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-center gap-3">
           <Award className="w-5 h-5 text-amber-400 flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-amber-400">Dossier déposé au CNC — en attente du certificat</p>
-            <p className="text-xs text-amber-500 mt-0.5">Dès réception, téléversez la copie numérique du certificat CNC ci-dessous.</p>
+            <p className="text-sm font-bold text-amber-400">Dossier déposé à la DGEPN — en attente de l’avis du CNC et du certificat</p>
+            <p className="text-xs text-amber-500 mt-0.5">Dès réception, téléversez la copie numérique du certificat DGEPN ci-dessous.</p>
           </div>
         </div>
       )}
@@ -854,7 +854,7 @@ export default function ExpertCertDetailPage() {
         )}
       </Card>
 
-      {/* ── CNC deposit & certificate (after the field audit) ── */}
+      {/* ── DGEPN deposit & certificate (after the field audit) ── */}
       {['audit_done', 'submitted_to_cnc', 'certified'].includes(cert.status) && (
         <CncDepositCard cert={cert} role="expert" onRefresh={loadCert} />
       )}

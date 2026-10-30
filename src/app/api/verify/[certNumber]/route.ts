@@ -11,7 +11,7 @@ export async function GET(_req: NextRequest, { params }: { params: { certNumber:
       `SELECT
          cr.id, cr.status, cr.certificate_number, cr.certified_at,
          cr.expert_name, cr.expert_email, cr.inspection_date, cr.audit_location,
-         -- the expert enters the CNC-issued number/date when uploading the certificate
+         -- the expert enters the DGEPN-issued number/date when uploading the certificate
          CASE WHEN cr.status = 'certified' THEN cr.certificate_number END AS cnc_certificate_number,
          CASE WHEN cr.status = 'certified' THEN cr.certified_at END AS cnc_certificate_generated_at,
          cr.avis_number, cr.avis_date,

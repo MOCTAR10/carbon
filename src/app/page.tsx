@@ -58,7 +58,7 @@ export default function HomePage() {
           </h1>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-8 leading-relaxed">
             La plateforme tout-en-un pour les entreprises gabonaises — bilan GES Scope 1, 2 & 3
-            et certification auprès du CNC, portée de bout en bout par un expert accrédité GreenLeaves.
+            et certification auprès de la DGEPN, portée de bout en bout par un expert accrédité GreenLeaves.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
@@ -113,13 +113,13 @@ export default function HomePage() {
               {
                 icon: Shield,
                 title: 'Certification GreenLeaves',
-                desc: 'Workflow simplifié en 5 étapes : soumission → expert assigné → audit terrain → dépôt au CNC → certificat. L’expert accrédité GreenLeaves porte votre dossier jusqu’au CNC.',
+                desc: 'Workflow simplifié en 5 étapes : soumission → expert assigné → audit terrain → dépôt à la DGEPN → certificat. L’expert accrédité GreenLeaves dépose votre dossier à la DGEPN, qui recueille l’avis du CNC puis délivre le certificat.',
                 color: 'bg-brand-50 text-brand-600',
               },
               {
                 icon: FileText,
                 title: 'Documents PDF professionnels',
-                desc: 'Rapport d\'audit expert détaillé, dossier de certification et rapport de bilan GES générés automatiquement, prêts à déposer au CNC.',
+                desc: 'Rapport d\'audit expert détaillé, dossier de certification et rapport de bilan GES générés automatiquement, prêts à déposer à la DGEPN.',
                 color: 'bg-purple-50 text-purple-600',
               },
               {
@@ -171,8 +171,8 @@ export default function HomePage() {
               { step: '01', icon: Building2,    title: 'Inscription',         desc: 'Créez votre compte entreprise et renseignez vos sites de production par pays.' },
               { step: '02', icon: BarChart3,    title: 'Bilan GES',           desc: 'Saisissez vos données Scope 1, 2 & 3 — ISO 14064-1, GHG Protocol, facteurs ADEME, IPCC et locaux Gabon. Sites par pays.' },
               { step: '03', icon: FileCheck,    title: 'Demande de certification', desc: 'Soumettez votre bilan finalisé en un clic pour déclencher le processus.' },
-              { step: '04', icon: UserCheck,    title: 'Audit expert',        desc: 'Un expert accrédité GreenLeaves est assigné, effectue l\'audit terrain puis dépose votre dossier au CNC.' },
-              { step: '05', icon: BadgeCheck,   title: 'Certifié ✓',         desc: 'Le Conseil National du Climat délivre le certificat, disponible au téléchargement sur la plateforme.' },
+              { step: '04', icon: UserCheck,    title: 'Audit expert',        desc: 'Un expert accrédité GreenLeaves est assigné, effectue l\'audit terrain puis dépose votre dossier à la DGEPN.' },
+              { step: '05', icon: BadgeCheck,   title: 'Certifié ✓',         desc: 'La DGEPN délivre le certificat après avis du CNC, disponible au téléchargement sur la plateforme.' },
             ].map((s, i) => (
               <div key={i} className="relative">
                 <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm h-full">
@@ -373,7 +373,7 @@ export default function HomePage() {
                 'Grille d\'audit expert (6 sections)',
                 'Rapport d\'Audit Expert PDF',
                 'Rapport de Bilan GES PDF',
-                'Dossier complet de certification (CNC)',
+                'Dossier complet de certification (DGEPN)',
                 'Dashboard entreprise — suivi temps réel',
                 'Application mobile iOS & Android',
                 'Rapports conformes ISO 14064 & GHG Protocol',

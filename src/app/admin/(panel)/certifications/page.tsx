@@ -35,8 +35,8 @@ const STATUS_LABELS: Record<string, { label: string; cls: string; icon: React.Re
   assigned:         { label: 'Expert assigné',  cls: 'bg-blue-500/20 text-blue-400',     icon: <User className="w-3 h-3" /> },
   in_progress:      { label: 'Audit en cours',  cls: 'bg-violet-500/20 text-violet-400', icon: <AlertCircle className="w-3 h-3" /> },
   audit_done:       { label: 'Audit finalisé',  cls: 'bg-teal-500/20 text-teal-400',     icon: <ShieldCheck className="w-3 h-3" /> },
-  submitted_to_cnc: { label: 'Déposé au CNC',   cls: 'bg-amber-500/20 text-amber-400',   icon: <Send className="w-3 h-3" /> },
-  certified:        { label: 'Certifié (CNC)',  cls: 'bg-green-500/20 text-green-400',   icon: <CheckCircle className="w-3 h-3" /> },
+  submitted_to_cnc: { label: 'Déposé à la DGEPN', cls: 'bg-amber-500/20 text-amber-400',   icon: <Send className="w-3 h-3" /> },
+  certified:        { label: 'Certifié DGEPN',  cls: 'bg-green-500/20 text-green-400',   icon: <CheckCircle className="w-3 h-3" /> },
   rejected:         { label: 'Rejeté',          cls: 'bg-red-500/20 text-red-400',       icon: <XCircle className="w-3 h-3" /> },
 }
 
@@ -168,7 +168,7 @@ export default function AdminCertifications() {
           { key: 'assigned', label: `Assignées (${counts.assigned})` },
           { key: 'in_progress', label: `En cours (${counts.in_progress})` },
           { key: 'audit_done', label: `Audit finalisé (${counts.audit_done})` },
-          { key: 'submitted_to_cnc', label: `Déposées au CNC (${counts.submitted_to_cnc})` },
+          { key: 'submitted_to_cnc', label: `Déposées à la DGEPN (${counts.submitted_to_cnc})` },
           { key: 'certified', label: `Certifiées (${counts.certified})` },
           { key: 'rejected', label: `Rejetées (${counts.rejected})` },
         ].map(tab => (

@@ -78,6 +78,17 @@ test.describe('Connexion', () => {
     expect(res.status()).toBe(429)
   })
 
+  test('étape e-mail : nom et entreprise, rien de sensible ; adresse inconnue → 404', async ({ company, baseURL }) => {
+    const api = await request.newContext({ baseURL, extraHTTPHeaders: { 'X-Real-IP': fakeIp() } })
+    const res = await api.post('/api/auth/lookup', { data: { email: company.email.toUpperCase() } })
+    expect(res.status()).toBe(200)
+    const who = await res.json()
+    expect(who.space).toBe(company.name)
+    expect(Object.keys(who).sort()).toEqual(['firstName', 'lastName', 'logoUrl', 'space'])
+    expect((await api.post('/api/auth/lookup', { data: { email: `inconnu@${QA_DOMAIN}` } })).status()).toBe(404)
+    expect((await api.post('/api/auth/lookup', { data: { email: 'pas-un-email' } })).status()).toBe(400)
+  })
+
   test('déconnexion : la session n’est plus acceptée', async ({ company }) => {
     expect((await company.api.get('/api/sites')).status()).toBe(200)
     await company.api.post('/api/auth/logout')

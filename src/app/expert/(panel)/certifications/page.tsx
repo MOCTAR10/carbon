@@ -22,8 +22,8 @@ interface CertRow {
 const STATUS_INFO: Record<string, { label: string; cls: string }> = {
   assigned:         { label: 'Assigné',          cls: 'bg-blue-500/20 text-blue-400' },
   in_progress:      { label: 'Audit en cours',   cls: 'bg-violet-500/20 text-violet-400' },
-  audit_done:       { label: 'À déposer au CNC', cls: 'bg-teal-500/20 text-teal-400' },
-  submitted_to_cnc: { label: 'Déposé au CNC',    cls: 'bg-amber-500/20 text-amber-400' },
+  audit_done:       { label: 'À déposer à la DGEPN', cls: 'bg-teal-500/20 text-teal-400' },
+  submitted_to_cnc: { label: 'Déposé à la DGEPN', cls: 'bg-amber-500/20 text-amber-400' },
   certified:        { label: 'Certifié',         cls: 'bg-green-500/20 text-green-400' },
   rejected:         { label: 'Rejeté',           cls: 'bg-red-500/20 text-red-400' },
 }
@@ -33,7 +33,7 @@ const TABS = [
   { key: 'assigned',         label: 'Assignés' },
   { key: 'in_progress',      label: 'En cours' },
   { key: 'audit_done',       label: 'À déposer' },
-  { key: 'submitted_to_cnc', label: 'Au CNC' },
+  { key: 'submitted_to_cnc', label: 'À la DGEPN' },
   { key: 'certified',        label: 'Certifiés' },
   { key: 'rejected',         label: 'Rejetés' },
 ]

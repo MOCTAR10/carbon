@@ -7,8 +7,8 @@ export const JOURNEY_STEPS = [
   { status: 'assigned',         label: 'Expert assigné',   short: 'Expert' },
   { status: 'in_progress',      label: 'Audit terrain',    short: 'Audit' },
   { status: 'audit_done',       label: 'Audit validé',     short: 'Validé' },
-  { status: 'submitted_to_cnc', label: 'Déposé au CNC',    short: 'CNC' },
-  { status: 'certified',        label: 'Certificat CNC',   short: 'Certificat' },
+  { status: 'submitted_to_cnc', label: 'Déposé à la DGEPN', short: 'DGEPN' },
+  { status: 'certified',        label: 'Certificat DGEPN', short: 'Certificat' },
 ] as const
 
 type StepState = 'done' | 'active' | 'todo' | 'refused'

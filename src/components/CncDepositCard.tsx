@@ -113,7 +113,7 @@ export default function CncDepositCard({ cert, role, onRefresh }: Props) {
     <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
       <div className="px-5 py-3.5 border-b border-gray-700 flex items-center gap-2.5">
         <Send className="w-4 h-4 text-emerald-400" />
-        <span className="text-sm font-semibold text-white">Dépôt au CNC &amp; certificat</span>
+        <span className="text-sm font-semibold text-white">Dépôt à la DGEPN &amp; certificat</span>
       </div>
 
       <div className="divide-y divide-gray-700">
@@ -143,12 +143,12 @@ export default function CncDepositCard({ cert, role, onRefresh }: Props) {
           </button>
         </div>
 
-        {/* 2 — Deposit at the CNC */}
+        {/* 2 — Deposit at the DGEPN */}
         <div className="px-5 py-4 space-y-3">
           <div className="flex items-start gap-3">
             <Send className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-white">2. Dépôt du dossier au CNC</p>
+              <p className="text-sm font-medium text-white">2. Dépôt du dossier à la DGEPN</p>
               {deposited ? (
                 <p className="text-xs text-emerald-400 mt-0.5 flex items-center gap-1.5">
                   <CheckCircle className="w-3.5 h-3.5" />
@@ -157,7 +157,7 @@ export default function CncDepositCard({ cert, role, onRefresh }: Props) {
               ) : (
                 <p className="text-xs text-gray-400 mt-0.5">
                   {cert.status === 'audit_done'
-                    ? (isExpert ? 'Après le dépôt physique au CNC, enregistrez-le ici.' : 'En attente du dépôt par l\'expert.')
+                    ? (isExpert ? 'Après le dépôt physique à la DGEPN, enregistrez-le ici.' : 'En attente du dépôt par l\'expert.')
                     : 'Disponible une fois l\'audit finalisé.'}
                 </p>
               )}
@@ -185,13 +185,13 @@ export default function CncDepositCard({ cert, role, onRefresh }: Props) {
           )}
         </div>
 
-        {/* 3 — CNC certificate */}
+        {/* 3 — DGEPN certificate (after the CNC's avis) */}
         <div className="px-5 py-4 space-y-3">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <Award className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-white">3. Certificat délivré par le CNC</p>
+                <p className="text-sm font-medium text-white">3. Certificat délivré par la DGEPN</p>
                 {certified ? (
                   <p className="text-xs text-emerald-400 mt-0.5 flex items-center gap-1.5">
                     <CheckCircle className="w-3.5 h-3.5" />
@@ -200,8 +200,8 @@ export default function CncDepositCard({ cert, role, onRefresh }: Props) {
                 ) : (
                   <p className="text-xs text-gray-400 mt-0.5">
                     {deposited
-                      ? (isExpert ? 'Téléversez la copie numérique du certificat dès réception.' : 'En attente du certificat du CNC.')
-                      : 'Disponible après le dépôt au CNC.'}
+                      ? (isExpert ? 'Téléversez la copie numérique du certificat dès réception.' : 'En attente de l\'avis du CNC et du certificat de la DGEPN.')
+                      : 'Disponible après le dépôt à la DGEPN.'}
                   </p>
                 )}
               </div>
@@ -241,7 +241,7 @@ export default function CncDepositCard({ cert, role, onRefresh }: Props) {
             <div className="pl-7 space-y-3">
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={label}>N° du certificat CNC *</label>
+                  <label className={label}>N° du certificat DGEPN *</label>
                   <input type="text" value={certNumber} onChange={e => setCertNumber(e.target.value)} placeholder="Tel qu'inscrit sur le certificat" className={input} />
                 </div>
                 <div>
@@ -272,19 +272,19 @@ export default function CncDepositCard({ cert, role, onRefresh }: Props) {
             </div>
           )}
 
-          {/* The CNC can still refuse the dossier after deposit */}
+          {/* The DGEPN can still refuse the dossier after deposit */}
           {isExpert && cert.status === 'submitted_to_cnc' && !showUpload && (
             showRefusal ? (
               <div className="pl-7 space-y-2">
                 <textarea
                   value={refusalReason} onChange={e => setRefusalReason(e.target.value)} rows={3}
-                  placeholder="Motif communiqué par le CNC…"
+                  placeholder="Motif communiqué par la DGEPN…"
                   className="w-full bg-gray-900 border border-gray-700 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 resize-none"
                 />
                 <div className="flex gap-2">
                   <button onClick={() => setShowRefusal(false)} className="px-4 py-2 rounded-xl bg-gray-700 text-gray-300 text-sm hover:text-white transition-colors">Annuler</button>
                   <button
-                    onClick={() => patch({ action: 'reject', rejectionReason: `Refus du CNC : ${refusalReason.trim()}` })}
+                    onClick={() => patch({ action: 'reject', rejectionReason: `Refus de la DGEPN : ${refusalReason.trim()}` })}
                     disabled={busy !== null || !refusalReason.trim()}
                     className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium disabled:opacity-50 transition-colors"
                   >
@@ -294,7 +294,7 @@ export default function CncDepositCard({ cert, role, onRefresh }: Props) {
               </div>
             ) : (
               <button onClick={() => setShowRefusal(true)} className="ml-7 flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300">
-                <XCircle className="w-3.5 h-3.5" />Le CNC a refusé le dossier
+                <XCircle className="w-3.5 h-3.5" />La DGEPN a refusé le dossier
               </button>
             )
           )}

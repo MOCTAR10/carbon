@@ -472,7 +472,7 @@ export default function AssessmentDetailClient() {
               </span>
               <div className="min-w-0">
                 <p className="font-display text-lg text-forest-900">Bilan certifié</p>
-                <p className="text-xs text-ink-500">Audité par un expert accrédité et certifié par le CNC. Ses données sont figées.</p>
+                <p className="text-xs text-ink-500">Audité par un expert accrédité et certifié par la DGEPN. Ses données sont figées.</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -521,7 +521,7 @@ export default function AssessmentDetailClient() {
                 <p className={cn('text-xs', certStatus === 'rejected' ? 'text-ink-500' : 'text-forest-100/75')}>
                   {requestBlocker ?? (certStatus === 'rejected'
                     ? 'Corrigez vos données et vos justificatifs, puis soumettez une nouvelle demande.'
-                    : 'Audit terrain par un expert accrédité, puis dépôt de votre dossier au CNC.')}
+                    : 'Audit terrain par un expert accrédité, puis dépôt de votre dossier à la DGEPN.')}
                 </p>
               </div>
             </div>
@@ -570,8 +570,8 @@ export default function AssessmentDetailClient() {
             <Card key={s.scope} className="p-3.5 sm:p-5">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs sm:gap-2 font-semibold text-ink-700">
-                  <span className={cn('size-2 rounded-full', s.bg)} />
-                  {s.label}
+                  <span className={cn('size-2.5 rounded-full', s.bg)} />
+                  <span className={s.text}>{s.label}</span>
                 </span>
                 <span className="hidden text-xs tabular-nums text-ink-400 sm:inline">{fmtPct(kg, totals.total)}</span>
               </div>
@@ -579,7 +579,7 @@ export default function AssessmentDetailClient() {
                 {fmtCO2(kg, unit).value} <span className="block font-sans text-[11px] text-ink-400 sm:inline sm:text-xs">{fmtCO2(kg, unit).unit}</span>
               </p>
               <p className="hidden text-[11px] text-ink-400 sm:block">{s.name}</p>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ivory-200">
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-ivory-200">
                 <div className={cn('h-full rounded-full transition-all duration-700', s.bg)} style={{ width: `${pct}%` }} />
               </div>
             </Card>
@@ -732,7 +732,7 @@ export default function AssessmentDetailClient() {
               {/* Section header */}
               <div className="flex items-start justify-between gap-4 px-5 py-4 sm:px-6">
                 <div className="flex min-w-0 items-start gap-3.5">
-                  <span className={cn('flex size-9 flex-shrink-0 items-center justify-center rounded-xl text-xs font-bold', sc.bg, section.scope === 1 ? 'text-ivory-50' : 'text-forest-950')}>
+                  <span className={cn('flex size-9 flex-shrink-0 items-center justify-center rounded-xl text-xs font-bold', sc.bg, sc.chipText)}>
                     S{section.scope}
                   </span>
                   <div className="min-w-0">
@@ -884,7 +884,7 @@ export default function AssessmentDetailClient() {
                   'Votre demande est transmise à l’équipe GreenLeaves',
                   'Un expert accrédité est assigné et fixe la date d’audit',
                   'Audit terrain et vérification de vos données',
-                  'Dépôt du dossier au CNC, puis remise du certificat',
+                  'Dépôt du dossier à la DGEPN, puis délivrance du certificat après avis du CNC',
                 ].map((step, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-ink-700">
                     <span className="mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded-full bg-forest-900 text-[10px] font-bold text-gold-200">{i + 1}</span>

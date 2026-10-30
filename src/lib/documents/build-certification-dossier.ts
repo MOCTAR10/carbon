@@ -1,6 +1,6 @@
 /**
  * Builds the certification dossier summary PDF (company, emissions, audit checklist, expert opinion)
- * that the expert deposits at the CNC. Used inside the full dossier ZIP.
+ * that the expert deposits at the DGEPN. Used inside the full dossier ZIP.
  */
 
 import { query } from '@/lib/db'

@@ -93,7 +93,7 @@ export const axisTick = (unit: CO2Unit) => (v: number) =>
   `${(v / UNIT_DIV[unit]).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} ${UNIT_SHORT[unit]}`
 
 // Muted series palette (Forest & Ivory) for non-scope breakdowns
-export const SERIES = ['#1A402C', '#B8935A', '#7FA98F', '#356A4C', '#D3B27C', '#8A8F87', '#0F2A1D', '#AFCBB9']
+export const SERIES = ['#1C5136', '#C99A4A', '#7DBB97', '#2F7A55', '#D3B27C', '#8A8F87', '#123A28', '#AFCBB9']
 
 // ── Derived data ──────────────────────────────────────────────────────────────
 

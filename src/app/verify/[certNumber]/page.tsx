@@ -127,7 +127,7 @@ const APPROACH_FR: Record<string, string> = {
 
 const STATUS_FR: Record<string, string> = {
   pending: 'Demande en attente', assigned: 'Expert assigné', in_progress: 'Audit terrain en cours',
-  audit_done: 'Audit validé', submitted_to_cnc: 'Déposé au CNC', certified: 'Certifié', rejected: 'Demande refusée',
+  audit_done: 'Audit validé', submitted_to_cnc: 'Déposé à la DGEPN', certified: 'Certifié', rejected: 'Demande refusée',
 }
 
 function longDate(d: string | Date | null) {
@@ -256,7 +256,7 @@ export default async function VerifyPage({ params }: { params: { certNumber: str
           <h1 className="mt-3 font-display text-3xl font-light leading-tight sm:text-5xl">Rapport de certification</h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-forest-100/80 print:text-ink-600">
             Inventaire des émissions de gaz à effet de serre établi selon le GHG Protocol et l’ISO 14064-1,
-            audité sur site par un expert accrédité, puis certifié par le Conseil National du Climat (CNC).
+            audité sur site par un expert accrédité, puis certifié par la DGEPN (Direction Générale de l’Environnement et de la Protection de la Nature) après avis du Conseil National Climat (CNC).
           </p>
 
           <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-gold-400/30 bg-white/[0.04] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 print:border-ink-300">
@@ -385,7 +385,7 @@ export default async function VerifyPage({ params }: { params: { certNumber: str
               <Fact icon={User} label="Expert accrédité">{cert.expertName || '—'}</Fact>
               <Fact icon={Calendar} label="Audit terrain">{longDate(cert.inspectionDate)}</Fact>
               <Fact icon={MapPin} label="Lieu de l’audit">{cert.auditLocation || '—'}</Fact>
-              <Fact icon={ShieldCheck} label="Certificat CNC">{isCertified ? `Délivré le ${longDate(cert.certifiedAt)}` : 'En attente'}</Fact>
+              <Fact icon={ShieldCheck} label="Certificat DGEPN">{isCertified ? `Délivré le ${longDate(cert.certifiedAt)}` : 'En attente'}</Fact>
             </dl>
             {cert.avisNumber && (
               <div className="mt-6 rounded-2xl border border-gold-200 bg-gold-50 p-4 text-sm">
@@ -407,7 +407,7 @@ export default async function VerifyPage({ params }: { params: { certNumber: str
               <li><b className="text-ink-800">Scope 2</b> — émissions liées à l’électricité et à l’énergie achetées.</li>
               <li><b className="text-ink-800">Scope 3</b> — autres émissions indirectes : fret, déplacements, intrants, déchets, immobilisations.</li>
               <li>Calcul selon le <b className="text-ink-800">GHG Protocol</b> et l’<b className="text-ink-800">ISO 14064-1</b>, avec les facteurs d’émission de références reconnues (Base Carbone ADEME, AIE).</li>
-              <li>Données vérifiées sur site par un expert accrédité GreenLeaves ; certificat délivré par le <b className="text-ink-800">Conseil National du Climat</b>.</li>
+              <li>Données vérifiées sur site par un expert accrédité GreenLeaves ; certificat délivré par la <b className="text-ink-800">DGEPN</b> après avis du Conseil National Climat.</li>
             </ul>
           </section>
         </div>

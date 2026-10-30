@@ -6,7 +6,7 @@ import { SECTOR_LABELS } from '@/lib/sectors'
 export const dynamic = 'force-dynamic'
 
 /**
- * Name and RCCM identify the company on the dossier the expert files at the CNC and on the certificate,
+ * Name and RCCM identify the company on the dossier the expert files at the DGEPN and on the certificate,
  * so they are frozen once a certification request is live (any status but rejected).
  */
 async function identityLocked(companyId: number) {

@@ -2,7 +2,7 @@ import React from 'react'
 import { Document, Page, Text, View, Image, StyleSheet, pdf } from '@react-pdf/renderer'
 
 // "Fiche de suivi" — tracking sheet for a company's certification request.
-// Not a certificate: the official certificate is issued by the CNC and uploaded by the expert.
+// Not a certificate: the official certificate is issued by the DGEPN (after the CNC's avis) and uploaded by the expert.
 
 export interface SuiviStep {
   label: string
@@ -101,7 +101,7 @@ function SuiviDemandeDocument({ d }: { d: SuiviDemandeData }) {
           <Text style={s.statusLabel}>Statut actuel</Text>
           <Text style={s.statusValue}>{d.statusLabel}</Text>
           {d.rejected && d.rejectionReason ? <Text style={s.stepMeta}>Motif : {d.rejectionReason}</Text> : null}
-          {d.certificateNumber ? <Text style={s.stepMeta}>Certificat CNC n° {d.certificateNumber}</Text> : null}
+          {d.certificateNumber ? <Text style={s.stepMeta}>Certificat DGEPN n° {d.certificateNumber}</Text> : null}
         </View>
 
         <View style={s.section}>
@@ -134,8 +134,8 @@ function SuiviDemandeDocument({ d }: { d: SuiviDemandeData }) {
 
         <Text style={s.notice}>
           {'Ce document atteste uniquement de l’état d’avancement de la demande de certification sur la plateforme ' +
-            'CarbonTrack. Il ne constitue pas un certificat. Le certificat officiel est délivré par le Conseil National ' +
-            'du Climat (CNC) à l’issue de l’examen du dossier déposé par l’expert accrédité, puis mis à disposition ' +
+            'CarbonTrack. Il ne constitue pas un certificat. Le certificat officiel est délivré par la DGEPN, après avis ' +
+            'du Conseil National Climat (CNC), à l’issue de l’examen du dossier déposé par l’expert accrédité, puis mis à disposition ' +
             'sur la plateforme.'}
         </Text>
 

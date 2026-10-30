@@ -36,7 +36,7 @@ test.describe('Bilan certifié (interface)', () => {
 
     // ── Tableau de bord : bandeau or avec le numéro ──
     await page.goto('/dashboard')
-    const band = page.getByRole('region', { name: 'Certificat CNC' })
+    const band = page.getByRole('region', { name: 'Certificat DGEPN' })
     await expect(band).toBeVisible()
     await expect(band).toContainText(`N° ${number}`)
     await expect(band.getByRole('link', { name: /Voir le certificat/ })).toBeVisible()
@@ -71,7 +71,7 @@ test.describe('Bilan certifié (interface)', () => {
     const number = await certify(company.api, admin, expert, asmt.id)
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     await page.goto('/dashboard')
-    await page.getByRole('region', { name: 'Certificat CNC' }).getByRole('button', { name: /Lien de vérification/ }).click()
+    await page.getByRole('region', { name: 'Certificat DGEPN' }).getByRole('button', { name: /Lien de vérification/ }).click()
     await expect(toast(page, 'Lien de vérification copié')).toBeVisible()
     const copied = await page.evaluate(() => navigator.clipboard.readText())
     expect(copied).toMatch(new RegExp(`/verify/${encodeURIComponent(number)}$`))

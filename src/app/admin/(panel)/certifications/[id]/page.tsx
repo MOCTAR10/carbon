@@ -94,8 +94,8 @@ const STATUS_LABELS: Record<string, { label: string; cls: string; icon: React.Re
   assigned:         { label: 'Expert assigné',   cls: 'bg-blue-500/20 text-blue-400',      icon: <User className="w-3.5 h-3.5" /> },
   in_progress:      { label: 'Audit en cours',   cls: 'bg-violet-500/20 text-violet-400',  icon: <AlertCircle className="w-3.5 h-3.5" /> },
   audit_done:       { label: 'Audit finalisé',   cls: 'bg-teal-500/20 text-teal-400',      icon: <FileCheck className="w-3.5 h-3.5" /> },
-  submitted_to_cnc: { label: 'Déposé au CNC',    cls: 'bg-amber-500/20 text-amber-400',    icon: <Landmark className="w-3.5 h-3.5" /> },
-  certified:        { label: 'Certifié (CNC)',   cls: 'bg-green-500/20 text-green-400',    icon: <CheckCircle className="w-3.5 h-3.5" /> },
+  submitted_to_cnc: { label: 'Déposé à la DGEPN', cls: 'bg-amber-500/20 text-amber-400',    icon: <Landmark className="w-3.5 h-3.5" /> },
+  certified:        { label: 'Certifié DGEPN',   cls: 'bg-green-500/20 text-green-400',    icon: <CheckCircle className="w-3.5 h-3.5" /> },
   rejected:         { label: 'Rejeté',           cls: 'bg-red-500/20 text-red-400',        icon: <XCircle className="w-3.5 h-3.5" /> },
 }
 
@@ -104,7 +104,7 @@ const WORKFLOW_STEPS = [
   { key: 'assigned',         label: 'Expert' },
   { key: 'in_progress',      label: 'Audit' },
   { key: 'audit_done',       label: 'Audit finalisé' },
-  { key: 'submitted_to_cnc', label: 'Dépôt CNC' },
+  { key: 'submitted_to_cnc', label: 'Dépôt DGEPN' },
   { key: 'certified',        label: 'Certificat' },
 ]
 
@@ -380,7 +380,7 @@ export default function AdminCertDetailPage() {
         <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex items-center gap-3">
           <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-green-400">Bilan certifié par le CNC</p>
+            <p className="text-sm font-bold text-green-400">Bilan certifié par la DGEPN</p>
             <p className="text-xs text-green-500 mt-0.5">
               {fmtDate(cert.certifiedAt)}{cert.certificateNumber && ` · Certificat n° ${cert.certificateNumber}`}{cert.expertName && ` · Par ${cert.expertName}`}
             </p>
@@ -468,7 +468,7 @@ export default function AdminCertDetailPage() {
         />
       )}
 
-      {/* ── CNC deposit & certificate — handled by the expert, followed by the admin ── */}
+      {/* ── DGEPN deposit & certificate — handled by the expert, followed by the admin ── */}
       {['audit_done', 'submitted_to_cnc', 'certified'].includes(cert.status) && (
         <CncDepositCard cert={cert} role="admin" onRefresh={loadCert} />
       )}

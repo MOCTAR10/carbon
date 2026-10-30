@@ -80,13 +80,13 @@ export async function GET(_request: NextRequest, { params }: { params: { assessm
             : r.audit_location,
         },
         {
-          label: 'Dossier déposé au CNC par l\'expert',
+          label: 'Dossier déposé à la DGEPN par l\'expert',
           done: reached('submitted_to_cnc'),
           date: r.submitted_to_cnc_at,
           detail: r.cnc_deposit_reference ? `Réf. ${r.cnc_deposit_reference}` : null,
         },
         {
-          label: 'Certificat CNC délivré',
+          label: 'Certificat DGEPN délivré',
           done: status === 'certified',
           date: status === 'certified' ? r.certified_at : null,
           detail: status === 'certified' && r.certificate_number ? `N° ${r.certificate_number}` : null,
